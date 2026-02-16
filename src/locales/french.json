@@ -434,7 +434,7 @@
         "dropToUpload": "Déposer pour télécharger",
         "howCanIHelp": "Comment puis-je vous aider aujourd'hui ?",
         "startConversation": "Commencez une conversation avec votre agent IA.",
-        "inputPlaceholder": "Demander à AISA...",
+        "inputPlaceholder": "Demander à AIVA...",
         "recording": "Enregistrement...",
         "shareFeedback": "Partager des commentaires",
         "submit": "Soumettre",
@@ -1040,7 +1040,7 @@
         }
     },
     "adminName": "Administrateur",
-    "aisaName": "AISA",
+    "aisaName": "AIVA",
     "free": "Gratuit",
     "draft": "Brouillon",
     "active": "Actif",

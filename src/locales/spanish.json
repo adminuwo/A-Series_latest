@@ -377,7 +377,7 @@
         "dropToUpload": "Soltar para subir",
         "howCanIHelp": "¿Cómo puedo ayudarte hoy?",
         "startConversation": "Inicia una conversación con tu agente de IA.",
-        "inputPlaceholder": "Preguntar a AISA...",
+        "inputPlaceholder": "Preguntar a AIVA...",
         "recording": "Grabando...",
         "shareFeedback": "Compartir comentarios",
         "submit": "Enviar",
@@ -983,7 +983,7 @@
         "openInNewWindow": "Abrir en una ventana nueva"
     },
     "adminName": "Administrador",
-    "aisaName": "AISA",
+    "aisaName": "AIVA",
     "free": "Gratis",
     "draft": "Borrador",
     "active": "Activo",

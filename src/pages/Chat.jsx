@@ -28,7 +28,7 @@ import { getUserData, sessionsData, toggleState } from '../userStore/userData';
 import { usePersonalization } from '../context/PersonalizationContext';
 
 
-const WELCOME_MESSAGE = "Hello! I’m AISA™, your Artificial Intelligence Super Assistant.";
+const WELCOME_MESSAGE = "Hello! I’m AIVA™, your Artificial Intelligence Super Assistant.";
 
 const FEEDBACK_PROMPTS = {
   en: [
@@ -241,7 +241,7 @@ const Chat = () => {
   const [isLiveMode, setIsLiveMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [filePreviews, setFilePreviews] = useState([]);
-  const [activeAgent, setActiveAgent] = useState({ agentName: 'AISA', category: 'General' });
+  const [activeAgent, setActiveAgent] = useState({ agentName: 'AIVA', category: 'General' });
   const [userAgents, setUserAgents] = useState([]);
   const [toolModels, setToolModels] = useState({
     chat: 'gemini-flash',
@@ -727,7 +727,7 @@ const Chat = () => {
               conversion: {
                 file: mp3Base64,
                 blobUrl: audioUrl,
-                fileName: `AISA_Voice_${Date.now()}.mp3`,
+                fileName: `AIVA_Voice_${Date.now()}.mp3`,
                 mimeType: 'audio/mpeg',
                 fileSize: formattedSize,
                 rawSize: rawBytes,
@@ -1488,20 +1488,23 @@ const Chat = () => {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             const agents = res.data?.agents || [];
-            // Add default AISA agent if not present
-            const processedAgents = [{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' }, ...agents];
-            setUserAgents(processedAgents);
+            // Add default AIVA agent if not present
+            const processedAgents = [{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }, ...agents];
+            setAgents(processedAgents);
+            setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
           } catch (agentErr) {
             // Silently use defaults if fetch fails (no console warning)
-            setUserAgents([{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' }]);
+            setAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
+            setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
           }
         } else {
           // No user logged in, use default
-          setUserAgents([{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' }]);
+          setAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
+          setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
         }
       } catch (err) {
         // Silently handle errors
-        setUserAgents([{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' }]);
+        setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
       }
     };
     loadSessions();
@@ -1853,7 +1856,7 @@ const Chat = () => {
         }
 
         const SYSTEM_INSTRUCTION = `
-You are ${activeAgent.agentName || 'AISA'}, an advanced AI assistant powered by A-Series.
+You are ${activeAgent.agentName || 'AIVA'}, an advanced AI assistant powered by A-Series.
 ${activeAgent.category ? `Your specialization is in ${activeAgent.category}.` : ''}
 
 ${PERSONA_INSTRUCTION}
@@ -2858,7 +2861,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
   }, [sessions]);
 
   return (
-    <div className="flex w-full bg-secondary relative overflow-hidden aisa-scalable-text overscroll-none h-full focus:outline-none">
+    <div className="flex w-full bg-secondary relative overflow-hidden aiva-scalable-text overscroll-none h-full focus:outline-none">
 
       {/* Document Viewer Modal */}
       <AnimatePresence>
@@ -3237,7 +3240,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
         <div
           ref={chatContainerRef}
           onScroll={handleScroll}
-          className="relative flex-1 overflow-y-auto p-1 sm:p-2 md:p-3 pb-48 md:pb-56 space-y-2.5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent aisa-scalable-text"
+          className="relative flex-1 overflow-y-auto p-1 sm:p-2 md:p-3 pb-48 md:pb-56 space-y-2.5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent aiva-scalable-text"
         >
           {messages.length > 0 && (
             <>
@@ -4443,9 +4446,9 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     }
                   }}
                   onPaste={handlePaste}
-                  placeholder={isAudioConvertMode ? "Enter text to convert..." : isDocumentConvert ? "Upload file & ask to convert..." : isCodeWriter ? "Ask for any code or paste bugs..." : "Ask AISA..."}
+                  placeholder={isAudioConvertMode ? "Enter text to convert..." : isDocumentConvert ? "Upload file & ask to convert..." : isCodeWriter ? "Ask for any code or paste bugs..." : "Ask AIVA..."}
                   rows={1}
-                  className={`w-full bg-transparent border-0 focus:ring-0 outline-none focus:outline-none p-0 text-maintext text-left placeholder-subtext/50 resize-none overflow-y-auto custom-scrollbar leading-relaxed aisa-scalable-text flex items-center`}
+                  className={`w-full bg-transparent border-0 focus:ring-0 outline-none focus:outline-none p-0 text-maintext text-left placeholder-subtext/50 resize-none overflow-y-auto custom-scrollbar leading-relaxed aiva-scalable-text flex items-center`}
                   style={{ minHeight: '24px', maxHeight: '150px', lineHeight: '24px' }}
                 />
               </div >

@@ -153,8 +153,8 @@ export const PersonalizationProvider = ({ children }) => {
 
         const scaleMap = { 'Small': '0.85', 'Medium': '1', 'Large': '1.15', 'Extra Large': '1.3' };
 
-        document.documentElement.style.setProperty('--aisa-font-size', fontSizeMap[fontSize] || '15px');
-        document.documentElement.style.setProperty('--aisa-scale', scaleMap[fontSize] || '1');
+        document.documentElement.style.setProperty('--aiva-font-size', fontSizeMap[fontSize] || '15px');
+        document.documentElement.style.setProperty('--aiva-scale', scaleMap[fontSize] || '1');
 
         // Font Style
         const fontStyle = p.personalization.fontStyle || 'Default';
@@ -163,7 +163,7 @@ export const PersonalizationProvider = ({ children }) => {
         const fontClassName = fontStyle === 'Serif' ? 'font-serif' : fontStyle === 'Mono' ? 'font-mono' : fontStyle === 'Rounded' ? 'font-rounded' : 'font-sans';
         document.body.classList.add(fontClassName);
 
-        document.body.classList.add('aisa-scalable-text');
+        document.body.classList.add('aiva-scalable-text');
     };
 
     useEffect(() => {

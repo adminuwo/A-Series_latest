@@ -4,16 +4,20 @@ const path = require('path');
 const localesDir = path.join(__dirname, 'src', 'locales');
 
 const translations = {
-    "hindi": { "placeholder": "आइसा से पूछें..." },
-    "bengali": { "placeholder": "আইসাকে জিজ্ঞাসা করুন..." },
-    "marathi": { "placeholder": "आइसाला विचारा..." },
-    "gujarati": { "placeholder": "આઈસાને પૂછો..." },
-    "tamil": { "placeholder": "ஐசாவிடம் கேளுங்கள்..." },
-    "telugu": { "placeholder": "ఐసాను అడగండి..." },
-    "arabic": { "placeholder": "اسأل آيسا..." },
-    "english": { "placeholder": "Ask AISA..." },
-    "french": { "placeholder": "Demandez à AISA..." },
-    "spanish": { "placeholder": "Pregunta a AISA..." }
+    "hindi": { "placeholder": "आइसा से पूछें..." }, // Keeping Hindi transliteration if correct, or change if needed. "Aiva" -> "आइवा"? User said "Asia" -> "Aiva". "Aisa" -> "Aiva".
+    // "Aisa" in Hindi is "आइसा". "Aiva" is "आइवा".
+    // I will replace "AISA" -> "AIVA" in English/French/Spanish.
+    // I will also update the transliterations to be safe: "आइवा" (Aiva).
+    "hindi": { "placeholder": "आइवा से पूछें..." },
+    "bengali": { "placeholder": "আইভাকে জিজ্ঞাসা করুন..." },
+    "marathi": { "placeholder": "आइवाला विचारा..." },
+    "gujarati": { "placeholder": "આઈવાને પૂછો..." },
+    "tamil": { "placeholder": "ஐவாவிடம் கேளுங்கள்..." },
+    "telugu": { "placeholder": "ఐవాను అడగండి..." },
+    "arabic": { "placeholder": "اسأل آيفا..." },
+    "english": { "placeholder": "Ask AIVA..." },
+    "french": { "placeholder": "Demandez à AIVA..." },
+    "spanish": { "placeholder": "Pregunta a AIVA..." }
 };
 
 Object.keys(translations).forEach(lang => {

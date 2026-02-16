@@ -390,7 +390,7 @@
         "newAnnouncement": "New Announcement"
     },
     "chatPage": {
-        "welcomeMessage": "Hello! I’m AISA™, your Artificial Intelligence Super Assistant.",
+        "welcomeMessage": "Hello! I’m AIVA™, your Artificial Intelligence Super Assistant.",
         "newChat": "New Chat",
         "history": "History",
         "recent": "Recent",
@@ -399,7 +399,7 @@
         "dropToUpload": "Drop to Upload",
         "howCanIHelp": "How can I help you today?",
         "startConversation": "Start a conversation with your AI agent.",
-        "inputPlaceholder": "Ask AISA...",
+        "inputPlaceholder": "Ask AIVA...",
         "recording": "Recording...",
         "shareFeedback": "Share feedback",
         "submit": "Submit",
@@ -992,7 +992,7 @@
         }
     },
     "adminName": "Admin",
-    "aisaName": "AISA",
+    "aisaName": "AIVA",
     "free": "Free",
     "draft": "Draft",
     "active": "Active",

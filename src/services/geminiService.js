@@ -70,7 +70,7 @@ export const generateChatResponse = async (history, currentMessage, systemInstru
             return "The A-Series system is currently busy (Quota limit reached). Please wait 60 seconds and try again.";
         }
         if (error.response?.status === 401) {
-            return "Please [Log In](/login) to your AISA™ account to continue chatting.";
+            return "Please [Log In](/login) to your AIVA™ account to continue chatting.";
         }
         if (error.response?.data?.error === "LIMIT_REACHED") {
             return { error: "LIMIT_REACHED", reason: error.response.data.reason };

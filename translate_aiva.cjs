@@ -4,16 +4,16 @@ const path = require('path');
 const localesDir = path.join(__dirname, 'src', 'locales');
 
 const translations = {
-    "hindi": { "aisaName": "आइसा" },
-    "bengali": { "aisaName": "আইসা" },
-    "marathi": { "aisaName": "आइसा" },
-    "gujarati": { "aisaName": "આઈસા" },
-    "tamil": { "aisaName": "ஐசா" }, // Aisa
-    "telugu": { "aisaName": "ఐసా" }, // Aisa
-    "arabic": { "aisaName": "آيسا" },
-    "english": { "aisaName": "AISA" },
-    "french": { "aisaName": "AISA" },
-    "spanish": { "aisaName": "AISA" }
+    "hindi": { "aisaName": "आइवा" },
+    "bengali": { "aisaName": "আইভা" },
+    "marathi": { "aisaName": "आइवा" },
+    "gujarati": { "aisaName": "આઈવા" },
+    "tamil": { "aisaName": "ஐவா" },
+    "telugu": { "aisaName": "ఐవా" },
+    "arabic": { "aisaName": "آيفا" },
+    "english": { "aisaName": "AIVA" },
+    "french": { "aisaName": "AIVA" },
+    "spanish": { "aisaName": "AIVA" }
 };
 
 Object.keys(translations).forEach(lang => {
