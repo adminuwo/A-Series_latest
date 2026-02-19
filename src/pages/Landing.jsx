@@ -274,7 +274,7 @@ const Landing = () => {
                     rel="noopener noreferrer"
                     className="transition-all duration-300 hover:scale-110 hover:opacity-100 shrink-0 cursor-pointer relative z-[300] active:scale-95 flex items-center justify-center p-0.5 pointer-events-auto"
                     style={{ pointerEvents: 'auto' }}
-                    onClick={(e) => {
+                    onClick={() => {
                       if (social.isWhatsApp) {
                         // Force open if standard link fails
                         window.open(social.href, "_blank");

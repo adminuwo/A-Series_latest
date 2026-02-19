@@ -1,9 +1,9 @@
 export const logo = "/logo/Logo.png";
-export const name = "AI-MALL™";
+export const name = "A-Series™";
 
 export const faqs = [
     {
-        question: "What exactly is AI-MALL™?",
+        question: "What exactly is A-Series™?",
         answer: "It is a marketplace for specialized AI agents. Unlike a generic chatbot, you pick specific 'employees' (Agents) for specific tasks like coding, writing, or analysis."
     },
     {
@@ -28,7 +28,7 @@ export const faqs = [
     },
     {
         question: "Why should I use this over other AI solutions?",
-        answer: "AI-MALL™ offers a curated experience with specialized flows. You don't need to prompt-engineer; our agents are already tuned for their specific jobs."
+        answer: "A-Series™ offers a curated experience with specialized flows. You don't need to prompt-engineer; our agents are already tuned for their specific jobs."
     },
     {
         question: "Is it mobile-friendly?",

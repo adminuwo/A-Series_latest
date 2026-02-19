@@ -184,6 +184,8 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
 
 
+
+
           <NavLink to="/dashboard/chat" className={navItemClass} onClick={onClose}>
             <MessageSquare className="w-5 h-5" />
             <span>{t('chat') || 'Chat'}</span>

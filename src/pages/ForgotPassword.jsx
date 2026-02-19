@@ -27,7 +27,7 @@ const ForgotPassword = () => {
         setError('');
         try {
             // Pass language code to backend
-            const response = await axios.post(apis.sendForgotOTP, { email, lang: language });
+            await axios.post(apis.sendForgotOTP, { email, lang: language });
             // setMessage(response.data.message); 
             setMessage(t('auth.otpSentSuccess'));
             setStep(2);
@@ -69,7 +69,7 @@ const ForgotPassword = () => {
         }
 
         try {
-            const response = await axios.post(apis.resetPasswordOTP, {
+            await axios.post(apis.resetPasswordOTP, {
                 email,
                 resetToken,
                 newPassword,

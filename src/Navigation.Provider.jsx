@@ -19,10 +19,12 @@ import Profile from './pages/Profile';
 import AiPersonalAssistantDashboard from './pages/AiPersonalAssistant/Dashboard';
 import UserTransactions from './pages/UserTransactions';
 import ContactUs from './pages/ContactUs';
+import AISAWorkSpace from './pages/AISAWorkSpace';
 
 import { AppRoute } from './types';
 import AiBiz from './agents/AIBIZ/AiBiz.jsx';
 import AiBase from './agents/AIBASE/AiBase.jsx';
+import AiHire from './agents/AIHIRE/AiHire.jsx';
 import ComingSoon from './Components/ComingSoon/ComingSoon.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
@@ -173,6 +175,7 @@ const NavigateProvider = () => {
         {/* agents */}
         <Route path='/agents/aibiz' element={<AiBiz />}></Route>
         <Route path='/agents/aibase/*' element={<AiBase />}></Route>
+        <Route path='/agents/aihire' element={<AiHire />}></Route>
         {/* Dashboard (Protected) */}
         <Route
           path={AppRoute.DASHBOARD}
@@ -181,6 +184,9 @@ const NavigateProvider = () => {
           <Route index element={<Navigate to="marketplace" replace />} />
           <Route path="chat" element={<Chat />} />
           <Route path="chat/:sessionId" element={<Chat />} />
+          <Route path="workspace" element={<AISAWorkSpace />} />
+          <Route path="workspace/:agentId" element={<AISAWorkSpace />} />
+          <Route path="workspace/:agentId/:sessionId" element={<AISAWorkSpace />} />
           <Route path="overview" element={<ProtectedRoute><DashboardOverview /></ProtectedRoute>} />
           <Route path="marketplace" element={<Marketplace />} />
           <Route path="ai-personal-assistant" element={<ProtectedRoute><AiPersonalAssistantDashboard /></ProtectedRoute>} />

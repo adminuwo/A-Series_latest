@@ -60,6 +60,11 @@ export const AppRoute = {
   agentSoon: "/agentsoon",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password/:token",
+  CHAT: "/dashboard/chat",
+  WORKSPACE: "/dashboard/workspace",
+  WORKSPACE_AGENT: "/dashboard/workspace/:agentId",
+  WORKSPACE_SESSION: "/dashboard/workspace/:agentId/:sessionId",
+  AI_HIRE: "/dashboard/workspace/AIHIRE",
 };
 
 

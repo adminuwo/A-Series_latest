@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 const Invoices = () => {
     const { t } = useLanguage();
     const [payments, setPayments] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
     const token = getUserData()?.token;
 
     useEffect(() => {

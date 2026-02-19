@@ -78,9 +78,10 @@ const getAuthHeaders = () => {
 
 export const chatStorageService = {
 
-  async getSessions() {
+  async getSessions(agentType) {
     try {
       const response = await axios.get(`${API_BASE_URL}/chat`, {
+        params: agentType ? { agentType } : {},
         headers: getAuthHeaders(),
         withCredentials: true
       });

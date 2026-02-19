@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Download, Check, Star, FileText, Play, X, Calendar } from 'lucide-react';
+import { Search, Download, Check, Star, FileText, Play, X, Calendar, Users } from 'lucide-react';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { getUserData, toggleState } from '../userStore/userData';
@@ -55,7 +55,9 @@ const Marketplace = () => {
         }
 
         if (agentsRes.status === 'fulfilled') {
-          setAgents(Array.isArray(agentsRes.value.data) ? agentsRes.value.data : []);
+          const rawAgents = Array.isArray(agentsRes.value.data) ? agentsRes.value.data : [];
+          console.log('[MARKETPLACE] Agents from API:', rawAgents.length, rawAgents.map(a => a.agentName));
+          setAgents(rawAgents);
         } else {
           console.error("Failed to fetch agents:", agentsRes.reason);
           setAgents([]);
@@ -195,7 +197,7 @@ const Marketplace = () => {
       {/* Agents Grid */}
       < div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" >
         {/* Personal Assistant App Card */}
-        < div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden" >
+        <div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden">
           <div className="flex justify-between items-start mb-4 relative z-10">
             <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
               <Calendar className="w-10 h-10 text-white" />
@@ -222,7 +224,8 @@ const Marketplace = () => {
           >
             {t('marketplacePage.openApp')}
           </button>
-        </div >
+        </div>
+
         {loading ? <h1>{t('myAgentsPage.loading')}</h1> : filteredAgents.map(agent => (
           <div
             key={agent._id}
@@ -262,32 +265,51 @@ const Marketplace = () => {
 
             <p className="text-sm text-subtext mb-6 flex-1">{agent.description}</p>
 
-            {/* Install Button */}
+            {/* Install / Launch Buttons */}
             <div className="flex gap-2">
-              <button
-                onClick={() => toggleBuy(agent._id)}
-                disabled={userAgent.some((ag) => ag && agent._id == ag._id) || (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon')}
-                className={`flex-1 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${userAgent.some((ag) => ag && agent._id == ag._id)
-                  ? 'bg-primary/10 text-subtext border border-primary/20 cursor-not-allowed opacity-70'
-                  : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon')
-                    ? 'bg-border text-subtext cursor-not-allowed opacity-50'
-                    : 'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20'
-                  }`}
-              >
-                {userAgent.some((ag) => ag && agent._id == ag._id) ? (
-                  <>
-                    <Check className="w-4 h-4" /> {t('marketplacePage.subscribed')}
-                  </>
-                ) : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon') ? (
-                  <>
-                    {t('marketplacePage.unavailable')}
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4" /> {t('marketplacePage.subscribe')}
-                  </>
-                )}
-              </button>
+              {userAgent.some((ag) => ag && agent._id == ag._id) ? (
+                <div className="flex-1 flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const name = (agent.agentName || "").toUpperCase().replace(/\s+/g, '');
+                      // Workspace agents
+                      const workspaceAgents = ['AISALES', 'AIWRITE', 'AIBIZ', 'AIDESK'];
+                      if (workspaceAgents.includes(name)) {
+                        navigate(`${AppRoute.WORKSPACE}/${name}`);
+                      } else if (name === 'AIHIRE') {
+                        navigate('/agents/aihire');
+                      } else {
+                        const targetUrl = agent.url || AppRoute.agentSoon;
+                        window.location.href = targetUrl;
+                      }
+                    }}
+                    className="flex-1 py-2.5 rounded-xl font-semibold bg-emerald-600 text-white hover:opacity-90 shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+                  >
+                    <Play className="w-4 h-4" /> {t('marketplacePage.launch') || 'Launch'}
+                  </button>
+                  <button
+                    className="px-3 py-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 opacity-70 cursor-default"
+                    title={t('marketplacePage.subscribed')}
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon') ? (
+                <button
+                  disabled
+                  className="flex-1 py-2.5 rounded-xl font-semibold bg-border text-subtext cursor-not-allowed opacity-50 flex items-center justify-center gap-2"
+                >
+                  {t('marketplacePage.unavailable')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => toggleBuy(agent._id)}
+                  className="flex-1 py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all"
+                >
+                  <Download className="w-4 h-4" /> {t('marketplacePage.subscribe')}
+                </button>
+              )}
               {userAgent.some((ag) => ag && agent._id == ag._id) && (
                 <button
                   onClick={() => {

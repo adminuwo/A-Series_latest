@@ -14,7 +14,7 @@ const MyAgents = () => {
     const [loading, setLoading] = useState(true);
     const [expandedId, setExpandedId] = useState(null);
     const [editedInstructions, setEditedInstructions] = useState('');
-    const [isSaving, setIsSaving] = useState(false);
+    const [_isSaving, setIsSaving] = useState(false);
 
     // Modal State
     const [selectedAgent, setSelectedAgent] = useState(null);
@@ -43,7 +43,7 @@ const MyAgents = () => {
         }
     };
 
-    const handleCreateAgent = async () => {
+    const _handleCreateAgent = async () => {
         const newAgent = {
             name: t('myAgentsPage.defaultName'),
             description: t('myAgentsPage.defaultDescription'),
@@ -54,7 +54,7 @@ const MyAgents = () => {
         loadAgents();
     };
 
-    const handleDelete = async (id, e) => {
+    const _handleDelete = async (id, e) => {
         e.stopPropagation();
         if (window.confirm(t('myAgentsPage.deleteConfirm'))) {
             await apiService.deleteAgent(id);
@@ -62,7 +62,7 @@ const MyAgents = () => {
         }
     };
 
-    const toggleExpand = (agent) => {
+    const _toggleExpand = (agent) => {
         if (expandedId === agent._id) {
             setExpandedId(null);
         } else {
@@ -71,7 +71,7 @@ const MyAgents = () => {
         }
     };
 
-    const handleSaveInstructions = async (id) => {
+    const _handleSaveInstructions = async (id) => {
         setIsSaving(true);
         await apiService.updateAgent(id, { instructions: editedInstructions });
 
@@ -83,7 +83,7 @@ const MyAgents = () => {
         setExpandedId(null);
     };
 
-    const getIcon = (type) => {
+    const _getIcon = (type) => {
         if (type === 'coder') return <Code className="w-6 h-6 text-blue-500" />;
         if (type === 'writer') return <Edit3 className="w-6 h-6 text-pink-500" />;
         return <Bot className="w-6 h-6 text-primary" />;
@@ -154,9 +154,29 @@ const MyAgents = () => {
                                 <div className="flex gap-2 mt-auto">
                                     <button
                                         onClick={() => {
-                                            const targetUrl = (!agent?.url || agent.url.trim() === "") ? AppRoute.agentSoon : agent.url;
-                                            setSelectedAgent({ ...agent, url: targetUrl });
-                                            setIsModalOpen(true);
+                                            const name = (agent.agentName || "").toUpperCase().replace(/\s+/g, '');
+                                            // Agents that use the new AISAWorkSpace interface
+                                            const workspaceAgents = ['AISALES', 'AIWRITE', 'AIBIZ', 'AIDESK'];
+
+                                            // Standalone agents
+                                            const standaloneAgents = {
+                                                'AIHIRE': '/agents/aihire'
+                                            };
+
+                                            // Agents that use the generic Chat interface
+                                            const chatAgents = ['AIVA'];
+
+                                            if (workspaceAgents.includes(name)) {
+                                                navigate(`${AppRoute.WORKSPACE}/${name}`);
+                                            } else if (standaloneAgents[name]) {
+                                                navigate(standaloneAgents[name]);
+                                            } else if (chatAgents.includes(name)) {
+                                                navigate(AppRoute.CHAT, { state: { agentType: name, agent: agent } });
+                                            } else {
+                                                const targetUrl = (!agent?.url || agent.url.trim() === "") ? AppRoute.agentSoon : agent.url;
+                                                setSelectedAgent({ ...agent, url: targetUrl });
+                                                setIsModalOpen(true);
+                                            }
                                         }}
                                         className="flex-1 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 hover:shadow-md"
                                     >

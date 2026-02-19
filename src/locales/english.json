@@ -1,5 +1,5 @@
 {
-    "brandName": "AI-MALL™",
+    "brandName": "A-Series™",
     "regions": {
         "World": "World",
         "India": "India",
@@ -38,6 +38,7 @@
     "displayLanguage": "Display Language",
     "dashboard": "Dashboard",
     "chat": "Chat",
+    "workspace": "Workspace",
     "myAgents": "My Agents",
     "marketplace": "Marketplace",
     "vendorDashboard": "Vendor Dashboard",
@@ -65,9 +66,9 @@
     "signOut": "Log Out from Device",
     "auth": {
         "welcomeBack": "Welcome Back",
-        "signInSubtitle": "Sign in to continue to AI-MALL™",
+        "signInSubtitle": "Sign in to continue to A-Series™",
         "createAccount": "Create Account",
-        "joinSubtitle": "Join AI-MALL™ to unlock full access",
+        "joinSubtitle": "Join A-Series™ to unlock full access",
         "email": "Email Address",
         "password": "Password",
         "fullName": "Full Name",
@@ -133,16 +134,16 @@
             "management": "Management",
             "governance": "Governance",
             "signOut": "Sign Out",
-            "goToASeries": "Go to AI-MALL™"
+            "goToASeries": "Go to A-Series™"
         },
         "header": {
             "search": "Search your agents...",
             "config": "Agent Configuration",
-            "brand": "AI-MALL™"
+            "brand": "A-Series™"
         },
         "overview": {
             "title": "Dashboard Overview",
-            "welcome": "Welcome back, AI-MALL™. Here's what's happening today.",
+            "welcome": "Welcome back, A-Series™. Here's what's happening today.",
             "systemsOperational": "Systems Operational",
             "systemReady": "System Ready",
             "production": "Production V2.4",
@@ -363,7 +364,7 @@
     "notificationsPage": {
         "title": "Updates",
         "subtitle": "Stay informed with the latest platform announcements and account alerts.",
-        "welcomeTitle": "Welcome to AI-MALL™!",
+        "welcomeTitle": "Welcome to A-Series™!",
         "welcomeMessage": "We're glad to have you here. This is your updates center where you'll receive platform announcements, subscription alerts, and new agent launches.",
         "markRead": "Mark as read",
         "delete": "Delete",
@@ -471,6 +472,8 @@
     "showAll": "Show All",
     "hideAll": "Hide All",
     "marketplacePage": {
+        "launch": "Launch",
+        "launchIntelligence": "Launch Intelligence",
         "title": "AI Marketplace",
         "subtitle": "Discover and deploy specialized AI agents for your business.",
         "searchPlaceholder": "Search agents...",
@@ -533,7 +536,7 @@
         "getStarted": "Get Started",
         "heroTitle1": "The Future of",
         "heroTitle2": "Conversational AI",
-        "heroSubtitle": "Experience the next generation of intelligent assistance. AI-MALL™ learns, adapts, and creates with you in real-time through a stunning interface.",
+        "heroSubtitle": "Experience the next generation of intelligent assistance. A-Series™ learns, adapts, and creates with you in real-time through a stunning interface.",
         "startNow": "Start Now",
         "existingUser": "Existing User",
         "poweredBy": "Powered by UWO™",
@@ -552,8 +555,8 @@
             }
         },
         "footer": {
-            "description": "AI-MALL™ — India's First AI App Marketplace.",
-            "appCount": "100 AI Apps | AI-MALL™ | Partner Integrations",
+            "description": "A-Series™ — India's First AI App Marketplace.",
+            "appCount": "100 AI Apps | A-Series™ | Partner Integrations",
             "poweredBy": "Powered by UWO™",
             "explore": "Explore",
             "marketplace": "Marketplace",
@@ -576,11 +579,11 @@
             "title": "Privacy Policy",
             "compliance": {
                 "heading": "Compliance & Data Protection",
-                "content": "AI-MALL™ strictly adheres to global data protection regulations, including GDPR, CCPA, and SOC2 standards. We prioritize the security of your personal information through robust encryption and strict access controls."
+                "content": "A-Series™ strictly adheres to global data protection regulations, including GDPR, CCPA, and SOC2 standards. We prioritize the security of your personal information through robust encryption and strict access controls."
             },
             "zeroTraining": {
                 "heading": "Zero-Training Policy on User Data",
-                "content": "We respect your intellectual property. AI-MALL™ does NOT use your private data, uploaded documents, or conversation history to train our core AI models. Your proprietary information remains isolated and secure."
+                "content": "We respect your intellectual property. A-Series™ does NOT use your private data, uploaded documents, or conversation history to train our core AI models. Your proprietary information remains isolated and secure."
             },
             "rightToForgotten": {
                 "heading": "Data Rights & The Right to be Forgotten",
@@ -595,7 +598,7 @@
             "title": "Terms of Service",
             "intellectualProperty": {
                 "heading": "Intellectual Property Rights",
-                "content": "You retain all rights, title, and interest in the content you create or upload to the Platform. AI-MALL™ claims no ownership over your proprietary business logic, custom agents, or generated outputs."
+                "content": "You retain all rights, title, and interest in the content you create or upload to the Platform. A-Series™ claims no ownership over your proprietary business logic, custom agents, or generated outputs."
             },
             "acceptableUse": {
                 "heading": "Acceptable Use Policy",
@@ -603,11 +606,11 @@
             },
             "aiSafety": {
                 "heading": "AI Safety & Responsible Use",
-                "content": "Users must employ AI agents responsibly. AI-MALL™ implements safety guardrails, but users are responsible for verifying critical outputs. Automated decision-making should always be supervised by human judgment in high-stakes scenarios."
+                "content": "Users must employ AI agents responsibly. A-Series™ implements safety guardrails, but users are responsible for verifying critical outputs. Automated decision-making should always be supervised by human judgment in high-stakes scenarios."
             },
             "highRisk": {
                 "heading": "High-Risk Domain Disclaimer",
-                "content": "AI-MALL™ agents are not substitutes for professional advice in medical, legal, or financial fields. We accept no liability for decisions made solely based on AI recommendations in these regulated industries."
+                "content": "A-Series™ agents are not substitutes for professional advice in medical, legal, or financial fields. We accept no liability for decisions made solely based on AI recommendations in these regulated industries."
             }
         },
         "cookie": {
@@ -629,7 +632,7 @@
     "securityGuidelines": {
         "pageTitle": "Security Guidelines",
         "lastUpdated": "Last Updated: February 2026",
-        "intro": "At AI-MALL™, we take security seriously. These guidelines outline how we protect your data and what we expect from our users.",
+        "intro": "At A-Series™, we take security seriously. These guidelines outline how we protect your data and what we expect from our users.",
         "legalSummaryTitle": "Legal Summary",
         "legalSummaryText": "By using our platform, you agree to adhere to these security standards.",
         "section1": {
@@ -802,8 +805,8 @@
         },
         "faqs": [
             {
-                "question": "How does AI-MALL™ work?",
-                "answer": "AI-MALL™ uses advanced language models to provide accurate, real-time responses and task execution."
+                "question": "How does A-Series™ work?",
+                "answer": "A-Series™ uses advanced language models to provide accurate, real-time responses and task execution."
             },
             {
                 "question": "How can I create a custom agent?",
@@ -822,7 +825,7 @@
                 "answer": "Yes, you can export individual chats as PDF or Word documents using the export button in the chat interface."
             },
             {
-                "question": "What languages does AI-MALL™ support?",
+                "question": "What languages does A-Series™ support?",
                 "answer": "We currently support 10 major languages including English, Hindi, Spanish, French, Arabic, and several Indian regional languages."
             },
             {
@@ -853,8 +856,8 @@
         "success": "Your message has been sent successfully!",
         "faqs": [
             {
-                "question": "How does AI-MALL™ work?",
-                "answer": "AI-MALL™ uses advanced language models to provide accurate, real-time responses and task execution."
+                "question": "How does A-Series™ work?",
+                "answer": "A-Series™ uses advanced language models to provide accurate, real-time responses and task execution."
             },
             {
                 "question": "How can I create a custom agent?",
@@ -923,7 +926,7 @@
         "cancel": "Cancel",
         "submit": "Submit Report",
         "successTitle": "Report Submitted!",
-        "successMessage": "Thank you for helping us improve AI-MALL™.",
+        "successMessage": "Thank you for helping us improve A-Series™.",
         "close": "Close"
     },
     "aibiz": {
@@ -931,7 +934,7 @@
             "title": "Create Business Document",
             "subtitle": "Fill in the details to generate a polished, customized business document",
             "businessName": "Business Name",
-            "businessNamePlaceholder": "e.g., AI-MALL™",
+            "businessNamePlaceholder": "e.g., A-Series™",
             "ideaLabel": "Idea / Concept",
             "ideaHelp": "Choose a concept from the list.",
             "industryLabel": "Industry",
@@ -992,7 +995,7 @@
         }
     },
     "adminName": "Admin",
-    "aisaName": "AIVA",
+    "aivaName": "AIVA",
     "free": "Free",
     "draft": "Draft",
     "active": "Active",

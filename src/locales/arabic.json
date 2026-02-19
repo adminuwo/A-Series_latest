@@ -480,6 +480,7 @@
         "delete": "حذف"
     },
     "marketplacePage": {
+        "launch": "Launch",
         "title": "سوق الذكاء الاصطناعي",
         "subtitle": "اكتشف ونشر وكلاء الذكاء الاصطناعي المتخصصين لعملك.",
         "searchPlaceholder": "بحث عن الوكلاء...",

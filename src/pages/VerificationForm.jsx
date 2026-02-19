@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { Mail, CheckCircle, ArrowLeft, AlertCircle, Pencil } from 'lucide-react';
 import { AppRoute, apis } from '../types';
-import { apiService } from '../services/apiService';
 import axios from 'axios';
 import { getUserData, setUserData } from '../userStore/userData';
 
 
 export default function VerificationForm() {
     const [verificationCode, setVerificationCode] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [loading, _setLoading] = useState(false);
     const [error, setError] = useState('');
 
     // const [formData, setFormData] = useState({ email: Cookies.get("email"), })

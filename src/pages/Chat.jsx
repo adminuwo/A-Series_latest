@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, Fragment, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Paperclip, X, FileText, Image as ImageIcon, Cloud, HardDrive, Edit2, Download, Mic, Wand2, Eye, FileSpreadsheet, Presentation, File as FileIcon, MoreVertical, Trash2, Check, Camera, Video, Copy, ThumbsUp, ThumbsDown, Share, Search, Undo2, Menu as MenuIcon, Volume2, Pause, Headphones, MessageCircle, ExternalLink, ZoomIn, ZoomOut, RotateCcw, Minus, MessageSquare, Calendar as CalendarIcon, Code } from 'lucide-react';
 
 import { renderAsync } from 'docx-preview';
@@ -28,7 +28,7 @@ import { getUserData, sessionsData, toggleState } from '../userStore/userData';
 import { usePersonalization } from '../context/PersonalizationContext';
 
 
-const WELCOME_MESSAGE = "Hello! I’m AIVA™, your Artificial Intelligence Super Assistant.";
+const getWelcomeMessage = (name) => `Hello! I’m ${name || 'AIVA'}™, your Artificial Intelligence Super Assistant.`;
 
 const FEEDBACK_PROMPTS = {
   en: [
@@ -169,7 +169,9 @@ const ImageViewer = ({ src, alt }) => {
 
   // Reset position if zoomed out to 1
   useEffect(() => {
-    if (scale === 1) setPosition({ x: 0, y: 0 });
+    if (scale === 1) {
+      setPosition(prev => (prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }));
+    }
   }, [scale]);
 
   return (
@@ -230,7 +232,7 @@ const Chat = () => {
   const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef(null);
   const [currentSessionId, setCurrentSessionId] = useState(sessionId || 'new');
-  const [tglState, setTglState] = useRecoilState(toggleState);
+  const [_tglState, setTglState] = useRecoilState(toggleState);
   const [typingMessageId, setTypingMessageId] = useState(null);
   const [editingSessionId, setEditingSessionId] = useState(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -239,10 +241,11 @@ const Chat = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [isLiveMode, setIsLiveMode] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [_isSidebarOpen, _setIsSidebarOpen] = useState(false);
   const [filePreviews, setFilePreviews] = useState([]);
-  const [activeAgent, setActiveAgent] = useState({ agentName: 'AIVA', category: 'General' });
+  const [activeAgent, setActiveAgent] = useState({ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' });
   const [userAgents, setUserAgents] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [toolModels, setToolModels] = useState({
     chat: 'gemini-flash',
     image: 'gemini-flash',
@@ -258,8 +261,8 @@ const Chat = () => {
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [listeningTime, setListeningTime] = useState(0);
-  const timerRef = useRef(null);
+  const [_listeningTime, _setListeningTime] = useState(0);
+  const _timerRef = useRef(null);
   const attachBtnRef = useRef(null);
   const menuRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -318,18 +321,6 @@ const Chat = () => {
   const processFile = (file) => {
     if (!file) return;
 
-    // Validate file type
-    const validTypes = [
-      'image/',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-    ];
-
     setSelectedFiles(prev => [...prev, file]);
 
     // Generate Preview
@@ -345,6 +336,17 @@ const Chat = () => {
     };
     reader.readAsDataURL(file);
   };
+
+  const _unusedValidTypes = [
+    'image/',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  ];
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -403,7 +405,7 @@ const Chat = () => {
     if (photosInputRef.current) photosInputRef.current.value = '';
   };
 
-  const handleAttachmentSelect = (type) => {
+  const _handleAttachmentSelect = (type) => {
     setIsAttachMenuOpen(false);
     if (type === 'upload') {
       uploadInputRef.current?.click();
@@ -451,7 +453,7 @@ const Chat = () => {
       setMessages(prev => [...prev, userMsg]);
       await chatStorageService.saveMessage(activeSessionId, userMsg);
 
-      // 2. Add Processing Message from AISA
+      // 2. Add Processing Message from AIVA
       const aiMsgId = (Date.now() + 1).toString();
       const processingMsg = {
         id: aiMsgId,
@@ -544,7 +546,9 @@ const Chat = () => {
 
             errorMsg = errorData.error || errorMsg;
             errorDetail = errorData.details || errorDetail;
-          } catch (e) { }
+          } catch (e) {
+            console.error("Error parsing catch-block data", e);
+          }
         }
 
         setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
@@ -631,6 +635,7 @@ const Chat = () => {
               const updatedMsg = {
                 ...msg,
                 isProcessing: false,
+                mode: MODES.AUDIO_GEN,
                 content: `✅ Audio conversion complete for **${file.name}**.`,
                 conversion: {
                   file: mp3Base64,
@@ -723,6 +728,7 @@ const Chat = () => {
             const updatedMsg = {
               ...msg,
               isProcessing: false,
+              mode: MODES.AUDIO_GEN,
               content: `✅ Your text has been converted to voice audio.`,
               conversion: {
                 file: mp3Base64,
@@ -760,7 +766,7 @@ const Chat = () => {
     }
   };
 
-  const handleGenerateVideo = async () => {
+  const _handleGenerateVideo = async () => {
     try {
       if (!inputRef.current?.value.trim() && selectedFiles.length === 0) {
         // toast.error('Please enter a prompt or select a file');
@@ -845,6 +851,7 @@ const Chat = () => {
             role: 'assistant',
             content: `🎥 Video generated successfully!`, // Use content
             videoUrl: data.videoUrl,
+            mode: MODES.VIDEO_GEN,
             timestamp: new Date(),
           };
 
@@ -925,6 +932,7 @@ const Chat = () => {
             role: 'assistant',
             content: `🖼️ Image generated successfully!`,
             imageUrl: finalUrl,
+            mode: MODES.IMAGE_GEN,
             timestamp: Date.now(),
           };
 
@@ -956,7 +964,7 @@ const Chat = () => {
     }
   };
 
-  const handleDeepSearch = async () => {
+  const _handleDeepSearch = async () => {
     try {
       if (!inputRef.current?.value.trim()) {
         toast.error('Please enter a topic for deep search');
@@ -1160,7 +1168,7 @@ const Chat = () => {
       .replace(/\bclg\b/gi, 'college ')
       .replace(/\bplz\b/gi, 'please ')
       // Remove specific symbols as requested: , . ? ; " \ * / + - : @ [ ] ( ) | _
-      .replace(/[,\.\?;\"\\\*\/\+\-:@\[\]\(\)\|\_]/g, ' ')
+      .replace(/[.,?;\"\\*/+\-:@\[\]()|_]/g, ' ')
       // Remove quotes/dashes just in case regex above missed something or for extra safety
       .replace(/["']/g, '')
       // Collapse whitespace
@@ -1175,153 +1183,155 @@ const Chat = () => {
 
   // Internal function to execute speech
   const executeSpeak = async (text, language, msgId, attachments = []) => {
-    return new Promise(async (resolve) => {
-      // Store resolve to allow external cancellation
-      currentSpeechResolverRef.current = resolve;
+    return new Promise((resolve) => {
+      (async () => {
+        // Store resolve to allow external cancellation
+        currentSpeechResolverRef.current = resolve;
 
-      // Reset State Logic used to be here, now handled by queue manager
+        // Reset State Logic used to be here, now handled by queue manager
 
-      try {
-        let audioBlob = null;
-        let targetLang = 'en-US';
+        try {
+          let audioBlob = null;
+          let targetLang = 'en-US';
 
-        const readableAttachment = attachments && attachments.length > 0
-          ? attachments.find(a =>
-          (a.type && (
-            a.type.includes('pdf') ||
-            a.type.includes('word') ||
-            a.type.includes('document') ||
-            a.type.includes('text') ||
-            a.type.startsWith('image/')
-          ))
-          ) : null;
+          const readableAttachment = attachments && attachments.length > 0
+            ? attachments.find(a =>
+            (a.type && (
+              a.type.includes('pdf') ||
+              a.type.includes('word') ||
+              a.type.includes('document') ||
+              a.type.includes('text') ||
+              a.type.startsWith('image/')
+            ))
+            ) : null;
 
-        // Check Cache
-        if (msgId && audioCacheRef.current[msgId]) {
-          console.log(`[VOICE] Using cached audio for: ${msgId}`);
-          audioBlob = audioCacheRef.current[msgId];
-        } else {
-          // Not cached, fetch
-          if (readableAttachment) {
-            toast.loading("Processing file & text...", { id: 'voice-loading' });
-            console.log(`[VOICE] Reading attachment: ${readableAttachment.name}`);
-
-            const fileRes = await fetch(readableAttachment.url);
-            const fileBlob = await fileRes.blob();
-
-            const base64Data = await new Promise((res) => {
-              const reader = new FileReader();
-              reader.onloadend = () => res(reader.result.split(',')[1]);
-              reader.readAsDataURL(fileBlob);
-            });
-
-            const headerText = text ? cleanTextForTTS(text) : "";
-
-            const response = await axios.post(apis.synthesizeFile, {
-              fileData: base64Data,
-              mimeType: readableAttachment.type || 'application/pdf',
-              languageCode: null,
-              gender: 'FEMALE',
-              introText: headerText
-            }, {
-              responseType: 'arraybuffer'
-            });
-
-            audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
-            toast.dismiss('voice-loading');
-
+          // Check Cache
+          if (msgId && audioCacheRef.current[msgId]) {
+            console.log(`[VOICE] Using cached audio for: ${msgId}`);
+            audioBlob = audioCacheRef.current[msgId];
           } else {
-            if (!text) {
-              resolve();
-              return;
+            // Not cached, fetch
+            if (readableAttachment) {
+              toast.loading("Processing file & text...", { id: 'voice-loading' });
+              console.log(`[VOICE] Reading attachment: ${readableAttachment.name}`);
+
+              const fileRes = await fetch(readableAttachment.url);
+              const fileBlob = await fileRes.blob();
+
+              const base64Data = await new Promise((res) => {
+                const reader = new FileReader();
+                reader.onloadend = () => res(reader.result.split(',')[1]);
+                reader.readAsDataURL(fileBlob);
+              });
+
+              const headerText = text ? cleanTextForTTS(text) : "";
+
+              const response = await axios.post(apis.synthesizeFile, {
+                fileData: base64Data,
+                mimeType: readableAttachment.type || 'application/pdf',
+                languageCode: null,
+                gender: 'FEMALE',
+                introText: headerText
+              }, {
+                responseType: 'arraybuffer'
+              });
+
+              audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+              toast.dismiss('voice-loading');
+
+            } else {
+              if (!text) {
+                resolve();
+                return;
+              }
+
+              const cleanText = cleanTextForTTS(text);
+              if (!cleanText) {
+                resolve();
+                return;
+              }
+
+              const langMap = {
+                'Hindi': 'hi-IN',
+                'English': 'en-US',
+                'Hinglish': 'hi-IN'
+              };
+              targetLang = /[\u0900-\u097F]/.test(cleanText) ? 'hi-IN' : (langMap[language] || 'en-US');
+
+              // Show loading for normal TTS too
+              toast.loading("Generating voice...", { id: 'voice-loading' });
+
+              const response = await axios.post(apis.synthesizeVoice, {
+                text: cleanText,
+                languageCode: targetLang,
+                gender: 'FEMALE',
+                tone: 'conversational'
+              }, {
+                responseType: 'arraybuffer'
+              });
+
+              toast.dismiss('voice-loading');
+              audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
             }
 
-            const cleanText = cleanTextForTTS(text);
-            if (!cleanText) {
-              resolve();
-              return;
+            // Save to Cache
+            if (msgId && audioBlob) {
+              audioCacheRef.current[msgId] = audioBlob;
             }
-
-            const langMap = {
-              'Hindi': 'hi-IN',
-              'English': 'en-US',
-              'Hinglish': 'hi-IN'
-            };
-            targetLang = /[\u0900-\u097F]/.test(cleanText) ? 'hi-IN' : (langMap[language] || 'en-US');
-
-            // Show loading for normal TTS too
-            toast.loading("Generating voice...", { id: 'voice-loading' });
-
-            const response = await axios.post(apis.synthesizeVoice, {
-              text: cleanText,
-              languageCode: targetLang,
-              gender: 'FEMALE',
-              tone: 'conversational'
-            }, {
-              responseType: 'arraybuffer'
-            });
-
-            toast.dismiss('voice-loading');
-            audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
           }
 
-          // Save to Cache
-          if (msgId && audioBlob) {
-            audioCacheRef.current[msgId] = audioBlob;
+          // Check if user stopped/switched while we were fetching
+          if (currentSpeechResolverRef.current && currentSpeechResolverRef.current !== resolve) {
+            console.log('[VOICE] Aborted playback - new task started');
+            resolve();
+            return;
           }
-        }
 
-        // Check if user stopped/switched while we were fetching
-        if (currentSpeechResolverRef.current && currentSpeechResolverRef.current !== resolve) {
-          console.log('[VOICE] Aborted playback - new task started');
+          // DOUBLE CHECK: Stop any existing audio before playing new one
+          if (window.currentAudio) {
+            window.currentAudio.pause();
+            window.currentAudio = null;
+          }
+
+          const url = window.URL.createObjectURL(audioBlob);
+          const audio = new Audio(url);
+
+          window.currentAudio = audio;
+          audioRef.current = audio;
+
+          audio.onended = () => {
+            window.URL.revokeObjectURL(url);
+            if (window.currentAudio === audio) window.currentAudio = null;
+            if (audioRef.current === audio) audioRef.current = null;
+            resolve();
+          };
+
+          audio.onerror = (e) => {
+            console.error(`[VOICE] Audio playback error:`, e);
+            if (!readableAttachment) fallbackSpeak(cleanTextForTTS(text), targetLang);
+            resolve();
+          };
+
+          // FINAL CHECK: Ensure we haven't been stopped while preparing the audio object
+          if (!currentSpeechResolverRef.current || currentSpeechResolverRef.current !== resolve) {
+            console.log('[VOICE] Aborted playback - cancelled during final prep');
+            resolve();
+            return;
+          }
+
+          await audio.play();
+
+        } catch (err) {
+          console.error('[VOICE] Synthesis failed:', err);
+          toast.dismiss('voice-loading');
+          // fallback logic...
+          if (!attachments || attachments.length === 0) {
+            // simple fallback
+            // fallbackSpeak(...)
+          }
           resolve();
-          return;
         }
-
-        // DOUBLE CHECK: Stop any existing audio before playing new one
-        if (window.currentAudio) {
-          window.currentAudio.pause();
-          window.currentAudio = null;
-        }
-
-        const url = window.URL.createObjectURL(audioBlob);
-        const audio = new Audio(url);
-
-        window.currentAudio = audio;
-        audioRef.current = audio;
-
-        audio.onended = () => {
-          window.URL.revokeObjectURL(url);
-          if (window.currentAudio === audio) window.currentAudio = null;
-          if (audioRef.current === audio) audioRef.current = null;
-          resolve();
-        };
-
-        audio.onerror = (e) => {
-          console.error(`[VOICE] Audio playback error:`, e);
-          if (!readableAttachment) fallbackSpeak(cleanTextForTTS(text), targetLang);
-          resolve();
-        };
-
-        // FINAL CHECK: Ensure we haven't been stopped while preparing the audio object
-        if (!currentSpeechResolverRef.current || currentSpeechResolverRef.current !== resolve) {
-          console.log('[VOICE] Aborted playback - cancelled during final prep');
-          resolve();
-          return;
-        }
-
-        await audio.play();
-
-      } catch (err) {
-        console.error('[VOICE] Synthesis failed:', err);
-        toast.dismiss('voice-loading');
-        // fallback logic...
-        if (!attachments || attachments.length === 0) {
-          // simple fallback
-          // fallbackSpeak(...)
-        }
-        resolve();
-      }
+      })();
     });
   };
 
@@ -1474,7 +1484,7 @@ const Chat = () => {
 
   useEffect(() => {
     const loadSessions = async () => {
-      const data = await chatStorageService.getSessions();
+      const data = await chatStorageService.getSessions(activeAgent.agentName);
       setSessions(data);
 
       // Fetch User Subscribed Agents
@@ -1490,30 +1500,43 @@ const Chat = () => {
             const agents = res.data?.agents || [];
             // Add default AIVA agent if not present
             const processedAgents = [{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }, ...agents];
-            setAgents(processedAgents);
-            setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
-          } catch (agentErr) {
+            setUserAgents(processedAgents);
+          } catch (_agentErr) {
             // Silently use defaults if fetch fails (no console warning)
-            setAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
             setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
           }
         } else {
           // No user logged in, use default
-          setAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
           setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
         }
-      } catch (err) {
+      } catch (_err) {
         // Silently handle errors
         setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' }]);
       }
     };
     loadSessions();
-  }, [messages, setSessions]);
+  }, [messages, setSessions, activeAgent.agentName]);
 
   const isNavigatingRef = useRef(false);
 
   useEffect(() => {
     const initChat = async () => {
+      // Handle agent selection from navigation state
+      if (location.state?.agentType) {
+        const type = location.state.agentType;
+        const agent = location.state.agent || { agentName: type, category: 'Internal' };
+        setActiveAgent({
+          agentName: type,
+          category: agent.category || 'Internal',
+          instructions: agent.instructions || '',
+          avatar: agent.avatar || (type === 'AIVA' ? '/AGENTS_IMG/AIVA.png' : null)
+        });
+        console.log(`[CHAT] Agent Type set from navigation: ${type}`);
+      } else if (!sessionId || sessionId === 'new') {
+        // Reset to default if new chat and no state
+        setActiveAgent({ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA.png' });
+      }
+
       // If we just navigated from 'new' to a real ID in handleSendMessage,
       // don't clear the messages we already have in state.
       if (isNavigatingRef.current) {
@@ -1528,6 +1551,16 @@ const Chat = () => {
         console.log(`[DEBUG] Received history:`, history);
         if (history && history.length > 0) {
           console.log(`[DEBUG] First message role: ${history[0].role}, content preview: ${history[0].content?.substring(0, 20)}`);
+
+          // Try to restore active agent from history if possible
+          const lastModelMsg = [...history].reverse().find(m => m.role === 'model' && m.agentName);
+          if (lastModelMsg) {
+            setActiveAgent({
+              agentName: lastModelMsg.agentName,
+              category: lastModelMsg.agentCategory || 'General',
+              avatar: lastModelMsg.agentAvatar || (lastModelMsg.agentName === 'AIVA' ? '/AGENTS_IMG/AIVA.png' : null)
+            });
+          }
         }
         setMessages(history || []);
       } else {
@@ -1538,7 +1571,7 @@ const Chat = () => {
       if (window.innerWidth < 1024) setShowHistory(false);
     };
     initChat();
-  }, [sessionId]);
+  }, [sessionId, location.state]);
 
   const chatContainerRef = useRef(null);
   const shouldAutoScrollRef = useRef(true);
@@ -1568,7 +1601,7 @@ const Chat = () => {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  const handleNewChat = async () => {
+  const _handleNewChat = async () => {
     navigate('/dashboard/chat/new');
     if (window.innerWidth < 1024) setShowHistory(false);
   };
@@ -1600,7 +1633,7 @@ const Chat = () => {
 
   const { language: currentLang, t } = useLanguage();
 
-  const handleDriveClick = () => {
+  const _handleDriveClick = () => {
     setIsAttachMenuOpen(false);
     // Simulating Drive Integration via Link
     const link = prompt("Paste your Google Drive File Link:");
@@ -1869,7 +1902,7 @@ ${PERSONA_INSTRUCTION}
 
 ### RESPONSE BEHAVIOR:
 - Answer the user's question directly without greeting messages
-- Do NOT say "Hello... welcome to AISA" or similar greetings
+- Do NOT say "Hello... welcome to AIVA" or similar greetings
 - Focus ONLY on providing the answer to what user asked
 - Be helpful, clear, and concise
 
@@ -1967,15 +2000,16 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
 `;
         // Check for greeting to send the specific welcome message
         const lowerInput = (contentToSend || "").toLowerCase().trim();
-        const isGreeting = ['hi', 'hello', 'hey', 'namaste', 'नमस्ते', 'greetings', 'hi aisa', 'hello aisa'].includes(lowerInput);
+        const isGreeting = ['hi', 'hello', 'hey', 'namaste', 'नमस्ते', 'greetings', 'hi aiva', 'hello aiva'].includes(lowerInput);
 
         let aiResponseData;
 
         if (isGreeting) {
           // Respond with the welcome message for greetings
           aiResponseData = {
-            reply: WELCOME_MESSAGE,
-            language: currentLang
+            reply: getWelcomeMessage(activeAgent.agentName),
+            id: Date.now() + 1,
+            role: 'model',
           };
         } else {
           // Default AI message sending
@@ -1986,7 +2020,8 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
             userMsg.attachments,
             currentLang,
             abortControllerRef.current.signal,
-            detectedMode
+            detectedMode,
+            { agentType: activeAgent.agentName }
           );
         }
 
@@ -2042,6 +2077,10 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
             role: 'model',
             content: '', // Start empty for typewriter effect
             timestamp: Date.now() + i * 100,
+            mode: detectedMode,
+            agentName: activeAgent.agentName,
+            agentCategory: activeAgent.category,
+            agentAvatar: activeAgent.avatar,
             ...(i === 0 && aiVideoUrl && { videoUrl: aiVideoUrl }),
             ...(i === 0 && aiImageUrl && { imageUrl: aiImageUrl }),
           };
@@ -2125,7 +2164,7 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
 
 
 
-  const handleKeyDown = (e) => {
+  const _handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -2136,8 +2175,8 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
     const name = (agentName || '').toLowerCase();
     const cat = (category || '').toLowerCase();
 
-    // Default: Everything enabled for AISA
-    if (name === 'aisa' || !name) {
+    // Default: Everything enabled for AIVA
+    if (name === 'aiva' || !name) {
       return {
         canUploadImages: true,
         canUploadDocs: true,
@@ -2213,7 +2252,7 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
     }
   };
 
-  const handleImageAction = (action) => {
+  const _handleImageAction = (action) => {
     if (selectedFiles.length === 0) return;
 
     let command = '';
@@ -2321,8 +2360,8 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
             try {
               await navigator.share({
                 files: [file],
-                title: 'AISA Document',
-                text: 'Check out this document generated by AISA AI.'
+                title: 'AIVA Document',
+                text: 'Check out this document generated by AIVA AI.'
               });
               toast.success("Shared successfully!", { id: shareToastId });
             } catch (shareErr) {
@@ -2427,7 +2466,7 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
         heightLeft -= contentHeightPerPage;
       }
 
-      const filename = `aisa-response-${msg.id}.pdf`;
+      const filename = `aiva-response-${msg.id}.pdf`;
 
       if (action === 'download') {
         pdf.save(filename);
@@ -2621,7 +2660,7 @@ ${codeWriterActive ? `### CODE WRITER MODE ENABLED (CRITICAL):
 
       // Generate new AI response based on the edited message
       const SYSTEM_INSTRUCTION = `
-You are AISA, an advanced AI assistant.
+You are AIVA, an advanced AI assistant.
 IMAGE GENERATION CAPABILITIES:
 If the user asks for an image (e.g., "generate", "create", "draw", "show me a pic", "image dikhao", "photo bhejo", "pic do"), you MUST generate it using the Pollinations API.
 Format: ![Image](https://image.pollinations.ai/prompt/{URL_ENCODED_DESCRIPTION}?nologo=true)
@@ -3028,7 +3067,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => {
-                    navigate('/dashboard/chat');
+                    navigate('/dashboard/chat', { state: { agentType: activeAgent.agentName, agent: activeAgent } });
                     setShowHistory(false);
                   }}
                   className="p-1.5 text-subtext hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
@@ -3053,7 +3092,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     <MessageCircle className="w-6 h-6 text-subtext/40" />
                   </div>
                   <p className="text-xs font-medium text-subtext leading-relaxed">
-                    No conversations yet.<br />Start chatting with Aaisa!
+                    No conversations yet.<br />Start chatting with AIVA!
                   </p>
                   <button
                     onClick={() => {
@@ -3206,7 +3245,14 @@ For "Remix" requests with an attachment, analyze the attached image, then create
             </button>
 
             <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-primary truncate">{t('brandName')}</span>
+              <span className="font-bold text-lg text-primary truncate">
+                {activeAgent.agentName === 'AIVA' || !activeAgent.agentName ? t('brandName') : activeAgent.agentName}
+              </span>
+              {activeAgent.agentName !== 'AIVA' && activeAgent.agentName && (
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">
+                  Powered by A-Series
+                </span>
+              )}
             </div>
           </div>
 
@@ -3262,7 +3308,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     {msg.role === 'user' ? (
                       <User className="w-4 h-4 text-white" />
                     ) : (
-                      <img src="/AGENTS_IMG/AISA.png" alt="AISA" className="w-5 h-5 object-contain" />
+                      <img src={msg.agentAvatar || "/AGENTS_IMG/AIVA.png"} alt={msg.agentName || "AI"} className="w-5 h-5 object-contain" />
                     )}
                   </div>
 
@@ -3498,7 +3544,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity">
                                         <div className="flex items-center gap-2">
                                           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-                                          <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Asset</span>
+                                          <span className="text-[10px] font-bold text-white uppercase tracking-widest">{activeAgent.agentName || 'AIVA'} Generated Asset</span>
                                         </div>
                                       </div>
                                       <img
@@ -3513,7 +3559,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation(); // Prevent opening modal when clicking download
-                                          handleDownload(props.src, 'aisa-generated.png');
+                                          handleDownload(props.src, 'aiva-generated.png');
                                         }}
                                         className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
                                         title="Download High-Res"
@@ -3537,7 +3583,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity pointer-events-none">
                                   <div className="flex items-center gap-2">
                                     <Video className="w-4 h-4 text-primary animate-pulse" />
-                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Video</span>
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">{activeAgent.agentName || 'AIVA'} Generated Video</span>
                                   </div>
                                 </div>
 
@@ -3554,7 +3600,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 </div>
 
                                 <button
-                                  onClick={() => handleDownload(msg.videoUrl, 'aisa-generated-video.mp4')}
+                                  onClick={() => handleDownload(msg.videoUrl, 'aiva-generated-video.mp4')}
                                   className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100 z-20"
                                   title="Download Video"
                                 >
@@ -3575,13 +3621,13 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity">
                                   <div className="flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Asset</span>
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">{activeAgent.agentName || 'AIVA'} Generated Asset</span>
                                   </div>
                                 </div>
                                 <img
                                   src={msg.imageUrl}
                                   className="w-full h-auto rounded-xl bg-black/5 min-h-[100px]"
-                                  alt="AISA Generated"
+                                  alt={`${activeAgent.agentName || 'AIVA'} Generated`}
                                   onError={(e) => {
                                     console.error("Image failed to load:", msg.imageUrl);
                                     e.target.style.display = 'none';
@@ -3597,7 +3643,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation(); // Prevent opening modal handling
-                                    handleDownload(msg.imageUrl, 'aisa-generated.png');
+                                    handleDownload(msg.imageUrl, 'aiva-generated.png');
                                   }}
                                   className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
                                   title="Download High-Res"
@@ -3720,7 +3766,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       {({ active }) => (
                                         <button
                                           onClick={() => {
-                                            const text = `I've converted "${msg.conversion.fileName}" into voice audio using AISA! ${window.location.href}`;
+                                            const text = `I've converted "${msg.conversion.fileName}" into voice audio using ${activeAgent.agentName || 'AIVA'}! ${window.location.href}`;
                                             const url = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
                                               ? `whatsapp://send?text=${encodeURIComponent(text)}`
                                               : `https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`;
@@ -3737,7 +3783,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       {({ active }) => (
                                         <button
                                           onClick={() => {
-                                            const text = `AISA Audio Conversion: ${msg.conversion.fileName}`;
+                                            const text = `${activeAgent.agentName || 'AIVA'} Audio Conversion: ${msg.conversion.fileName}`;
                                             const url = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
                                             window.open(url, '_blank');
                                           }}
@@ -3790,119 +3836,155 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             })()}
                             <div className="flex flex-col items-end gap-2 self-end sm:self-auto">
                               <div className="flex items-center gap-3">
-                                <button
-                                  onClick={() => {
-                                    // Pass message ID to speakResponse for tracking
-                                    const isHindi = /[\u0900-\u097F]/.test(msg.content);
-                                    speakResponse(msg.content, isHindi ? 'Hindi' : 'English', msg.id, msg.attachments || [], true);
-                                  }}
-                                  className={`transition-colors p-1.5 rounded-lg ${speakingMessageId === msg.id
-                                    ? 'text-primary bg-primary/10'
-                                    : 'text-subtext hover:text-primary hover:bg-surface-hover'
-                                    }`}
-                                  title={speakingMessageId === msg.id && !isPaused ? "Pause" : "Speak"}
-                                >
-                                  {speakingMessageId === msg.id && !isPaused ? (
-                                    <Pause className="w-3.5 h-3.5" />
-                                  ) : (
-                                    <Volume2 className="w-3.5 h-3.5" />
-                                  )}
-                                </button>
-                                <button
-                                  onClick={() => handleCopyMessage(msg.content)}
-                                  className="text-subtext hover:text-maintext transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
-                                  title="Copy"
-                                >
-                                  <Copy className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => handleThumbsUp(msg.id)}
-                                  className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'up'
-                                    ? 'text-blue-500 bg-blue-500/10'
-                                    : 'text-subtext hover:text-primary hover:bg-surface-hover'
-                                    }`}
-                                  title="Helpful"
-                                >
-                                  <ThumbsUp className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => handleThumbsDown(msg.id)}
-                                  className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'down'
-                                    ? 'text-red-500 bg-red-500/10'
-                                    : 'text-subtext hover:text-red-500 hover:bg-surface-hover'
-                                    }`}
-                                  title="Not Helpful"
-                                >
-                                  <ThumbsDown className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => handleShare(msg.content)}
-                                  className="text-subtext hover:text-primary transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
-                                  title="Share Text"
-                                >
-                                  <Share className="w-3.5 h-3.5" />
-                                </button>
+                                {(() => {
+                                  const vIcons = (() => {
+                                    const mode = msg.mode;
+                                    if (!mode || mode === MODES.NORMAL_CHAT || mode === MODES.DEEP_SEARCH) {
+                                      return ['volume', 'copy', 'thumbsUp', 'thumbsDown', 'share', 'pdf'];
+                                    }
+                                    switch (mode) {
+                                      case MODES.IMAGE_GEN:
+                                      case MODES.VIDEO_GEN:
+                                        return ['thumbsUp', 'thumbsDown'];
+                                      case MODES.AUDIO_GEN:
+                                        return ['volume', 'thumbsUp', 'thumbsDown'];
+                                      case MODES.CODING_HELP:
+                                        return ['copy', 'thumbsUp', 'thumbsDown'];
+                                      case MODES.FILE_CONVERSION:
+                                        return ['pdf', 'thumbsUp', 'thumbsDown'];
+                                      default:
+                                        return ['volume', 'copy', 'thumbsUp', 'thumbsDown', 'share', 'pdf'];
+                                    }
+                                  })();
 
-                                {/* PDF Menu */}
-                                <Menu as="div" className="relative inline-block text-left">
-                                  <Menu.Button className="text-subtext hover:text-red-500 transition-colors flex items-center" disabled={pdfLoadingId === msg.id}>
-                                    {pdfLoadingId === msg.id ? (
-                                      <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
-                                    ) : (
-                                      <FileText className="w-4 h-4" />
-                                    )}
-                                  </Menu.Button>
-                                  <Transition
-                                    as={Fragment}
-                                    enter="transition ease-out duration-100"
-                                    enterFrom="transform opacity-0 scale-95"
-                                    enterTo="transform opacity-100 scale-100"
-                                    leave="transition ease-in duration-75"
-                                    leaveFrom="transform opacity-100 scale-100"
-                                    leaveTo="transform opacity-0 scale-95"
-                                  >
-                                    <Menu.Items className="absolute bottom-full right-0 sm:left-0 mb-2 w-44 origin-bottom-right sm:origin-bottom-left divide-y divide-border rounded-xl bg-card shadow-2xl ring-1 ring-black ring-opacity-10 focus:outline-none z-50 overflow-hidden backdrop-blur-xl border border-border/50">
-                                      <div className="px-1.5 py-1.5">
-                                        <Menu.Item>
-                                          {({ active }) => (
-                                            <button
-                                              onClick={() => handlePdfAction('open', msg)}
-                                              className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
-                                                } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
-                                            >
-                                              <Eye className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
-                                              Open PDF
-                                            </button>
+                                  return (
+                                    <>
+                                      {vIcons.includes('volume') && (
+                                        <button
+                                          onClick={() => {
+                                            const isHindi = /[\u0900-\u097F]/.test(msg.content);
+                                            speakResponse(msg.content, isHindi ? 'Hindi' : 'English', msg.id, msg.attachments || [], true);
+                                          }}
+                                          className={`transition-colors p-1.5 rounded-lg ${speakingMessageId === msg.id
+                                            ? 'text-primary bg-primary/10'
+                                            : 'text-subtext hover:text-primary hover:bg-surface-hover'
+                                            }`}
+                                          title={speakingMessageId === msg.id && !isPaused ? "Pause" : "Speak"}
+                                        >
+                                          {speakingMessageId === msg.id && !isPaused ? (
+                                            <Pause className="w-3.5 h-3.5" />
+                                          ) : (
+                                            <Volume2 className="w-3.5 h-3.5" />
                                           )}
-                                        </Menu.Item>
-                                        <Menu.Item>
-                                          {({ active }) => (
-                                            <button
-                                              onClick={() => handlePdfAction('download', msg)}
-                                              className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
-                                                } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
-                                            >
-                                              <Download className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
-                                              Download PDF
-                                            </button>
-                                          )}
-                                        </Menu.Item>
-                                        <Menu.Item>
-                                          {({ active }) => (
-                                            <button
-                                              onClick={() => handlePdfAction('share', msg)}
-                                              className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
-                                                } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
-                                            >
-                                              <Share className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
-                                              Share PDF
-                                            </button>
-                                          )}
-                                        </Menu.Item>
-                                      </div>
-                                    </Menu.Items>
-                                  </Transition>
-                                </Menu>
+                                        </button>
+                                      )}
+                                      {vIcons.includes('copy') && (
+                                        <button
+                                          onClick={() => handleCopyMessage(msg.content)}
+                                          className="text-subtext hover:text-maintext transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
+                                          title="Copy"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                      {vIcons.includes('thumbsUp') && (
+                                        <button
+                                          onClick={() => handleThumbsUp(msg.id)}
+                                          className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'up'
+                                            ? 'text-blue-500 bg-blue-500/10'
+                                            : 'text-subtext hover:text-primary hover:bg-surface-hover'
+                                            }`}
+                                          title="Helpful"
+                                        >
+                                          <ThumbsUp className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                      {vIcons.includes('thumbsDown') && (
+                                        <button
+                                          onClick={() => handleThumbsDown(msg.id)}
+                                          className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'down'
+                                            ? 'text-red-500 bg-red-500/10'
+                                            : 'text-subtext hover:text-red-500 hover:bg-surface-hover'
+                                            }`}
+                                          title="Not Helpful"
+                                        >
+                                          <ThumbsDown className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                      {vIcons.includes('share') && (
+                                        <button
+                                          onClick={() => handleShare(msg.content)}
+                                          className="text-subtext hover:text-primary transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
+                                          title="Share Text"
+                                        >
+                                          <Share className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+
+                                      {vIcons.includes('pdf') && (
+                                        <Menu as="div" className="relative inline-block text-left">
+                                          <Menu.Button className="text-subtext hover:text-red-500 transition-colors flex items-center" disabled={pdfLoadingId === msg.id}>
+                                            {pdfLoadingId === msg.id ? (
+                                              <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+                                            ) : (
+                                              <FileText className="w-4 h-4" />
+                                            )}
+                                          </Menu.Button>
+                                          <Transition
+                                            as={Fragment}
+                                            enter="transition ease-out duration-100"
+                                            enterFrom="transform opacity-0 scale-95"
+                                            enterTo="transform opacity-100 scale-100"
+                                            leave="transition ease-in duration-75"
+                                            leaveFrom="transform opacity-100 scale-100"
+                                            leaveTo="transform opacity-0 scale-95"
+                                          >
+                                            <Menu.Items className="absolute bottom-full right-0 sm:left-0 mb-2 w-44 origin-bottom-right sm:origin-bottom-left divide-y divide-border rounded-xl bg-card shadow-2xl ring-1 ring-black ring-opacity-10 focus:outline-none z-50 overflow-hidden backdrop-blur-xl border border-border/50">
+                                              <div className="px-1.5 py-1.5">
+                                                <Menu.Item>
+                                                  {({ active }) => (
+                                                    <button
+                                                      onClick={() => handlePdfAction('open', msg)}
+                                                      className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
+                                                        } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
+                                                    >
+                                                      <Eye className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
+                                                      View PDF
+                                                    </button>
+                                                  )}
+                                                </Menu.Item>
+                                                <Menu.Item>
+                                                  {({ active }) => (
+                                                    <button
+                                                      onClick={() => handlePdfAction('download', msg)}
+                                                      className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
+                                                        } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
+                                                    >
+                                                      <Download className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
+                                                      Download PDF
+                                                    </button>
+                                                  )}
+                                                </Menu.Item>
+                                                <Menu.Item>
+                                                  {({ active }) => (
+                                                    <button
+                                                      onClick={() => handlePdfAction('share', msg)}
+                                                      className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
+                                                        } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
+                                                    >
+                                                      <Share className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
+                                                      Share PDF
+                                                    </button>
+                                                  )}
+                                                </Menu.Item>
+                                              </div>
+                                            </Menu.Items>
+                                          </Transition>
+                                        </Menu>
+                                      )}
+                                    </>
+                                  );
+                                })()}
                               </div>
 
 
@@ -3917,7 +3999,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                         minute: '2-digit',
                       })}
                     </span>
-                  </div>
+                  </div >
 
                   {/* Hover Actions - User Only (AI has footer) */}
                   {
@@ -3969,41 +4051,43 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                       </div>
                     )
                   }
-                </div>
+                </div >
               ))}
 
-              {isLoading && (
-                <div className="flex items-start gap-4 max-w-4xl mx-auto">
-                  <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0">
-                    <img src="/AGENTS_IMG/AISA.png" alt="AISA" className="w-5 h-5 object-contain" />
+              {
+                isLoading && (
+                  <div className="flex items-start gap-4 max-w-4xl mx-auto">
+                    <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0">
+                      <img src="/AGENTS_IMG/AIVA.png" alt="AIVA" className="w-5 h-5 object-contain" />
 
-                  </div>
-                  <div className="px-5 py-3 rounded-2xl rounded-tl-none bg-surface border border-border flex items-center gap-3">
-                    <span className="text-sm font-medium text-subtext animate-pulse">
-                      {loadingText}
-                    </span>
-                    <div className="flex gap-1">
-                      <span
-                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
-                        style={{ animationDelay: '0ms' }}
-                      ></span>
-                      <span
-                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
-                        style={{ animationDelay: '150ms' }}
-                      ></span>
-                      <span
-                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
-                        style={{ animationDelay: '300ms' }}
-                      ></span>
+                    </div>
+                    <div className="px-5 py-3 rounded-2xl rounded-tl-none bg-surface border border-border flex items-center gap-3">
+                      <span className="text-sm font-medium text-subtext animate-pulse">
+                        {loadingText}
+                      </span>
+                      <div className="flex gap-1">
+                        <span
+                          className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
+                          style={{ animationDelay: '0ms' }}
+                        ></span>
+                        <span
+                          className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
+                          style={{ animationDelay: '150ms' }}
+                        ></span>
+                        <span
+                          className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
+                          style={{ animationDelay: '300ms' }}
+                        ></span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )
+              }
             </>
           )}
 
           <div ref={messagesEndRef} />
-        </div>
+        </div >
 
         {/* Welcome Screen - Absolute Overlay */}
         {
@@ -4012,15 +4096,15 @@ For "Remix" requests with an attachment, analyze the attached image, then create
               <div className="flex flex-col items-center justify-center my-auto w-full max-w-4xl">
                 <div className="mb-6 select-none shrink-0">
                   <img
-                    src="/AGENTS_IMG/AISA.png"
-                    alt="AISA Icon"
+                    src={activeAgent.avatar || "/AGENTS_IMG/AIVA.png"}
+                    alt={`${activeAgent.agentName || 'AIVA'} Icon`}
                     className="w-16 h-16 md:w-24 md:h-24 object-contain drop-shadow-2xl pointer-events-none"
                     draggable={false}
                     onDragStart={(e) => e.preventDefault()}
                   />
                 </div>
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-maintext tracking-tight w-full leading-relaxed drop-shadow-sm px-4 shrink-0">
-                  {t('chatPage.welcomeMessage')}
+                  {activeAgent.agentName === 'AIVA' || !activeAgent.agentName ? t('chatPage.welcomeMessage') : `Hello! I’m ${activeAgent.agentName}, how can I help you today?`}
                 </h2>
 
                 <div className="mt-12 w-full max-w-4xl px-4 animate-in slide-in-from-bottom-5 duration-700 shrink-0">
@@ -4057,7 +4141,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                         {
                           icon: Headphones,
                           title: "Voice Chat",
-                          desc: "Talk to AISA naturally with real-time voice interaction.",
+                          desc: "Talk to AIVA naturally with real-time voice interaction.",
                           action: () => handleVoiceInput()
                         }
                       ].map((item, index) => (
@@ -4446,7 +4530,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     }
                   }}
                   onPaste={handlePaste}
-                  placeholder={isAudioConvertMode ? "Enter text to convert..." : isDocumentConvert ? "Upload file & ask to convert..." : isCodeWriter ? "Ask for any code or paste bugs..." : "Ask AIVA..."}
+                  placeholder={isAudioConvertMode ? "Enter text to convert..." : isDocumentConvert ? "Upload file & ask to convert..." : isCodeWriter ? "Ask for any code or paste bugs..." : `Ask ${activeAgent.agentName === 'AIVA' || !activeAgent.agentName ? 'AIVA' : activeAgent.agentName}...`}
                   rows={1}
                   className={`w-full bg-transparent border-0 focus:ring-0 outline-none focus:outline-none p-0 text-maintext text-left placeholder-subtext/50 resize-none overflow-y-auto custom-scrollbar leading-relaxed aiva-scalable-text flex items-center`}
                   style={{ minHeight: '24px', maxHeight: '150px', lineHeight: '24px' }}

@@ -78,7 +78,7 @@ const Profile = () => {
     const [passwordForm, setPasswordForm] = React.useState({ current: '', new: '', confirm: '' });
     const [showAllPasswords, setShowAllPasswords] = React.useState(false);
 
-    const toggleSetting = async (key) => {
+    const _toggleSetting = async (key) => {
         const oldSettings = { ...userSettings };
         const newState = { ...userSettings, [key]: !userSettings[key] };
 
@@ -173,10 +173,10 @@ const Profile = () => {
         }
     };
 
-    const { language, setLanguage, t, region, setRegion, regions, languages, regionFlags, allTimezones, regionTimezones } = useLanguage();
+    const { language, setLanguage, t, region, setRegion, regions: _regions, languages: _languages, regionFlags: _regionFlags, allTimezones, regionTimezones } = useLanguage();
     const { theme, setTheme } = useTheme();
 
-    const getFlagUrl = (code) => `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+    const _getFlagUrl = (code) => `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
 
     const [isEditing, setIsEditing] = React.useState(false);
     const [editForm, setEditForm] = React.useState({ name: user.name, email: user.email });
@@ -318,14 +318,14 @@ const Profile = () => {
         if (regionTimezones[region]) {
             setPreferences(prev => ({ ...prev, timezone: regionTimezones[region] }));
         }
-    }, [region]);
+    }, [region, regionTimezones]);
 
     const [activeSection, setActiveSection] = React.useState(null);
-    const [selectionMode, setSelectionMode] = React.useState('language'); // 'language' or 'region'
+    const [_selectionMode, setSelectionMode] = React.useState('language'); // 'language' or 'region'
 
     const location = useLocation();
 
-    const handleLanguageChange = async (lang) => {
+    const _handleLanguageChange = async (lang) => {
         setLanguage(lang);
         setActiveSection(null);
 
@@ -386,7 +386,7 @@ const Profile = () => {
         "Turkish": "Türkçe - TR"
     };
 
-    const getNativeName = (lang) => nativeLanguageNames[lang] || lang;
+    const _getNativeName = (lang) => nativeLanguageNames[lang] || lang;
 
     const translateTimezone = (tz) => {
         const keywords = t('timezoneKeywords');

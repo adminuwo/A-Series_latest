@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router';
 import { Cpu, Mail, Lock, ArrowLeft, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { apiService } from '../services/apiService';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { setUserData, userData as userDataAtom } from '../userStore/userData';

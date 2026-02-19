@@ -481,6 +481,8 @@
         "addFromDrive": "ड्राइव से जोड़ें"
     },
     "marketplacePage": {
+        "launch": "लॉन्च",
+        "launchIntelligence": "इंटेलिजेंस लॉन्च करें",
         "title": "एआई मार्केटप्लेस",
         "subtitle": "अपने व्यवसाय के लिए विशेष एआई एजेंट खोजें और तैनात करें।",
         "searchPlaceholder": "एजेंट खोजें...",

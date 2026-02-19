@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { Bell, Check, Trash2, Clock, ShieldAlert, BadgeInfo, BadgeCheck } from 'lucide-react';
-import axios from 'axios';
-import { apis } from '../types';
 import { getUserData, notificationsState } from '../userStore/userData';
 import { useRecoilState } from 'recoil';
 import apiService from '../services/apiService';

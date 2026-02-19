@@ -1,3 +1,4 @@
+/* global require, __dirname, process */
 const fs = require('fs');
 
 const filePath = 'g:\\A_Series\\A-Series\\src\\context\\LanguageContext.jsx';
