@@ -97,4 +97,10 @@ export const apis = {
   sendForgotOTP: `${API}/auth/send-forgot-otp`,
   verifyForgotOTP: `${API}/auth/verify-forgot-otp`,
   resetPasswordOTP: `${API}/auth/reset-password-otp`,
+  imageGen: `${API}/image/generate`,
+  videoGen: `${API}/video/generate`,
+  audioGen: `${API}/audio/generate`,
+  webSearch: `${API}/search/web`,
+  conversion: `${API}/conversion`,
+  reminders: `${API}/reminders`,
 };
