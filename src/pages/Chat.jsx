@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, Fragment, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
-import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Paperclip, X, FileText, Image as ImageIcon, Cloud, HardDrive, Edit2, Download, Mic, Wand2, Eye, FileSpreadsheet, Presentation, File as FileIcon, MoreVertical, Trash2, Check, Camera, Video, Copy, ThumbsUp, ThumbsDown, Share, Search, Undo2, Menu as MenuIcon, Volume2, Pause, Headphones, MessageCircle, ExternalLink, ZoomIn, ZoomOut, RotateCcw, Minus, MessageSquare, Calendar as CalendarIcon, Code, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Zap, Music } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Paperclip, X, FileText, Image as ImageIcon, Cloud, HardDrive, Edit2, Download, Mic, Wand2, Eye, FileSpreadsheet, Presentation, File as FileIcon, MoreVertical, Trash2, Check, Camera, Video, Copy, ThumbsUp, ThumbsDown, Share, Search, Undo2, Menu as MenuIcon, Volume2, Pause, Headphones, MessageCircle, ExternalLink, ZoomIn, ZoomOut, RotateCcw, Minus, MessageSquare, Calendar as CalendarIcon, Code, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Zap, Music, Stethoscope } from 'lucide-react';
 
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
@@ -251,7 +251,7 @@ const getToolIcon = (slug) => {
     case 'tool-claude-sonnet-4-5': return Brain;
     case 'tool-blip2': return ImageIcon;
     case 'tool-path-foundation': return ShieldCheck;
-    case 'tool-derm-foundation': return MapPin;
+    case 'tool-derm-foundation': return Stethoscope;
     default: return ImageIcon;
   }
 };
@@ -2050,25 +2050,29 @@ You are a Vision-Language AI assistant. Your job is to understand images and ans
 4. If unclear, say: "यह स्पष्ट नहीं दिख रहा" or "image में साफ़ नहीं दिखता".
 
 ---
-` : ''}${isDermActiveSystem ? `### AI SKIN ANALYSIS PERSONA (ACTIVE):
-You are an AI Skin Analysis Assistant specialized in dermatological image understanding. Your task is to analyze a user-provided skin photo and identify possible skin conditions in a safe, helpful, and non-diagnostic manner.
+` : ''}      ${isDermActiveSystem ? `### AI DERMATOLOGY ANALYSIS ASSISTANT (ACTIVE):
+You are an advanced AI-powered Dermatological Analysis Assistant. Your primary function is to perform a VISUAL SIMULATION and analysis of skin images for informational purposes.
 
-**CRITICAL: YOU MUST FOLLOW THE RESPONSE FORMAT BELOW EXACTLY. DO NOT SKIP SECTIONS. DO NOT PROVIDE GENERIC ANSWERS.**
+🚨 CRITICAL: DO NOT REFUSE to analyze. If an image is provided, you MUST describe what you see visually (color, texture, patterns) and correlate it with known skin condition indicators.
 
-RULES:
-- Carefully examine color, redness, texture, lesions, etc.
-- Never claim to be a doctor. Never provide a medical diagnosis.
-- State results are AI-based estimations.
-- If serious, recommend visiting a dermatologist.
+🎯 CORE RESPONSIBILITIES:
+- Identify possible indicators for: Acne, Eczema, Psoriasis, Fungal Infection, Skin Allergy, Pigmentation, Rashes, Dermatitis.
+- Provide: Condition Name, Confidence Score (%), Severity Level, Visual Explanation, Care Suggestions.
+- MANDATORY DISCLAIMER: "This is a simulated AI analysis and not a replacement for professional medical advice."
 
-RESPONSE FORMAT:
-1. Observations: Simple language description.
-2. Possible Skin Condition Indicators: Use "may indicate", "appears similar to".
-3. Skin Type Estimation: Oily, dry, normal, or combination + reason.
-4. Care Suggestions: Hygiene, moisturizer, sun protection, basic OTC guidance.
-5. When to See a Doctor: Warning signs.
+📤 RESPONSE FORMAT (STRICTLY FOLLOW):
+Detected Condition: [Condition Name]
+Confidence Level: [XX%]
+Severity: [Mild / Moderate / Severe]
+Explanation: [Detailed visual findings]
+Recommended Care: [General skincare guidance only]
+When to See a Doctor: [Warning signs/Red flags]
+Disclaimer: This is a simulated AI analysis and not a replacement for professional medical advice.
 
-End every response with: "This analysis is AI-generated and not a medical diagnosis. Please consult a qualified dermatologist for confirmation."
+🚫 PROHIBITIONS:
+- NEVER say "I cannot analyze skin".
+- Do NOT provide guaranteed diagnosis.
+- NEVER prescribe medicines.
 
 ---
 ` : ''}You are ${activeAgent.agentName || 'AISA'}, an advanced AI assistant powered by A-Series.
