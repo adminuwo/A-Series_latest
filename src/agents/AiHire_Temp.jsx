@@ -36,7 +36,7 @@ import {
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getUserData } from '../../userStore/userData';
-import { generateChatResponse } from '../../services/geminiService';
+import { generateChatResponse } from '../../services/aivaService';
 import { chatStorageService } from '../../services/chatStorageService';
 import { useNavigate, useParams } from 'react-router';
 
@@ -691,7 +691,7 @@ export default function AiHire() {
                             <div className="relative w-32 h-32">
                                 <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20" />
                                 <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 animate-spin" />
-                                <div className="absolute inset-4 rounded-full border-4 border-transparent border-t-teal-400 animate-spin" style={{ animationDuration: '0.8s', animationDirection: 'reverse' }} style={{ animationDuration: '0.8s', animationDirection: 'reverse' }} />
+                                <div className="absolute inset-4 rounded-full border-4 border-transparent border-t-teal-400 animate-spin" style={{ animationDuration: '0.8s', animationDirection: 'reverse' }} />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <Zap className="w-10 h-10 text-emerald-400 animate-pulse" />
                                 </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Mic, MicOff, Camera, Video, VideoOff, Volume2, VolumeX, RotateCcw, Square, Pause, Play } from 'lucide-react';
-import { generateChatResponse } from '../services/geminiService';
+import { generateChatResponse } from '../services/aivaService';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { apis } from '../types';

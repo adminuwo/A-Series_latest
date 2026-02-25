@@ -6,7 +6,7 @@ import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Papercl
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 import { Menu, Transition, Dialog } from '@headlessui/react';
-import { generateChatResponse } from '../services/geminiService';
+import { generateChatResponse } from '../services/aivaService';
 import { chatStorageService } from '../services/chatStorageService';
 import { useLanguage } from '../context/LanguageContext';
 import { useRecoilState } from 'recoil';
@@ -60,26 +60,26 @@ const FEEDBACK_PROMPTS = {
 const TOOL_PRICING = {
   chat: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Free chat model' }
+      { id: 'aiva-stable', name: 'AIVA Stable', price: 0, speed: 'Fast', description: 'Standard free model' }
     ]
   },
   image: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Basic image analysis' },
-      { id: 'gemini-pro', name: 'Gemini Pro Vision', price: 0.02, speed: 'Medium', description: 'Advanced image understanding' },
+      { id: 'aiva-stable', name: 'AIVA Stable', price: 0, speed: 'Fast', description: 'Basic image analysis' },
+      { id: 'aiva-pro', name: 'AIVA Pro Vision', price: 0.02, speed: 'Medium', description: 'Advanced image understanding' },
       { id: 'gpt4-vision', name: 'GPT-4 Vision', price: 0.05, speed: 'Slow', description: 'Premium image analysis' }
     ]
   },
   document: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Basic document analysis' },
-      { id: 'gemini-pro', name: 'Gemini Pro', price: 0.02, speed: 'Medium', description: 'Advanced document processing' },
+      { id: 'aiva-stable', name: 'AIVA Stable', price: 0, speed: 'Fast', description: 'Basic document analysis' },
+      { id: 'aiva-pro', name: 'AIVA Pro', price: 0.02, speed: 'Medium', description: 'Advanced document processing' },
       { id: 'gpt4', name: 'GPT-4', price: 0.03, speed: 'Medium', description: 'Premium document analysis' }
     ]
   },
   voice: {
     models: [
-      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Standard voice recognition' }
+      { id: 'aiva-stable', name: 'AIVA Stable', price: 0, speed: 'Fast', description: 'Standard voice recognition' }
     ]
   }
 };
@@ -247,10 +247,10 @@ const Chat = () => {
   const [userAgents, setUserAgents] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [toolModels, setToolModels] = useState({
-    chat: 'gemini-flash',
-    image: 'gemini-flash',
-    document: 'gemini-flash',
-    voice: 'gemini-flash'
+    chat: 'aiva-stable',
+    image: 'aiva-stable',
+    document: 'aiva-stable',
+    voice: 'aiva-stable'
   });
   const uploadInputRef = useRef(null);
   const driveInputRef = useRef(null);
@@ -3576,6 +3576,27 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             >
                               {msg.content || msg.text || ""}
                             </ReactMarkdown>
+
+                            {/* Message Download Button */}
+                            {msg.role !== 'user' && !msg.isProcessing && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const textContent = msg.content || msg.text || '';
+                                  const blob = new Blob([textContent], { type: 'text/markdown' });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = `response_${msg.id}_${new Date().toISOString().slice(0, 10)}.md`;
+                                  a.click();
+                                  URL.revokeObjectURL(url);
+                                }}
+                                className="absolute top-2 right-2 p-1.5 text-subtext/50 hover:text-primary hover:bg-surface/50 rounded-lg opacity-0 group-hover/bubble:opacity-100 transition-all"
+                                title="Download Response as Markdown"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                              </button>
+                            )}
 
                             {/* Dynamic Video Rendering */}
                             {msg.videoUrl && (

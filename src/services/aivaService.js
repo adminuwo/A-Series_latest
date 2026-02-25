@@ -59,11 +59,10 @@ export const generateChatResponse = async (history, currentMessage, systemInstru
         });
 
         // Return full response data (includes reply and potentially conversion data)
-        // Return full response data (includes reply, conversion data, and imageUrl)
         return result.data;
 
     } catch (error) {
-        console.error("Gemini API Error:", error);
+        console.error("AIVA API Error:", error);
         if (error.response?.status === 429) {
             // Allow backend detail to override if present, otherwise default
             const detail = error.response?.data?.details || error.response?.data?.error;

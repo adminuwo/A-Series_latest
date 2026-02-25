@@ -25,6 +25,7 @@ import { AppRoute } from './types';
 import AiBiz from './agents/AIBIZ/AiBiz.jsx';
 import AiBase from './agents/AIBASE/AiBase.jsx';
 import AiHire from './agents/AIHIRE/AiHire.jsx';
+import AiSales from './agents/AISALES/AiSales.jsx';
 import ComingSoon from './Components/ComingSoon/ComingSoon.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
@@ -176,6 +177,8 @@ const NavigateProvider = () => {
         <Route path='/agents/aibiz' element={<AiBiz />}></Route>
         <Route path='/agents/aibase/*' element={<AiBase />}></Route>
         <Route path='/agents/aihire' element={<AiHire />}></Route>
+        <Route path='/agents/aisales' element={<AiSales />}></Route>
+        <Route path='/agents/aisales/:sessionId' element={<AiSales />}></Route>
         {/* Dashboard (Protected) */}
         <Route
           path={AppRoute.DASHBOARD}

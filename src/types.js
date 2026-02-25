@@ -96,6 +96,7 @@ export const apis = {
   getMyAgents: `${API}/agents/me`,
   chatAgent: `${API}/chat`,
   aibiz: `${API}/aibiz`,
+  aihire: `${API}/aihire`,
   support: `${API}/support`,
   resetPasswordEmail: `${API}/auth/reset-password-email`,
   feedback: `${API}/feedback`,

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import mammoth from 'mammoth';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import {
     BarChart3,
@@ -53,7 +55,8 @@ import {
     Newspaper,
     Network,
     TrendingDown,
-    Activity
+    Activity,
+    Download
 } from 'lucide-react';
 import {
     PieChart, Pie, Cell, ResponsiveContainer,
@@ -62,7 +65,7 @@ import {
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { getUserData } from '../userStore/userData';
-import { generateChatResponse } from '../services/geminiService';
+import { generateChatResponse } from '../services/aivaService';
 import { chatStorageService } from '../services/chatStorageService';
 import { useNavigate, useParams } from 'react-router';
 import { useLanguage } from '../context/LanguageContext';
@@ -867,11 +870,19 @@ const AISAWorkSpace = () => {
                 SECTIONS: FUNNEL PERFORMANCE, BUDGET ATTRIBUTION, TURNOVER PREDICTION, DATA VISUALIZATIONS.
                 `}`}
                 
+                ${activeAgent.id === 'AIHIRE' ? `
+                IMPORTANT: The user has requested a specific function: "${finalInput}".
+                You must ONLY provide the analysis/output for this specific function. Do not provide a generic overview of other modes.
+                Maintain the context of "${hiringMode}" but focus exclusively on the requested task.
+                ${hiringMode === 'Evaluation' ? 'MANDATORY: You must provide a "match percentage" out of 100 for each candidate in Section 2, indicating how well they fit the job.' : ''}
+                MANDATORY: You must respond in English. Absolutely NO HINDI or other languages allowed. Every single word of your response must be in English.
+                ` : ''}
+
                 MANDATORY OUTPUT FORMAT:
                 SECTION 1: EXECUTIVE SUMMARY
                 SECTION 2: DETAILED ANALYSIS
                 SECTION 3: ACTIONABLE STEPS
-                SECTION 4: RISK & MITIGATION
+                SECTION 4: RISK & MITIGATION (Only if applicable to "${finalInput}")
                 SECTION 5: VISUALIZATIONS
                 (MANDATORY: Provide JSON data for charts inside Section 5. Do not use code blocks.)
                 {
@@ -879,13 +890,15 @@ const AISAWorkSpace = () => {
                     "growthProjection": [{"year": "Week 1", "revenue": 10}, {"year": "Week 4", "revenue": 50}],
                     "mindMap": [{"id": "1", "label": "Hiring Funnel", "children": ["Sourcing", "Screening", "Offer"]}]
                 }
+
+                ${hiringMode === 'Evaluation' ? 'MANDATORY: For Evaluation mode, you MUST include a SCORECARD_JSON_START ... SCORECARD_JSON_END block after Section 2 containing the parsed scores for visualizations.' : ''}
                 `;
             }
 
             const systemInstruction = `You are ${activeAgent.name}, part of the A-Series AI Business OS.
                 Focus: ${activeAgent.category}.
                 ${agentSpecificInstruction}
-                MANDATORY: You must respond in ${language || 'English'}.
+                MANDATORY: You must respond in ${activeAgent.id === 'AIHIRE' ? 'English' : (language || 'English')}.
                 Use Markdown formatting effectively.`;
 
             let activeSessionId = currentSessionId;
@@ -897,7 +910,7 @@ const AISAWorkSpace = () => {
             }
             await chatStorageService.saveMessage(activeSessionId, userMsg);
             const attachments = activeAgent.id === 'AIHIRE' ? hireFileAttachments : [];
-            const response = await generateChatResponse(updatedMessages, finalInput, systemInstruction, attachments, language || 'English', null, null, { agentType: activeAgent.id });
+            const response = await generateChatResponse(updatedMessages, finalInput, systemInstruction, attachments, activeAgent.id === 'AIHIRE' ? 'English' : (language || 'English'), null, null, { agentType: activeAgent.id });
             const aiReply = response.reply || response;
             const modelMsg = {
                 id: (Date.now() + 1).toString(),
@@ -1102,7 +1115,34 @@ const AISAWorkSpace = () => {
             : card.content != null
                 ? JSON.stringify(card.content, null, 2)
                 : '';
-        return <div className="text-xs text-subtext leading-relaxed whitespace-pre-wrap font-medium">{safeContent}</div>;
+        return (
+            <div className="text-xs text-subtext leading-relaxed font-medium">
+                <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                        table: ({ node, ...props }) => <div className="overflow-x-auto my-4 rounded-xl border border-border/50 shadow-sm"><table className="w-full text-left border-collapse bg-white" {...props} /></div>,
+                        thead: ({ node, ...props }) => <thead className="bg-secondary/50 text-[10px] font-black uppercase tracking-widest text-subtext border-b border-border/40" {...props} />,
+                        tbody: ({ node, ...props }) => <tbody className="divide-y divide-border/20" {...props} />,
+                        tr: ({ node, ...props }) => <tr className="hover:bg-secondary/10 transition-colors group" {...props} />,
+                        th: ({ node, ...props }) => <th className="px-4 py-3 first:pl-6 last:pr-6 whitespace-nowrap" {...props} />,
+                        td: ({ node, ...props }) => <td className="px-4 py-3 first:pl-6 last:pr-6 text-maintext align-top" {...props} />,
+                        p: ({ node, ...props }) => <p className="mb-3 last:mb-0 leading-relaxed whitespace-pre-wrap" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-3 space-y-1 marker:text-primary" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-3 space-y-1 marker:text-primary font-bold" {...props} />,
+                        li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                        a: ({ node, ...props }) => <a className="text-primary hover:underline font-bold" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-black text-maintext" {...props} />,
+                        blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-primary/30 pl-4 py-1 my-4 bg-secondary/20 rounded-r-xl italic text-maintext" {...props} />,
+                        code: ({ node, inline, className, children, ...props }) => {
+                            if (inline) return <code className="bg-secondary px-1.5 py-0.5 rounded text-[10px] font-mono font-bold text-maintext border border-border/50" {...props}>{children}</code>;
+                            return <div className="bg-[#1e1e1e] rounded-xl p-4 overflow-x-auto my-4 text-white text-[10px] font-mono shadow-inner"><code {...props}>{children}</code></div>;
+                        }
+                    }}
+                >
+                    {safeContent}
+                </ReactMarkdown>
+            </div>
+        );
     };
 
     const renderMessageAsCards = (msg) => {
@@ -2498,13 +2538,55 @@ const AISAWorkSpace = () => {
                     </button>
                 )}
                 {activeAgent.id === 'AIHIRE' && (
-                    <button
-                        type="button"
-                        onClick={() => handleAction(null, `Run comprehensive ${hiringMode} analysis.`)}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all"
-                    >
-                        <Trophy className="w-3.5 h-3.5" /> Start Audit
-                    </button>
+                    <div className="flex gap-2">
+                        {hiringMode === 'Strategy' && (
+                            <>
+                                <button type="button" onClick={() => handleAction(null, "Run a comprehensive Readiness Score and Gap Analysis.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <Target className="w-3.5 h-3.5" /> Readiness Score
+                                </button>
+                                <button type="button" onClick={() => handleAction(null, "Conduct a detailed Risk Audit for this role.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <ShieldCheck className="w-3.5 h-3.5" /> Risk Audit
+                                </button>
+                            </>
+                        )}
+                        {hiringMode === 'Evaluation' && (
+                            <>
+                                <button type="button" onClick={() => handleAction(null, "Evaluate and rank these candidates against the Scorecard.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <Users className="w-3.5 h-3.5" /> AI Scoring
+                                </button>
+                                <button type="button" onClick={() => handleAction(null, "Run a Bias and Inclusion check on the JD and profiles.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <Bot className="w-3.5 h-3.5" /> Bias Scan
+                                </button>
+                                <button type="button" onClick={() => handleAction(null, "Generate a custom Interview Framework for this role.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <MessageSquare className="w-3.5 h-3.5" /> Interview Guide
+                                </button>
+                            </>
+                        )}
+                        {hiringMode === 'Offer' && (
+                            <>
+                                <button type="button" onClick={() => handleAction(null, "Predict acceptance probability and suggest package optimizations.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <TrendingUp className="w-3.5 h-3.5" /> Acceptance Odds
+                                </button>
+                                <button type="button" onClick={() => handleAction(null, "Build a direct negotiation strategy for this candidate.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <Target className="w-3.5 h-3.5" /> Closing Script
+                                </button>
+                            </>
+                        )}
+                        {hiringMode === 'Planning' && (
+                            <>
+                                <button type="button" onClick={() => handleAction(null, "Run a Scalability and Capacity Audit.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <Activity className="w-3.5 h-3.5" /> Capacity Plan
+                                </button>
+                            </>
+                        )}
+                        {hiringMode === 'Analytics' && (
+                            <>
+                                <button type="button" onClick={() => handleAction(null, "Generate a Funnel Performance and Cost-per-hire report.")} className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-2xl font-bold text-[10px] uppercase hover:bg-white transition-all">
+                                    <BarChart3 className="w-3.5 h-3.5" /> Funnel Audit
+                                </button>
+                            </>
+                        )}
+                    </div>
                 )}
             </div>
         );
@@ -2682,8 +2764,36 @@ const AISAWorkSpace = () => {
                             </div>
 
                             <div className="p-4 border-t border-border bg-white flex justify-end gap-3 shrink-0">
-                                <button onClick={() => setShowResultModal(false)} className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-subtext hover:text-maintext">Close View</button>
-                                <button onClick={() => setShowResultModal(false)} className="px-6 py-2 bg-primary text-white rounded-lg text-xs font-bold uppercase tracking-widest shadow-md">Continue in Chat</button>
+                                <button
+                                    onClick={() => setShowResultModal(false)}
+                                    className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${activeAgent?.id === 'AIHIRE'
+                                        ? 'bg-emerald-600 text-white rounded-lg shadow-md hover:bg-emerald-500'
+                                        : 'text-subtext hover:text-maintext'
+                                        }`}
+                                >
+                                    Close View
+                                </button>
+                                {activeAgent?.id !== 'AIHIRE' && (
+                                    <>
+                                        <button onClick={() => {
+                                            const lastMsg = messages[messages.length - 1];
+                                            if (lastMsg) {
+                                                const blob = new Blob([lastMsg.content], { type: 'text/plain' });
+                                                const url = URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = `AIVA_${activeAgent?.id}_Report_${new Date().toISOString().slice(0, 10)}.txt`;
+                                                a.click();
+                                                URL.revokeObjectURL(url);
+                                            }
+                                        }} className="px-6 py-2 bg-secondary text-maintext border border-border rounded-lg text-xs font-bold uppercase tracking-widest shadow-sm hover:bg-secondary/80 flex items-center gap-2">
+                                            <Download className="w-4 h-4" /> Download Report
+                                        </button>
+                                        <button onClick={() => setShowResultModal(false)} className="px-6 py-2 bg-primary text-white rounded-lg text-xs font-bold uppercase tracking-widest shadow-md">
+                                            Continue in Chat
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </motion.div>
                     </motion.div>

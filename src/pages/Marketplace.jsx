@@ -272,13 +272,15 @@ const Marketplace = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const name = (agent.agentName || "").toUpperCase().replace(/\s+/g, '');
+                      const name = (agent.agentName || agent.name || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
                       // Workspace agents
-                      const workspaceAgents = ['AISALES', 'AIWRITE', 'AIBIZ', 'AIDESK'];
+                      const workspaceAgents = ['AIWRITE', 'AIBIZ', 'AIDESK'];
                       if (workspaceAgents.includes(name)) {
                         navigate(`${AppRoute.WORKSPACE}/${name}`);
                       } else if (name === 'AIHIRE') {
                         navigate('/agents/aihire');
+                      } else if (name === 'AISALES') {
+                        navigate('/agents/aisales');
                       } else {
                         const targetUrl = agent.url || AppRoute.agentSoon;
                         window.location.href = targetUrl;

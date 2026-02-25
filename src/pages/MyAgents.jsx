@@ -154,13 +154,14 @@ const MyAgents = () => {
                                 <div className="flex gap-2 mt-auto">
                                     <button
                                         onClick={() => {
-                                            const name = (agent.agentName || "").toUpperCase().replace(/\s+/g, '');
+                                            const name = (agent.agentName || agent.name || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
                                             // Agents that use the new AISAWorkSpace interface
-                                            const workspaceAgents = ['AISALES', 'AIWRITE', 'AIBIZ', 'AIDESK'];
+                                            const workspaceAgents = ['AIWRITE', 'AIBIZ', 'AIDESK'];
 
                                             // Standalone agents
                                             const standaloneAgents = {
-                                                'AIHIRE': '/agents/aihire'
+                                                'AIHIRE': '/agents/aihire',
+                                                'AISALES': '/agents/aisales'
                                             };
 
                                             // Agents that use the generic Chat interface

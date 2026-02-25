@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import mammoth from 'mammoth';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
     BarChart3,
     FileText,
@@ -28,15 +30,22 @@ import {
     Mail,
     Linkedin,
     Trash,
-    Trophy
+    MessageSquare,
+    Trophy,
+    Download,
+    Upload,
+    History,
+    Plus
 } from 'lucide-react';
 import {
     PieChart, Pie, Cell, ResponsiveContainer,
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+    Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getUserData } from '../../userStore/userData';
-import { generateChatResponse } from '../../services/geminiService';
+import { generateChatResponse } from '../../services/aivaService';
+import { generateJobDescription, generateOfferLetter, generateInterviewQuestions, getHireHistory, deleteHireDocument, extractTemplateText } from '../../services/aihireService';
 import { chatStorageService } from '../../services/chatStorageService';
 import { useNavigate, useParams } from 'react-router';
 import { useLanguage } from '../../context/LanguageContext';
@@ -104,6 +113,83 @@ const CustomSelect = ({ value, onChange, options, placeholder, className = "" })
     );
 };
 
+// Offer Letter Templates
+const OFFER_TEMPLATES = {
+    Standard: `UNIFIED WEB OPTIONS AND SERVICES (UWO)
+3 Floor, 5G Square near PNB Bank, Rampur Chowk, Jabalpur MP (482008)
+Contact: 8358990909
+
+OFFER OF EMPLOYMENT
+
+Date: [Date]
+Candidate Name: [Candidate Name]
+Position: [Job Title]
+Reporting: [Manager Name]
+
+Dear [Candidate Name],
+
+We are pleased to offer you the position of [Job Title] with Unified Web Options and Services.
+
+1. START DATE: Your employment will begin on [Start Date].
+2. COMPENSATION: Your annual base salary will be ₹[Salary], payable monthly.
+3. BENEFITS: [Benefits]
+4. LOCATION: [Location]
+
+Acceptance:
+Please sign below to acknowledge your acceptance.
+
+Sincerely,
+[Manager Name]`,
+
+    Startup: `🚀 JOIN THE UWO MISSION
+Unified Web Options and Services (UWO)
+3 Floor, 5G Square, Jabalpur (482008)
+
+Hi [Candidate Name],
+
+We're excited to invite you to join Unified Web Options and Services (UWO) as our newest [Job Title]!
+
+THE PACKAGE:
+- ROLE: [Job Title]
+- START DATE: [Start Date]
+- CASH: ₹[Salary] / year
+- EQUITY: [Equity %]
+- PERKS: [Benefits]
+
+YOUR MISSION:
+Reporting to [Manager Name], you'll help build the future of our AI ecosystem.
+
+Accepted By: __________________  Date: __________`,
+
+    Executive: `CONFIDENTIAL EXECUTIVE APPOINTMENT
+UNIFIED WEB OPTIONS AND SERVICES (UWO)
+
+Date: [Date]
+For: [Candidate Name]
+Position: [Job Title]
+
+Dear [Candidate Name],
+
+We are pleased to appoint you as [Job Title] at Unified Web Options and Services.
+
+I. REMUNERATION
+Base Salary: ₹[Salary] per annum.
+Performance Bonus: [Bonus %].
+
+II. REPORTING
+You will report directly to [Reporting To].
+
+III. TERMS
+Start Date: [Start Date]
+Location: [Location]
+
+This offer stands until [Deadline].
+
+Best Regards,
+[Manager Name]
+Unified Web Options and Services (UWO)`
+};
+
 export default function AiHire() {
     const navigate = useNavigate();
     const { sessionId } = useParams();
@@ -117,6 +203,8 @@ export default function AiHire() {
     const [showResultModal, setShowResultModal] = useState(false);
     const [scorecardData, setScorecardData] = useState(null);
     const [currentSessionId, setCurrentSessionId] = useState(sessionId || 'new');
+    const [isEditingResult, setIsEditingResult] = useState(false);
+    const [editedReply, setEditedReply] = useState("");
 
     // AIHIRE Specialized States — Global
     const [hireRole, setHireRole] = useState('');
@@ -130,6 +218,11 @@ export default function AiHire() {
     const [hireTeamSize, setHireTeamSize] = useState('1-5');
     const [hireIndustry, setHireIndustry] = useState('SaaS');
     const [hireBusinessStage, setHireBusinessStage] = useState('Early Startup');
+    const [uploadedFileName, setUploadedFileName] = useState(null);
+
+    // History state
+    const [historySessions, setHistorySessions] = useState([]);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
     // Mode Specifics
     const [hireRiskTolerance, setHireRiskTolerance] = useState('Medium');
@@ -147,11 +240,14 @@ export default function AiHire() {
     const hireFileInputRef = React.useRef(null);
 
     // Offer state
+    const [hireCandidateName, setHireCandidateName] = useState('');
     const [hireOfferSalary, setHireOfferSalary] = useState('');
     const [hireEquityPercent, setHireEquityPercent] = useState('');
     const [hireCompetitorSalary, setHireCompetitorSalary] = useState('');
     const [hireOfferPerks, setHireOfferPerks] = useState('');
     const [hireCandidateLeverage, setHireCandidateLeverage] = useState('Medium');
+    const [hireOfferStartDate, setHireOfferStartDate] = useState('');
+    const [hireOfferManager, setHireOfferManager] = useState('');
 
     // Planning state
     const [hireOrgStructure, setHireOrgStructure] = useState('Flat');
@@ -163,12 +259,23 @@ export default function AiHire() {
         if (sessionId && sessionId !== 'new') {
             loadSession(sessionId);
         }
+        loadHistoryList();
     }, [sessionId]);
+
+    const loadHistoryList = async () => {
+        try {
+            const sessions = await chatStorageService.getSessions('AIHIRE');
+            setHistorySessions(sessions);
+        } catch (err) {
+            console.error('Failed to load history', err);
+        }
+    };
 
     const loadSession = async (sid) => {
         try {
-            const history = await chatStorageService.getSessionMessages(sid);
+            const history = await chatStorageService.getHistory(sid);
             if (history) setMessages(history);
+
             setCurrentSessionId(sid);
         } catch (err) {
             console.error('Load session error', err);
@@ -229,10 +336,39 @@ export default function AiHire() {
         }
     };
 
-    const handleAction = async (e, customPrompt = null) => {
+
+    const handleTemplateUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Please upload a PDF or an Image (JPEG/PNG).');
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            const data = await extractTemplateText(file);
+            if (data.success && data.data.text && data.data.text.trim().length > 0) {
+                setHireExtraNotes(data.data.text);
+                setUploadedFileName(file.name);
+            } else {
+                alert("The uploaded document appears to be empty or unreadable. Please check the file.");
+            }
+        } catch (error) {
+            console.error("Upload failed", error);
+            const errMsg = error.response?.data?.message || error.message || "Unknown error";
+            alert(`Failed to extract text: ${errMsg}`);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleAction = async (e, customPrompt = null, overrideMode = null) => {
         if (e) e.preventDefault();
 
-        let finalInput = customPrompt || `Run a full ${hiringMode} analysis for the role: ${hireRole || 'the specified position'}.`;
+        let finalInput = customPrompt || `Run a full ${overrideMode || hiringMode} analysis for the role: ${hireRole || 'the specified position'}.`;
 
         if (!finalInput || !finalInput.trim() || isProcessing) return;
 
@@ -246,52 +382,131 @@ export default function AiHire() {
             };
             setMessages(prev => [...prev, userMsg]);
 
-            const systemInstruction = `
-            YOU ARE THE AIHIRE AGENT — A PROFESSIONAL TALENT STRATEGIST.
-            CURRENT MODE: ${hiringMode}
+            let aiReply = "";
+            let responseData = null;
 
-            GLOBAL CONTEXT:
-            - Role: ${hireRole}
-            - Dept: ${hireDepartment}
-            - Seniority: ${hireSeniority}
-            - Budget: ₹${hireBudget}
-            - High Quality Priority: ${hireTradeoff}%
-            - Industry: ${hireIndustry}
-            - Business Stage: ${hireBusinessStage}
+            // --- SPECIALIZED AGENT CALLS ---
+            const currentMode = overrideMode || hiringMode;
 
-            ${hiringMode === 'Strategy' ? `
-            GOAL: Create a hiring roadmap. Timeline: ${hireTimelineWeeks} weeks. Risk: ${hireRiskTolerance}. Sourcing: ${hireSourcingChannels}.
-            NOTES: ${hireExtraNotes}
-            SECTIONS: READINESS SCORE, TRADE-OFF ANALYSIS, RISK RADAR, COST FORECAST, VISUALIZATIONS.
-            ` : hiringMode === 'Evaluation' ? `
-            GOAL: Rank candidates and check bias. Criteria: ${hireScorecardCriteria}. Bias Check: ${hireBiasCheck}.
-            JD: ${hireJobDescription}
-            PROFILES: ${hireCandidateProfiles}
-            SECTIONS: SCORECARD FRAMEWORK, CANDIDATE RANKING (with SCORECARD_JSON), BIAS REPORT, INTERVIEW FRAMEWORK, VISUALIZATIONS.
-            ` : hiringMode === 'Offer' ? `
-            GOAL: Closing strategy. 
-            CANDIDATE_DETAILS: ${hireExtraNotes}
-            TARGET_OFFER: Salary: ₹${hireOfferSalary}, Equity: ${hireEquityPercent}%, Perks: ${hireOfferPerks}.
-            MARKET_CONTEXT: Competitor: ₹${hireCompetitorSalary}, Leverage: ${hireCandidateLeverage}.
-            SECTIONS: MARKET BENCHMARK, EQUITY ANALYSIS, ACCEPTANCE PROBABILITY, NEGOTIATION PLAYBOOK, VISUALIZATIONS.
-            ` : hiringMode === 'Planning' ? `
-            GOAL: Org design and headcount forecasting. 
-            CONTEXT: ${hireExtraNotes}
-            STRUCTURE: ${hireOrgStructure}. Values: ${hireCulturalValues}.
-            SECTIONS: SCALABILITY AUDIT, CAPACITY PLANNING, REPORTING LINES, SUCCESSION PLAN, VISUALIZATIONS.
-            ` : `
-            GOAL: Talent Analytics and Funnel Optimization. 
-            ANALYSIS_REQUEST: ${hireExtraNotes || 'General funnel efficiency and cost-per-hire analysis.'}
-            SECTIONS: FUNNEL PERFORMANCE, BUDGET ATTRIBUTION, TURNOVER PREDICTION, DATA VISUALIZATIONS.
-            `}
+            // ROUTING LOGIC
+            // 1. Strategy Mode -> Job Description
+            if (currentMode === 'Strategy' && finalInput.toLowerCase().includes('job description')) {
+                const jdPayload = {
+                    jobTitle: hireRole || "the specified position",
+                    companyName: "Unified Web Options and Services",
+                    location: hireDepartment || "Remote",
+                    jobType: "Full-time",
+                    experienceLevel: hireSeniority || "Mid-Level",
+                    skills: [hireScorecardCriteria].filter(Boolean),
+                    salaryRange: hireBudget ? `₹${hireBudget}` : "",
+                    extraNotes: hireExtraNotes
+                };
+                console.log("Calling JD Service...");
+                const res = await generateJobDescription(jdPayload);
+                aiReply = res.data.document;
+            }
+            // 1. Offer Mode -> generateOfferLetter
+            if (currentMode === 'Offer' && (finalInput.toLowerCase().includes('offer letter') || finalInput.toLowerCase().includes('generate offer'))) {
+                const offerPayload = {
+                    candidateName: hireCandidateName || "Candidate",
+                    jobTitle: hireRole || "Employee",
+                    companyName: "Unified Web Options and Services",
+                    salary: hireOfferSalary || "TBD",
+                    equity: hireEquityPercent || "TBD",
+                    startDate: hireOfferStartDate || "TBD",
+                    managerName: hireOfferManager || "Hiring Manager",
+                    benefits: hireOfferPerks || "Standard Benefits",
+                    extraNotes: hireExtraNotes
+                };
+                console.log("Calling Offer Service...");
+                const res = await generateOfferLetter(offerPayload);
+                aiReply = res.data.document;
+            }
+            // 2. Evaluation Mode (Interview Questions) -> generateInterviewQuestions
+            else if (currentMode === 'Evaluation' && finalInput.includes('Question')) {
+                const questionPayload = {
+                    jobTitle: hireRole,
+                    skills: [hireScorecardCriteria], // simplistic
+                    experienceLevel: hireSeniority,
+                    questionCount: 10,
+                    extraNotes: hireExtraNotes
+                };
+                console.log("Calling Interview Service...");
+                const res = await generateInterviewQuestions(questionPayload);
+                aiReply = res.data.document;
+            }
+            // 3. Fallback to Generic Chat for Strategy/Planning/Analytics
+            else {
+                const systemInstruction = `
+                YOU ARE THE AIHIRE AGENT — A PROFESSIONAL TALENT STRATEGIST.
+                CURRENT MODE: ${currentMode}
+    
+                GLOBAL CONTEXT:
+                - Role: ${hireRole}
+                - Dept: ${hireDepartment}
+                - Seniority: ${hireSeniority}
+                - Budget: ₹${hireBudget}
+                - High Quality Priority: ${hireTradeoff}%
+                - Industry: ${hireIndustry}
+                - Business Stage: ${hireBusinessStage}
+    
+                ${currentMode === 'Strategy' ? `
+                GOAL: Create a hiring roadmap. Timeline: ${hireTimelineWeeks} weeks. Risk: ${hireRiskTolerance}. Sourcing: ${hireSourcingChannels}.
+                NOTES: ${hireExtraNotes}
+                SECTIONS: READINESS SCORE, TRADE-OFF ANALYSIS, RISK RADAR, COST FORECAST, VISUALIZATIONS.
+                ` : currentMode === 'Evaluation' ? `
+                GOAL: Rank candidates and check bias. Criteria: ${hireScorecardCriteria}. Bias Check: ${hireBiasCheck}.
+                JD: ${hireJobDescription}
+                PROFILES: ${hireCandidateProfiles}
+                SECTIONS: SCORECARD FRAMEWORK, CANDIDATE RANKING (with SCORECARD_JSON), BIAS REPORT, INTERVIEW FRAMEWORK, VISUALIZATIONS.
+                ` : currentMode === 'Offer' ? `
+                GOAL: Generate a formal offer letter and closing strategy. 
+                STRICT TEMPLATE ADHERENCE: If CANDIDATE_DETAILS contains a template (legal clauses, formal structure), use it EXCLUSIVELY. Do not rewrite or rephrase the template. Only fill in placeholders.
+                CANDIDATE_DETAILS: ${hireExtraNotes || 'Use the candidate details provided in the prompt.'}
+                TARGET_OFFER: Salary: ₹${hireOfferSalary || 'TBD'}, Equity: ${hireEquityPercent || 'TBD'}%, Perks: ${hireOfferPerks || 'Standard Benefits'}.
+                MARKET_CONTEXT: Competitor: ₹${hireCompetitorSalary}, Leverage: ${hireCandidateLeverage}.
+                SECTIONS: FORMAL OFFER LETTER (Strictly follows template if provided), MARKET BENCHMARK, ACCEPTANCE PROBABILITY, NEGOTIATION PLAYBOOK, VISUALIZATIONS.
+                ` : currentMode === 'Planning' ? `
+                GOAL: Org design and headcount forecasting. 
+                CONTEXT: ${hireExtraNotes}
+                STRUCTURE: ${hireOrgStructure}. Values: ${hireCulturalValues}.
+                SECTIONS: SCALABILITY AUDIT, CAPACITY PLANNING, REPORTING LINES, SUCCESSION PLAN, VISUALIZATIONS.
+                ` : `
+                GOAL: Talent Analytics and Funnel Optimization. 
+                ANALYSIS_REQUEST: ${hireExtraNotes || 'General funnel efficiency and cost-per-hire analysis.'}
+                SECTIONS: FUNNEL PERFORMANCE, BUDGET ATTRIBUTION, TURNOVER PREDICTION, DATA VISUALIZATIONS.
+                `}
+    
+                IMPORTANT: The user has requested a specific function: "${finalInput}".
+                You must ONLY provide the analysis/output for this specific function. Do not provide a generic overview of other modes.
+                Maintain the context of "${currentMode}" but focus exclusively on the requested task.
+    
+                MANDATORY: Use SECTION N: TITLE format. 
+                
+                MANDATORY FOR SECTION 5 VISUALIZATIONS: You must provide a JSON block representing the chart data at the very end. Use EXACTLY this structure, substituting the values logically based on the scenario:
+                \`\`\`json
+                {
+                   "candidateDistribution": [
+                       { "name": "Strong Match", "value": 45, "color": "#10b981" },
+                       { "name": "Average", "value": 35, "color": "#3b82f6" },
+                       { "name": "Weak", "value": 20, "color": "#ef4444" }
+                   ],
+                   "hiringTimeline": [
+                       { "stage": "Sourcing", "count": 150 },
+                       { "stage": "Screening", "count": 45 },
+                       { "stage": "Interviews", "count": 12 },
+                       { "stage": "Offers", "count": 2 }
+                   ]
+                }
+                \`\`\`
 
-            MANDATORY: Use SECTION N: TITLE format. Provide JSON at the end for Section 5 (Visualizations).
-            For Evaluation mode, you MUST include a SCORECARD_JSON_START ... SCORECARD_JSON_END block after Section 2.
-            MANDATORY: You must respond in ${language || 'English'}.
-            `;
+                ${currentMode === 'Evaluation' ? 'MANDATORY: For Evaluation mode, you MUST include a SCORECARD_JSON_START ... SCORECARD_JSON_END block after Section 2.' : ''}
+                MANDATORY: You must respond in English. Absolutely NO HINDI or other languages allowed. Every single word of your response must be in English.
+                `;
 
-            const response = await generateChatResponse([...messages, userMsg], finalInput, systemInstruction, hireFileAttachments, language || 'English', null, null, { agentType: 'AIHIRE' });
-            const aiReply = response.reply || response;
+                const response = await generateChatResponse([...messages, userMsg], finalInput, systemInstruction, hireFileAttachments, 'English', null, null, { agentType: 'AIHIRE' });
+                aiReply = response.reply || response;
+            }
 
             const modelMsg = {
                 id: (Date.now() + 1).toString(),
@@ -303,6 +518,9 @@ export default function AiHire() {
             };
 
             setMessages(prev => [...prev, modelMsg]);
+
+            // Clear extra notes after generation if it was a one-time thing?
+            // setHireExtraNotes(""); // Optional: keep for user to edit?
 
             // Parse scorecard
             if (hiringMode === 'Evaluation') {
@@ -323,15 +541,29 @@ export default function AiHire() {
             // Save session
             let activeSessionId = currentSessionId;
             if (activeSessionId === 'new') {
-                const newSession = await chatStorageService.createSession('AIHIRE', `Hire: ${hireRole || hiringMode}`);
-                activeSessionId = newSession.sessionId;
+                activeSessionId = await chatStorageService.createSession();
                 setCurrentSessionId(activeSessionId);
             }
             await chatStorageService.saveMessage(activeSessionId, userMsg);
             await chatStorageService.saveMessage(activeSessionId, modelMsg);
 
+            // Re-load sidebar history after new session is saved
+            if (currentSessionId === 'new') {
+                loadHistoryList();
+            }
+
         } catch (err) {
-            console.error('[AIHIRE ERROR]', err);
+            console.error('[AIHIRE ERROR]', err.response?.data || err);
+            // Fallback error handling
+            const errorDetails = err.response?.data?.error || err.response?.data?.details || err.message || "Failed to process request.";
+            const errorMsg = {
+                id: (Date.now() + 1).toString(),
+                role: 'model',
+                content: `Error: ${errorDetails}`,
+                timestamp: Date.now(),
+                agentName: 'AIHIRE'
+            };
+            setMessages(prev => [...prev, errorMsg]);
         } finally {
             setIsProcessing(false);
         }
@@ -343,13 +575,13 @@ export default function AiHire() {
         if (card.type === 'charts' && card.chartData) {
             return (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {card.chartData.marketShare && (
+                    {card.chartData.candidateDistribution && (
                         <div className="h-64">
-                            <p className="text-[10px] font-bold text-center mb-2 uppercase opacity-60">Distribution</p>
+                            <p className="text-[10px] font-bold text-center mb-2 uppercase opacity-60">Distribution Overview</p>
                             <ResponsiveContainer>
                                 <PieChart>
-                                    <Pie data={card.chartData.marketShare} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                                        {card.chartData.marketShare.map((entry, i) => <Cell key={i} fill={entry.color || '#10b981'} />)}
+                                    <Pie data={card.chartData.candidateDistribution} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" nameKey="name">
+                                        {card.chartData.candidateDistribution.map((entry, i) => <Cell key={i} fill={entry.color || '#3b82f6'} />)}
                                     </Pie>
                                     <Tooltip />
                                     <Legend />
@@ -357,16 +589,16 @@ export default function AiHire() {
                             </ResponsiveContainer>
                         </div>
                     )}
-                    {card.chartData.growthProjection && (
+                    {card.chartData.hiringTimeline && (
                         <div className="h-64">
-                            <p className="text-[10px] font-bold text-center mb-2 uppercase opacity-60">Timeline Progress</p>
+                            <p className="text-[10px] font-bold text-center mb-2 uppercase opacity-60">Funnel / Pipeline Status</p>
                             <ResponsiveContainer>
-                                <BarChart data={card.chartData.growthProjection}>
+                                <BarChart data={card.chartData.hiringTimeline}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                                    <XAxis dataKey="year" fontSize={10} axisLine={false} tickLine={false} />
+                                    <XAxis dataKey="stage" fontSize={10} axisLine={false} tickLine={false} />
                                     <YAxis fontSize={10} axisLine={false} tickLine={false} />
                                     <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-                                    <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -379,7 +611,75 @@ export default function AiHire() {
             ? card.content
             : card.content != null ? JSON.stringify(card.content, null, 2) : '';
 
-        return <div className="text-xs text-subtext leading-relaxed whitespace-pre-wrap font-medium">{safeContent}</div>;
+        return (
+            <div className="text-xs text-subtext leading-relaxed font-medium">
+                <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                        table: ({ node, ...props }) => <div className="overflow-x-auto my-4 rounded-xl border border-border/50 shadow-sm"><table className="w-full text-left border-collapse bg-white" {...props} /></div>,
+                        thead: ({ node, ...props }) => <thead className="bg-secondary/50 text-[10px] font-black uppercase tracking-widest text-subtext border-b border-border/40" {...props} />,
+                        tbody: ({ node, ...props }) => <tbody className="divide-y divide-border/20" {...props} />,
+                        tr: ({ node, ...props }) => <tr className="hover:bg-secondary/10 transition-colors group" {...props} />,
+                        th: ({ node, ...props }) => <th className="px-4 py-3 first:pl-6 last:pr-6 whitespace-nowrap" {...props} />,
+                        td: ({ node, ...props }) => <td className="px-4 py-3 first:pl-6 last:pr-6 text-maintext align-top" {...props} />,
+                        p: ({ node, ...props }) => <p className="mb-3 last:mb-0 leading-relaxed whitespace-pre-wrap" {...props} />,
+                        ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-3 space-y-1 marker:text-blue-500" {...props} />,
+                        ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-3 space-y-1 marker:text-blue-500 font-bold" {...props} />,
+                        li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                        a: ({ node, ...props }) => <a className="text-blue-600 hover:underline font-bold" {...props} />,
+                        strong: ({ node, ...props }) => <strong className="font-black text-maintext" {...props} />,
+                        blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500/30 pl-4 py-1 my-4 bg-secondary/20 rounded-r-xl italic text-maintext" {...props} />,
+                        code: ({ node, inline, className, children, ...props }) => {
+                            if (inline) return <code className="bg-secondary px-1.5 py-0.5 rounded text-[10px] font-mono font-bold text-maintext border border-border/50" {...props}>{children}</code>;
+                            return <div className="bg-[#1e1e1e] rounded-xl p-4 overflow-x-auto my-4 text-white text-[10px] font-mono shadow-inner"><code {...props}>{children}</code></div>;
+                        }
+                    }}
+                >
+                    {safeContent}
+                </ReactMarkdown>
+            </div>
+        );
+    };
+
+    const handleExportPDF = (contentToExport) => {
+        if (!contentToExport) return;
+        const printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write('<html><head><title>Offer Letter</title>');
+        printWindow.document.write('<style>body{font-family:sans-serif; padding: 40px; line-height: 1.6; color: #333; white-space: pre-wrap;}</style>');
+        printWindow.document.write('</head><body>');
+        let contentStr = contentToExport.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        contentStr = contentStr.replace(/^[#]{1,6}\s+(.*$)/gim, '<h3>$1</h3>');
+        printWindow.document.write(contentStr);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        setTimeout(() => printWindow.print(), 500);
+    };
+
+    const saveEditedReply = async () => {
+        if (!editedReply.trim() || !messages.length) return;
+        setIsProcessing(true);
+        try {
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg && lastMsg.role === 'model') {
+                const updatedMsg = { ...lastMsg, content: editedReply };
+
+                // Update local messages state
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = updatedMsg;
+                    return newMessages;
+                });
+
+                // Save to history storage
+                await chatStorageService.saveMessage(currentSessionId, updatedMsg);
+                setIsEditingResult(false);
+            }
+        } catch (error) {
+            console.error("Failed to save edited reply:", error);
+            alert("Failed to save changes. Please try again.");
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const renderMessageAsCards = (msg) => {
@@ -419,18 +719,18 @@ export default function AiHire() {
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Header Card */}
-                <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+                <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full -mr-32 -mt-32 blur-3xl" />
                     <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 bg-emerald-500 rounded-3xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                            <div className="w-16 h-16 bg-blue-500 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                                 <Users className="w-8 h-8 text-white" />
                             </div>
                             <div>
                                 <h1 className="text-3xl font-black text-maintext tracking-tight uppercase">Hire Intelligence</h1>
                                 <div className="flex items-center gap-3 mt-1">
-                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
-                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
                                         <span className="text-[10px] font-black uppercase tracking-wider">System Operational</span>
                                     </div>
                                     <span className="text-subtext/40 text-[10px] font-bold uppercase tracking-widest">• Talent OS v2.4</span>
@@ -439,17 +739,26 @@ export default function AiHire() {
                         </div>
 
                         {/* Top Navigation */}
-                        <div className="flex bg-secondary/50 p-1.5 rounded-3xl border border-border/40">
-                            {['Strategy', 'Evaluation', 'Offer', 'Planning', 'Analytics'].map(mode => (
-                                <button
-                                    key={mode}
-                                    onClick={() => setHiringMode(mode)}
-                                    className={`px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${hiringMode === mode ? 'bg-white text-emerald-600 shadow-md shadow-emerald-500/5 translate-y-[-1px]' : 'text-subtext hover:text-maintext'
-                                        }`}
-                                >
-                                    {mode}
-                                </button>
-                            ))}
+                        <div className="flex flex-col md:flex-row items-center gap-4">
+                            <div className="flex flex-wrap lg:flex-nowrap justify-center bg-secondary/50 p-1.5 rounded-3xl border border-border/40">
+                                {['Strategy', 'Evaluation', 'Offer', 'Planning', 'Analytics'].map(mode => (
+                                    <button
+                                        key={mode}
+                                        onClick={() => setHiringMode(mode)}
+                                        className={`px-4 lg:px-6 py-2.5 rounded-2xl text-[10px] lg:text-[11px] font-black uppercase tracking-widest transition-all ${hiringMode === mode ? 'bg-white text-blue-600 shadow-md shadow-blue-500/5 translate-y-[-1px]' : 'text-subtext hover:text-maintext'
+                                            }`}
+                                    >
+                                        {mode}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setIsHistoryOpen(true)}
+                                className="px-5 py-3 bg-white text-subtext rounded-2xl border border-border/40 shadow-sm hover:shadow-md hover:text-blue-600 hover:border-blue-200 transition-all flex items-center justify-center gap-2"
+                            >
+                                <History className="w-5 h-5" />
+                                <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">History</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -460,9 +769,9 @@ export default function AiHire() {
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* Global Config Card */}
-                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-8">
+                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 space-y-8">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                                     <Target className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-black text-maintext uppercase tracking-tight">Role Configuration</h3>
@@ -476,7 +785,7 @@ export default function AiHire() {
                                         value={hireRole}
                                         onChange={(e) => setHireRole(e.target.value)}
                                         placeholder="e.g. Senior Frontend Engineer"
-                                        className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-3xl px-5 py-4 text-sm text-maintext focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
+                                        className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-3xl px-5 py-4 text-sm text-maintext focus:outline-none focus:border-blue-500/30 transition-all font-bold"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -516,7 +825,7 @@ export default function AiHire() {
                                 className="space-y-8"
                             >
                                 {hiringMode === 'Strategy' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-8">
+                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 space-y-8">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                                                 <GitGraph className="w-6 h-6" />
@@ -547,17 +856,17 @@ export default function AiHire() {
 
                                 {hiringMode === 'Evaluation' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 space-y-6">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                                                    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                                                         <Users className="w-6 h-6" />
                                                     </div>
                                                     <h3 className="text-lg font-black text-maintext uppercase">Candidates</h3>
                                                 </div>
                                                 <button
                                                     onClick={() => hireFileInputRef.current?.click()}
-                                                    className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-colors flex items-center gap-2"
+                                                    className="px-4 py-2 bg-blue-50 text-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 transition-colors flex items-center gap-2"
                                                 >
                                                     <UploadCloud className="w-4 h-4" /> Upload
                                                 </button>
@@ -568,7 +877,7 @@ export default function AiHire() {
                                                 onDragOver={(e) => { e.preventDefault(); setHireUploadDragging(true); }}
                                                 onDragLeave={() => setHireUploadDragging(false)}
                                                 onDrop={(e) => { e.preventDefault(); setHireUploadDragging(false); handleResumeFiles(e.dataTransfer.files); }}
-                                                className={`relative border-2 border-dashed rounded-[32px] p-6 transition-all ${hireUploadDragging ? 'border-emerald-500 bg-emerald-50/50' : 'border-border/40 bg-[#f8fafc]/30'}`}
+                                                className={`relative border-2 border-dashed rounded-[32px] p-6 transition-all ${hireUploadDragging ? 'border-blue-500 bg-blue-50/50' : 'border-border/40 bg-[#f8fafc]/30'}`}
                                             >
                                                 <textarea
                                                     value={hireCandidateProfiles}
@@ -593,7 +902,7 @@ export default function AiHire() {
                                             </div>
                                         </div>
 
-                                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 space-y-6">
                                             <div className="flex items-center gap-4">
                                                 <div className="p-3 bg-pink-50 text-pink-600 rounded-2xl">
                                                     <ShieldCheck className="w-6 h-6" />
@@ -617,7 +926,7 @@ export default function AiHire() {
                                                     </div>
                                                     <button
                                                         onClick={() => setHireBiasCheck(!hireBiasCheck)}
-                                                        className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${hireBiasCheck ? 'bg-emerald-500' : 'bg-subtext/20'}`}
+                                                        className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${hireBiasCheck ? 'bg-blue-500' : 'bg-subtext/20'}`}
                                                     >
                                                         <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${hireBiasCheck ? 'translate-x-6' : 'translate-x-0'}`} />
                                                     </button>
@@ -628,7 +937,7 @@ export default function AiHire() {
                                 )}
 
                                 {hiringMode === 'Offer' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 space-y-6">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-red-50 text-red-600 rounded-2xl">
                                                 <IndianRupee className="w-6 h-6" />
@@ -637,12 +946,24 @@ export default function AiHire() {
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
+                                                <label className="text-[10px] text-subtext font-black uppercase tracking-widest ml-1">Candidate Name</label>
+                                                <input type="text" value={hireCandidateName} onChange={(e) => setHireCandidateName(e.target.value)} placeholder="e.g. Jane Doe" className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-3xl px-5 py-4 text-sm text-maintext focus:outline-none focus:border-red-500/30 font-bold" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] text-subtext font-black uppercase tracking-widest ml-1">Hiring Manager</label>
+                                                <input type="text" value={hireOfferManager} onChange={(e) => setHireOfferManager(e.target.value)} placeholder="e.g. Sarah Chen (CEO)" className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-3xl px-5 py-4 text-sm text-maintext focus:outline-none focus:border-red-500/30 font-bold" />
+                                            </div>
+                                            <div className="space-y-2">
                                                 <label className="text-[10px] text-subtext font-black uppercase tracking-widest ml-1">Base Salary (Annual)</label>
                                                 <input type="text" value={hireOfferSalary} onChange={(e) => setHireOfferSalary(e.target.value)} placeholder="e.g. 25,00,000" className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-3xl px-5 py-4 text-sm text-maintext focus:outline-none focus:border-red-500/30 font-bold" />
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[10px] text-subtext font-black uppercase tracking-widest ml-1">Equity %</label>
                                                 <input type="text" value={hireEquityPercent} onChange={(e) => setHireEquityPercent(e.target.value)} placeholder="e.g. 0.1%" className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-3xl px-5 py-4 text-sm text-maintext focus:outline-none focus:border-red-500/30 font-bold" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] text-subtext font-black uppercase tracking-widest ml-1">Expected Start Date</label>
+                                                <input type="text" value={hireOfferStartDate} onChange={(e) => setHireOfferStartDate(e.target.value)} placeholder="e.g. Oct 1, 2024" className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-3xl px-5 py-4 text-sm text-maintext focus:outline-none focus:border-red-500/30 font-bold" />
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-[10px] text-subtext font-black uppercase tracking-widest ml-1">Candidate Leverage</label>
@@ -661,7 +982,7 @@ export default function AiHire() {
                                 )}
 
                                 {hiringMode === 'Planning' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 space-y-6">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
                                                 <Building2 className="w-6 h-6" />
@@ -686,7 +1007,7 @@ export default function AiHire() {
                                 )}
 
                                 {hiringMode === 'Analytics' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-blue-500/5 space-y-6">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
                                                 <BarChart3 className="w-6 h-6" />
@@ -722,11 +1043,11 @@ export default function AiHire() {
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
                                         <label className="text-[11px] font-black uppercase tracking-widest opacity-60">Quality Target</label>
-                                        <span className="text-emerald-400 font-bold">{hireTradeoff}%</span>
+                                        <span className="text-blue-400 font-bold">{hireTradeoff}%</span>
                                     </div>
                                     <div className="relative h-2 bg-white/10 rounded-full">
                                         <motion.div
-                                            className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full"
+                                            className="absolute inset-y-0 left-0 bg-blue-500 rounded-full"
                                             animate={{ width: `${hireTradeoff}%` }}
                                         />
                                         <input
@@ -759,25 +1080,92 @@ export default function AiHire() {
                                     <input
                                         type="range" min="300000" max="20000000" step="100000"
                                         value={hireBudget} onChange={(e) => setHireBudget(Number(e.target.value))}
-                                        className="w-full accent-emerald-500 opacity-60"
+                                        className="w-full accent-blue-500 opacity-60"
                                     />
                                 </div>
 
-                                <div className="pt-4">
-                                    <button
-                                        onClick={handleAction}
-                                        disabled={isProcessing}
-                                        className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-3xl font-black uppercase tracking-[0.2em] shadow-xl shadow-emerald-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                                    >
-                                        <Zap className="w-5 h-5 fill-current" />
-                                        Execute {hiringMode}
-                                    </button>
+                                <div className="pt-4 space-y-3">
+                                    {hiringMode === 'Strategy' && (
+                                        <div className="grid grid-cols-1 gap-3">
+                                            <button onClick={() => handleAction(null, "Run a comprehensive Readiness Score and Gap Analysis.")} disabled={isProcessing} className="w-full py-4 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-[24px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><Target className="w-4 h-4" /> Readiness Score</button>
+                                            <button onClick={() => handleAction(null, "Generate a Job Description based on the current context.")} disabled={isProcessing} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><FileText className="w-4 h-4" /> Generate Job Description</button>
+                                            <button onClick={() => handleAction(null, "Conduct a detailed Risk Audit for this role.")} disabled={isProcessing} className="w-full py-4 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-[24px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><ShieldCheck className="w-4 h-4" /> Risk Audit</button>
+                                        </div>
+                                    )}
+                                    {hiringMode === 'Evaluation' && (
+                                        <div className="grid grid-cols-1 gap-3">
+                                            <button onClick={() => handleAction(null, "Evaluate and rank these candidates against the Scorecard.")} disabled={isProcessing} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><Users className="w-4 h-4" /> AI Scoring</button>
+                                            <button onClick={() => handleAction(null, "Run a Bias and Inclusion check on the JD and profiles.")} disabled={isProcessing} className="w-full py-4 bg-pink-600/20 hover:bg-pink-600/30 text-pink-100 border border-pink-500/20 rounded-[24px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><Bot className="w-4 h-4" /> Bias Scan</button>
+                                            <button onClick={() => handleAction(null, "Generate a custom Interview Framework.")} disabled={isProcessing} className="w-full py-4 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-[24px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><MessageSquare className="w-4 h-4" /> Interview Guide</button>
+                                        </div>
+                                    )}
+                                    {hiringMode === 'Offer' && (
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {/* Template Selector */}
+                                            <div className="bg-white/5 border border-white/10 rounded-2xl p-3 space-y-3">
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest opacity-60 block">Select Template</label>
+                                                    <select
+                                                        className="w-full bg-[#0f172a] text-white text-xs p-2 rounded-xl border border-white/10 outline-none focus:border-blue-500/50"
+                                                        onChange={(e) => {
+                                                            const selected = e.target.value;
+                                                            if (selected && OFFER_TEMPLATES[selected]) {
+                                                                setHireExtraNotes(OFFER_TEMPLATES[selected]);
+                                                            } else {
+                                                                setHireExtraNotes("");
+                                                            }
+                                                        }}
+                                                    >
+                                                        <option value="">Custom / Blank</option>
+                                                        <option value="Standard">Standard Professional</option>
+                                                        <option value="Startup">High-Growth Startup</option>
+                                                        <option value="Executive">Executive Leadership</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black uppercase tracking-widest opacity-60 block">Editor (Auto-Reads content)</label>
+                                                    <textarea
+                                                        value={hireExtraNotes}
+                                                        onChange={(e) => setHireExtraNotes(e.target.value)}
+                                                        placeholder="Select a template above or paste your own..."
+                                                        className="w-full bg-transparent text-xs text-white placeholder:text-white/20 outline-none resize-none h-80 custom-scrollbar font-mono leading-relaxed"
+                                                    />
+
+                                                    <div className="relative group pt-2">
+                                                        <input
+                                                            type="file"
+                                                            accept="application/pdf, image/jpeg, image/png, image/webp"
+                                                            onChange={handleTemplateUpload}
+                                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                        />
+                                                        <button className={`w-full py-2 border rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${uploadedFileName ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-white/5 border-white/10 text-[#94a3b8] group-hover:bg-white/10 group-hover:text-white'}`}>
+                                                            {uploadedFileName ? (
+                                                                <><CheckCircle2 className="w-3 h-3" /> {uploadedFileName}</>
+                                                            ) : (
+                                                                <><Upload className="w-3 h-3" /> Upload Template (PDF/Image)</>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => handleAction(null, "Predict acceptance probability and suggest package optimizations.")} disabled={isProcessing} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><TrendingUp className="w-4 h-4" /> Acceptance Odds</button>
+                                            <button onClick={() => handleAction(null, "Generate a formal offer letter for the Candidate.")} disabled={isProcessing} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><FileText className="w-4 h-4" /> Generate Offer Letter</button>
+                                            <button onClick={() => handleAction(null, "Build a direct negotiation strategy.")} disabled={isProcessing} className="w-full py-4 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-[24px] font-black uppercase tracking-widest active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><Target className="w-4 h-4" /> Closing Script</button>
+                                        </div>
+                                    )}
+                                    {hiringMode === 'Planning' && (
+                                        <button onClick={() => handleAction(null, "Run a Scalability and Capacity Audit.")} disabled={isProcessing} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><Activity className="w-5 h-5" /> Capacity Plan</button>
+                                    )}
+                                    {hiringMode === 'Analytics' && (
+                                        <button onClick={() => handleAction(null, "Generate a Funnel Performance and Cost-per-hire report.")} disabled={isProcessing} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl shadow-blue-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 text-[11px]"><BarChart3 className="w-5 h-5" /> Funnel Audit</button>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
                         {/* Quick Tips or Stats */}
-                        <div className="bg-emerald-600 rounded-[40px] p-8 text-white space-y-4 shadow-xl shadow-emerald-600/20">
+                        <div className="bg-blue-600 rounded-[40px] p-8 text-white space-y-4 shadow-xl shadow-blue-600/20">
                             <TrendingUp className="w-8 h-8 opacity-60" />
                             <h4 className="text-lg font-black uppercase leading-tight">AIHIRE Advantage</h4>
                             <p className="text-xs opacity-80 leading-relaxed font-medium">
@@ -794,21 +1182,21 @@ export default function AiHire() {
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl">
                         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="flex flex-col items-center gap-8">
                             <div className="relative w-32 h-32">
-                                <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20" />
-                                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-500 animate-spin" />
-                                <div className="absolute inset-4 rounded-full border-4 border-transparent border-t-teal-400 animate-spin" style={{ animationDuration: '0.8s', animationDirection: 'reverse' }} />
+                                <div className="absolute inset-0 rounded-full border-4 border-blue-500/20" />
+                                <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 animate-spin" />
+                                <div className="absolute inset-4 rounded-full border-4 border-transparent border-t-cyan-400 animate-spin" style={{ animationDuration: '0.8s', animationDirection: 'reverse' }} />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <Zap className="w-10 h-10 text-emerald-400 animate-pulse" />
+                                    <Zap className="w-10 h-10 text-blue-400 animate-pulse" />
                                 </div>
                             </div>
                             <div className="text-center space-y-3">
                                 <h3 className="text-white text-2xl font-black uppercase tracking-widest italic">Calculating {hiringMode}</h3>
                                 <div className="flex items-center gap-2 justify-center">
-                                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" />
-                                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                    <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.4s]" />
                                 </div>
-                                <p className="text-emerald-400/60 text-[10px] font-bold uppercase tracking-[0.4em]">Proprietary Talent Logic Engine</p>
+                                <p className="text-blue-400/60 text-[10px] font-bold uppercase tracking-[0.4em]">Proprietary Talent Logic Engine</p>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -824,12 +1212,12 @@ export default function AiHire() {
                             {/* Modal Header */}
                             <div className="p-8 border-b border-border/40 bg-white flex items-center justify-between shrink-0">
                                 <div className="flex items-center gap-5">
-                                    <div className="p-3 bg-emerald-500 rounded-3xl shadow-lg shadow-emerald-500/20">
+                                    <div className="p-3 bg-blue-500 rounded-3xl shadow-lg shadow-blue-500/20">
                                         <Users className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-black text-maintext tracking-tight uppercase italic">{hiringMode} Intelligence</h3>
-                                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-[0.2em] opacity-80">Autonomous Talent Strategy Outcome</p>
+                                        <p className="text-[10px] text-blue-600 font-bold uppercase tracking-[0.2em] opacity-80">Autonomous Talent Strategy Outcome</p>
                                     </div>
                                 </div>
                                 <button onClick={() => setShowResultModal(false)} className="p-3 hover:bg-secondary rounded-full transition-all group active:scale-95">
@@ -843,14 +1231,14 @@ export default function AiHire() {
                                 {hiringMode === 'Evaluation' && scorecardData?.candidates?.length > 0 && (
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="p-2 bg-emerald-500 text-white rounded-xl"><Trophy className="w-4 h-4" /></div>
+                                            <div className="p-2 bg-blue-500 text-white rounded-xl"><Trophy className="w-4 h-4" /></div>
                                             <h4 className="text-xs font-black text-maintext uppercase tracking-[0.3em]">Talent Scorecard</h4>
                                             <div className="h-px flex-1 bg-border/40" />
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                             {scorecardData.candidates.map((c, i) => {
                                                 const score = Number(c.overall) || 0;
-                                                const vStyle = c.verdict === 'HIRE' ? 'bg-emerald-500 ring-[#10b981]' : c.verdict === 'REJECT' ? 'bg-red-500 ring-[#ef4444]' : 'bg-amber-400 ring-[#f59e0b]';
+                                                const vStyle = c.verdict === 'HIRE' ? 'bg-blue-500 ring-[#3b82f6]' : c.verdict === 'REJECT' ? 'bg-red-500 ring-[#ef4444]' : 'bg-amber-400 ring-[#f59e0b]';
                                                 return (
                                                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
                                                         className="bg-white rounded-[40px] border border-border/40 p-8 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
@@ -883,7 +1271,7 @@ export default function AiHire() {
                                                                                 <span className="text-[9px] font-black text-maintext">{val}/10</span>
                                                                             </div>
                                                                             <div className="h-1 bg-secondary rounded-full overflow-hidden">
-                                                                                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${val * 10}%` }} />
+                                                                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${val * 10}%` }} />
                                                                             </div>
                                                                         </div>
                                                                     ))}
@@ -891,7 +1279,7 @@ export default function AiHire() {
                                                             </div>
                                                             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/30">
                                                                 <div>
-                                                                    <p className="text-[9px] font-black text-emerald-600 uppercase mb-2">Strengths</p>
+                                                                    <p className="text-[9px] font-black text-blue-600 uppercase mb-2">Strengths</p>
                                                                     {c.strengths?.map((s, j) => <p key={j} className="text-[10px] text-maintext leading-tight mb-1">• {s}</p>)}
                                                                 </div>
                                                                 <div>
@@ -899,6 +1287,19 @@ export default function AiHire() {
                                                                     {c.gaps?.map((g, j) => <p key={j} className="text-[10px] text-maintext leading-tight mb-1">• {g}</p>)}
                                                                 </div>
                                                             </div>
+                                                            {score > 65 && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setHiringMode('Offer');
+                                                                        setShowResultModal(false);
+                                                                        handleAction(null, `Generate a formal offer letter for candidate "${c.name}" for the role of ${hireRole || 'the specified position'}. Their match score is ${score}%. Structure it professionally and include placeholders for compensation details if not provided.`, 'Offer');
+                                                                    }}
+                                                                    className="w-full mt-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                                                                >
+                                                                    <FileText className="w-4 h-4" /> Generate Offer Letter
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </motion.div>
                                                 );
@@ -911,12 +1312,26 @@ export default function AiHire() {
                                 <div className="space-y-12">
                                     {(() => {
                                         const lastMsg = messages[messages.length - 1];
+
+                                        if (isEditingResult && hiringMode === 'Offer') {
+                                            return (
+                                                <div className="bg-white rounded-[40px] p-10 border border-blue-500/30 shadow-sm relative overflow-hidden">
+                                                    <h3 className="text-xl font-black text-maintext tracking-tight uppercase italic mb-8">Edit Offer Letter</h3>
+                                                    <textarea
+                                                        value={editedReply !== "" ? editedReply : lastMsg?.content}
+                                                        onChange={(e) => setEditedReply(e.target.value)}
+                                                        className="w-full h-[600px] p-6 bg-white border border-border/50 rounded-3xl text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y shadow-inner whitespace-pre-wrap leading-relaxed text-maintext focus:outline-none custom-scrollbar"
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
                                         const result = renderMessageAsCards(lastMsg);
                                         return result?.cards?.map((card, idx) => (
                                             <motion.div key={idx} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + idx * 0.1 }}
                                                 className="bg-white rounded-[40px] p-10 border border-border/40 shadow-sm relative overflow-hidden group">
                                                 <div className="flex items-center gap-5 mb-8">
-                                                    <div className="p-3 bg-secondary/50 rounded-2xl group-hover:bg-emerald-500 group-hover:text-white transition-all duration-500">
+                                                    <div className="p-3 bg-secondary/50 rounded-2xl group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
                                                         <SearchIcon className="w-6 h-6" />
                                                     </div>
                                                     <h3 className="text-xl font-black text-maintext tracking-tight uppercase italic">{card.title}</h3>
@@ -932,11 +1347,113 @@ export default function AiHire() {
 
                             {/* Modal Footer */}
                             <div className="p-8 border-t border-border/40 bg-white flex items-center justify-center gap-6 shrink-0">
-                                <button onClick={() => setShowResultModal(false)} className="px-10 py-4 bg-secondary text-maintext rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-border transition-all">Close View</button>
-                                <button onClick={() => { setShowResultModal(false); navigate(`/dashboard/chat/${currentSessionId}`); }} className="px-10 py-4 bg-emerald-600 text-white rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-emerald-500 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all">Continue in Chat</button>
+                                {isEditingResult && hiringMode === 'Offer' ? (
+                                    <>
+                                        <button onClick={() => handleExportPDF(editedReply)} className="px-10 py-4 bg-slate-800 text-white border border-slate-700 rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-slate-700 shadow-sm active:scale-95 transition-all w-full max-w-xs flex items-center justify-center gap-2">
+                                            <FileText className="w-4 h-4" /> Export as PDF
+                                        </button>
+                                        <button onClick={saveEditedReply} className="px-10 py-4 bg-green-500 text-white rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-green-600 shadow-xl shadow-green-500/20 hover:scale-105 transition-all w-full max-w-xs flex items-center justify-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4" /> Save Changes
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        {hiringMode === 'Offer' ? (
+                                            <>
+                                                <button onClick={() => setIsEditingResult(true)} className="px-10 py-4 bg-blue-50 text-blue-600 border border-blue-200 rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-blue-100 shadow-sm active:scale-95 transition-all w-full max-w-xs flex items-center justify-center gap-2">
+                                                    ✏️ Edit Final Letter
+                                                </button>
+                                                <button onClick={() => {
+                                                    const lastMsg = messages[messages.length - 1];
+                                                    if (lastMsg && lastMsg.content) {
+                                                        handleExportPDF(lastMsg.content);
+                                                    }
+                                                }} className="px-10 py-4 bg-slate-800 text-white border border-slate-700 rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-slate-700 shadow-sm active:scale-95 transition-all w-full max-w-xs flex items-center justify-center gap-2">
+                                                    <FileText className="w-4 h-4" /> Export as PDF
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button onClick={() => {
+                                                const lastMsg = messages[messages.length - 1];
+                                                if (lastMsg) {
+                                                    const blob = new Blob([lastMsg.content], { type: 'text/plain' });
+                                                    const url = URL.createObjectURL(blob);
+                                                    const a = document.createElement('a');
+                                                    a.href = url;
+                                                    a.download = `AIHIRE_Evaluation_${new Date().toISOString().slice(0, 10)}.txt`;
+                                                    a.click();
+                                                    URL.revokeObjectURL(url);
+                                                }
+                                            }} className="px-10 py-4 bg-secondary text-maintext border border-border rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-secondary/80 shadow-sm active:scale-95 transition-all w-full max-w-xs flex items-center justify-center gap-2">
+                                                <Download className="w-4 h-4" /> Download Report
+                                            </button>
+                                        )}
+                                        <button onClick={() => setShowResultModal(false)} className="px-10 py-4 bg-blue-600 text-white rounded-[24px] text-xs font-black uppercase tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-500/20 active:scale-95 transition-all w-full max-w-xs">Close View</button>
+                                    </>
+                                )}
                             </div>
                         </motion.div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* History Sidebar Panel */}
+            <AnimatePresence>
+                {isHistoryOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100]"
+                            onClick={() => setIsHistoryOpen(false)}
+                        />
+                        {/* Slide Panel */}
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed right-0 top-0 bottom-0 w-80 bg-white border-l border-border/40 shadow-2xl z-[101] flex flex-col"
+                        >
+                            <div className="p-6 border-b border-border/40 flex items-center justify-between bg-secondary/30">
+                                <h2 className="text-xs font-black text-maintext uppercase tracking-widest">AIHIRE Sessions</h2>
+                                <button onClick={() => setIsHistoryOpen(false)} className="p-2 text-subtext hover:bg-white rounded-xl transition-all"><X className="w-4 h-4" /></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                <button
+                                    onClick={() => {
+                                        setCurrentSessionId('new');
+                                        setMessages([]);
+                                        setIsHistoryOpen(false);
+                                    }}
+                                    className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl border border-dashed border-blue-500/50 text-blue-600 hover:bg-blue-50/50 transition-all font-bold text-xs uppercase tracking-widest shadow-sm"
+                                >
+                                    <Plus className="w-4 h-4" /> New Session
+                                </button>
+
+                                {historySessions.length === 0 ? (
+                                    <p className="text-xs text-subtext text-center pt-8">No previous sessions found.</p>
+                                ) : (
+                                    historySessions.map(session => (
+                                        <div
+                                            key={session.sessionId}
+                                            onClick={() => {
+                                                loadSession(session.sessionId);
+                                                setIsHistoryOpen(false);
+                                            }}
+                                            className="p-4 rounded-2xl border border-border/40 hover:border-blue-500/50 hover:bg-blue-50/50 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
+                                        >
+                                            <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -mr-8 -mt-8 group-hover:bg-blue-500/10 transition-colors" />
+                                            <h3 className="text-[11px] font-black text-maintext truncate group-hover:text-blue-600 transition-colors uppercase tracking-wider relative z-10">{session.title || 'Hire Strategy'}</h3>
+                                            <p className="text-[9px] text-subtext mt-1.5 font-bold uppercase relative z-10">{new Date(session.lastModified).toLocaleDateString()}</p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
         </div>
