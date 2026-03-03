@@ -1,0 +1,29 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '--build-arg', 'VITE_API_BASE_URL=$_BACKEND_URL', '-t', 'gcr.io/$PROJECT_ID/a-series-frontend', '.']
+  
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/a-series-frontend']
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'a-series-frontend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/a-series-frontend'
+      - '--region'
+      - 'asia-south1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+substitutions:
+  _BACKEND_URL: 'REPLACE_WITH_YOUR_BACKEND_URL'  # User needs to set this trigger variable
+
+images:
+  - 'gcr.io/$PROJECT_ID/a-series-frontend'

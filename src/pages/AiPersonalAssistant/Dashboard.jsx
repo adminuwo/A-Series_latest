@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { apiService } from '../../services/apiService';
 import TaskModal from './TaskModal';
-import { Plus, CheckCircle, Clock, Calendar as CalendarIcon, AlertTriangle, Trash2, Mic, Settings } from 'lucide-react';
+import { Plus, CheckCircle, Clock, Calendar as CalendarIcon, AlertTriangle, Trash2, Mic, Settings, Sparkles, Volume2, Bot } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { generateChatResponse } from '../../services/geminiService';
 
 const Dashboard = () => {
     const [tasks, setTasks] = useState([]);
@@ -10,12 +11,79 @@ const Dashboard = () => {
     const [editingTask, setEditingTask] = useState(null);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, today, pending, completed
+    const [briefing, setBriefing] = useState("");
+    const [isBriefingLoading, setIsBriefingLoading] = useState(false);
+    const [activeReminder, setActiveReminder] = useState(null);
 
     const notifiedRef = useRef(new Set());
+    const alarmIntervalRef = useRef(null);
 
     useEffect(() => {
         fetchTasks();
+        return () => stopAlarm();
     }, []);
+
+    const getTimeGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Good morning";
+        if (hour < 17) return "Good afternoon";
+        return "Good evening";
+    };
+
+    const generateDailyInsight = async (taskList) => {
+        if (!taskList || taskList.length === 0) {
+            setBriefing(`${getTimeGreeting()}! You haven't added any tasks yet. I'm ready to help you organize your day!`);
+            return;
+        }
+
+        try {
+            setIsBriefingLoading(true);
+            const greeting = getTimeGreeting();
+            const prompt = `It is currently ${new Date().toLocaleTimeString()}. Here are my tasks for today: ${taskList.map(t => `${t.title} at ${new Date(t.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`).join(', ')}. 
+            As my AI Personal Assistant (AISA™), give me a very short, energetic 2-sentence summary/motivation for my day, starting with "${greeting}".`;
+
+            const response = await generateChatResponse([], prompt, "You are AISA™, a helpful personal assistant. Keep it short and motivating.", [], "English");
+            if (typeof response === 'string' && response.includes("System Message")) {
+                setBriefing(`${greeting}! Your tasks are ready for action. Let's make today productive!`);
+            } else {
+                setBriefing(response.reply || response);
+            }
+        } catch (err) {
+            console.error("AI Briefing failed", err);
+            setBriefing(`${getTimeGreeting()}! Your tasks are ready for action. Let's make today productive!`);
+        } finally {
+            setIsBriefingLoading(false);
+        }
+    };
+
+    const startAlarm = (task) => {
+        setActiveReminder(task);
+
+        const speak = () => {
+            if (!task) return;
+            const text = `Attention! It is time for your task: ${task.title}. I repeat: Time for ${task.title}. Please stop the reminder to continue.`;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            window.speechSynthesis.speak(utterance);
+        };
+
+        // Initial speak
+        speak();
+
+        // Repeat every 5 seconds until stopped
+        if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
+        alarmIntervalRef.current = setInterval(speak, 5000);
+    };
+
+    const stopAlarm = () => {
+        window.speechSynthesis.cancel();
+        if (alarmIntervalRef.current) {
+            clearInterval(alarmIntervalRef.current);
+            alarmIntervalRef.current = null;
+        }
+        setActiveReminder(null);
+    };
 
     // Auto-mark missed helper
     const markAsMissed = async (task) => {
@@ -54,7 +122,7 @@ const Dashboard = () => {
 
         const interval = setInterval(checkReminders, 5000); // Check every 5s
         return () => clearInterval(interval);
-    }, [tasks]);
+    }, [tasks, activeReminder]);
 
     const triggerNotification = (task) => {
         // 1. Play Notification Sound (Music)
@@ -77,19 +145,20 @@ const Dashboard = () => {
                             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 {task.description || "It's time for your scheduled task."}
                             </p>
-                            {task.isUrgent && <span className="mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">URGENT</span>}
+                            <button
+                                onClick={() => { stopAlarm(); toast.dismiss(t.id); }}
+                                className="mt-3 w-full px-4 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-colors"
+                            >
+                                STOP REMINDER
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        ), { duration: 10000 });
+        ), { duration: Infinity }); // Stay until manually cleared
 
-        // 3. Audio Speech (Delayed slightly to follow the chime)
-        setTimeout(() => {
-            const text = `Time for your task: ${task.title}. I repeat: ${task.title}.`;
-            const utterance = new SpeechSynthesisUtterance(text);
-            window.speechSynthesis.speak(utterance);
-        }, 1000);
+        // 3. Start Persistent Voice Alarm
+        startAlarm(task);
     };
 
     const fetchTasks = async () => {
@@ -97,6 +166,7 @@ const Dashboard = () => {
             setLoading(true);
             const data = await apiService.getPersonalTasks({});
             setTasks(data);
+            generateDailyInsight(data);
         } catch (err) {
             toast.error("Failed to load tasks");
         } finally {
@@ -106,12 +176,17 @@ const Dashboard = () => {
 
     const handleSave = async (taskData) => {
         try {
+            let res;
             if (editingTask) {
-                await apiService.updatePersonalTask(editingTask._id, taskData);
+                res = await apiService.updatePersonalTask(editingTask._id, taskData);
                 toast.success("Task updated");
             } else {
-                await apiService.createPersonalTask(taskData);
+                res = await apiService.createPersonalTask(taskData);
                 toast.success("Task created");
+
+                // Proactive Voice Feedback
+                const utterance = new SpeechSynthesisUtterance(`Sure thing! I've scheduled your task ${taskData.title} for ${new Date(taskData.datetime).toLocaleTimeString()}.`);
+                window.speechSynthesis.speak(utterance);
             }
             setIsModalOpen(false);
             setEditingTask(null);
@@ -137,6 +212,7 @@ const Dashboard = () => {
         try {
             await apiService.updatePersonalTask(task._id, { status: newStatus });
             setTasks(prev => prev.map(t => t._id === task._id ? { ...t, status: newStatus } : t));
+            if (newStatus === 'completed' && activeReminder?._id === task._id) stopAlarm();
         } catch (err) {
             toast.error("Update failed");
         }
@@ -165,6 +241,24 @@ const Dashboard = () => {
         <div className="min-h-screen bg-background p-3 md:p-6 lg:p-8 font-sans transition-all">
             <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
 
+                {activeReminder && (
+                    <div className="sticky top-4 z-[100] bg-red-600 text-white p-4 rounded-2xl shadow-2xl animate-bounce flex items-center justify-between border-2 border-white">
+                        <div className="flex items-center gap-3">
+                            <Volume2 className="w-8 h-8 animate-pulse" />
+                            <div>
+                                <p className="font-bold text-lg">ALARM ACTIVE: {activeReminder.title}</p>
+                                <p className="text-sm opacity-90 italic">AISA is reminding you persistently...</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={stopAlarm}
+                            className="bg-white text-red-600 px-6 py-2 rounded-xl font-black hover:bg-gray-100 transition-all active:scale-95 shadow-lg border border-red-200"
+                        >
+                            STOP REMINDER
+                        </button>
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                     <div>
@@ -173,13 +267,48 @@ const Dashboard = () => {
                         </h1>
                         <p className="text-subtext text-xs md:text-sm">Manage your daily routine & smart reminders</p>
                     </div>
-                    <button
-                        onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
-                        className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-medium shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:scale-95 text-sm"
-                    >
-                        <Plus className="w-4 h-4" />
-                        New Task
-                    </button>
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <button
+                            onClick={() => {
+                                const text = briefing || "How can I help you with your routine today?";
+                                const utterance = new SpeechSynthesisUtterance(text);
+                                window.speechSynthesis.speak(utterance);
+                            }}
+                            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-secondary hover:bg-surface text-maintext rounded-xl font-medium border border-border transition-all"
+                        >
+                            <Mic className="w-4 h-4 text-primary" />
+                            Talk to AISA
+                        </button>
+                        <button
+                            onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
+                            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-medium shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:scale-95 text-sm"
+                        >
+                            <Plus className="w-4 h-4" />
+                            New Task
+                        </button>
+                    </div>
+                </div>
+
+                {/* AI Briefing Card */}
+                <div className="bg-card backdrop-blur-xl p-4 md:p-5 rounded-2xl shadow-sm border border-primary/20 bg-gradient-to-br from-primary/5 to-purple-500/5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Sparkles className="w-12 h-12 text-primary" />
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                            <Bot className="w-4 h-4 text-primary" />
+                        </div>
+                        <h2 className="text-sm font-bold text-maintext">AISA Daily Briefing</h2>
+                    </div>
+                    {isBriefingLoading ? (
+                        <div className="flex items-center gap-2 text-subtext text-sm italic">
+                            <span className="animate-pulse">Thinking...</span>
+                        </div>
+                    ) : (
+                        <p className="text-maintext text-sm md:text-base leading-relaxed">
+                            {briefing || "Welcome back! Let's make today productive."}
+                        </p>
+                    )}
                 </div>
 
                 {/* Stats / Dashboard */}
@@ -310,7 +439,7 @@ const Dashboard = () => {
                                                 <div className="flex items-center gap-4 mt-3 text-xs text-subtext max-w-full overflow-hidden">
                                                     <div className="flex items-center gap-1">
                                                         <Clock className="w-3 h-3" />
-                                                        {new Date(task.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        {new Date(task.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <CalendarIcon className="w-3 h-3" />
@@ -359,3 +488,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

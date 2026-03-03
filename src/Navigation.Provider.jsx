@@ -60,7 +60,8 @@ const DashboardLayout = () => {
   const isSidebarOpen = tglState.sidebarOpen;
   const setIsSidebarOpen = (val) => setTglState(prev => ({ ...prev, sidebarOpen: val }));
   const location = useLocation();
-  const isFullScreen = location.pathname.includes('/ai-personal-assistant');
+  const isFullScreen = location.pathname.includes('/ai-personal-assistant') || location.pathname.includes('/workspace');
+  const isAisaWorkspace = location.pathname.includes('/workspace');
 
   const user = JSON.parse(
     localStorage.getItem('user') || '{"name":"User"}'
@@ -85,7 +86,8 @@ const DashboardLayout = () => {
     <div className="fixed inset-0 flex bg-background text-maintext overflow-hidden font-sans">
       {/* Background Dreamy Orbs Removed */}
 
-      {!isFullScreen && <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />}
+      {(!isAisaWorkspace) && <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />}
+
 
       <div className="flex-1 flex flex-col min-w-0 bg-transparent h-full relative">
         {/* Outlet for pages */}

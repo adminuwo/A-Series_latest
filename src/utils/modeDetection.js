@@ -13,7 +13,8 @@ export const MODES = {
     FILE_CONVERSION: 'FILE_CONVERSION',
     IMAGE_GEN: 'IMAGE_GEN',
     VIDEO_GEN: 'VIDEO_GEN',
-    AUDIO_GEN: 'AUDIO_GEN'
+    AUDIO_GEN: 'AUDIO_GEN',
+    IMAGE_EDIT: 'IMAGE_EDIT'
 };
 
 const CODING_KEYWORDS = [
@@ -43,7 +44,8 @@ const TASK_KEYWORDS = [
 export function detectMode(message = '', attachments = []) {
     const lowerMessage = message.toLowerCase().trim();
 
-    // Priority 1: Image/Video Generation Intent
+    // Priority 1: Image/Video Generation Intent (DEACTIVATED AUTO-DETECTION - Requires Explicit Selection)
+    /*
     if (
         (lowerMessage.includes('image') || lowerMessage.includes('photo') || lowerMessage.includes('pic') || lowerMessage.includes('draw')) &&
         (lowerMessage.includes('generate') || lowerMessage.includes('create') || lowerMessage.includes('make') || lowerMessage.includes('show'))
@@ -63,9 +65,21 @@ export function detectMode(message = '', attachments = []) {
     ) {
         return MODES.AUDIO_GEN;
     }
+    */
 
-    // Priority 2: File Analysis
+    // Priority 2: File Analysis / Image Edit
     if (attachments && attachments.length > 0) {
+        const lowerInput = lowerMessage;
+        const isImageAttachment = attachments.some(a => a.type === 'image' || (a.name && a.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)));
+
+        if (isImageAttachment && (
+            lowerInput.includes('edit') || lowerInput.includes('modify') || lowerInput.includes('change') ||
+            lowerInput.includes('background') || lowerInput.includes('retouch') || lowerInput.includes('fix') ||
+            lowerInput.includes('badlo') || lowerInput.includes('editing')
+        )) {
+            return MODES.IMAGE_EDIT;
+        }
+
         // Simple check for conversion intent if files are present
         if (lowerMessage.includes('convert') || lowerMessage.includes('to pdf') || lowerMessage.includes('to doc') ||
             lowerMessage.includes('to word') || lowerMessage.includes('pptx to') || lowerMessage.includes('excel to') ||
@@ -115,7 +129,8 @@ export function getModeName(mode) {
         [MODES.FILE_CONVERSION]: 'Conversion',
         [MODES.IMAGE_GEN]: 'Image Gen',
         [MODES.VIDEO_GEN]: 'Video Gen',
-        [MODES.AUDIO_GEN]: 'Audio Gen'
+        [MODES.AUDIO_GEN]: 'Audio Gen',
+        [MODES.IMAGE_EDIT]: 'Image Edit'
     };
     return names[mode] || 'Chat';
 }
@@ -131,7 +146,8 @@ export function getModeIcon(mode) {
         [MODES.FILE_CONVERSION]: '🔄',
         [MODES.IMAGE_GEN]: '🎨',
         [MODES.VIDEO_GEN]: '🎬',
-        [MODES.AUDIO_GEN]: '🎵'
+        [MODES.AUDIO_GEN]: '🎵',
+        [MODES.IMAGE_EDIT]: '🪄'
     };
     return icons[mode] || '💬';
 }
@@ -147,7 +163,8 @@ export function getModeColor(mode) {
         [MODES.FILE_CONVERSION]: '#ec4899', // Pink
         [MODES.IMAGE_GEN]: '#f43f5e', // Rose
         [MODES.VIDEO_GEN]: '#8b5cf6',  // Violet
-        [MODES.AUDIO_GEN]: '#06b6d4'   // Cyan
+        [MODES.AUDIO_GEN]: '#06b6d4',  // Cyan
+        [MODES.IMAGE_EDIT]: '#8b5cf6'  // Violet
     };
     return colors[mode] || '#6366f1';
 }

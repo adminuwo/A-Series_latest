@@ -1,27 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { X } from 'lucide-react';
+import { X, Check, Star } from 'lucide-react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { toggleState, userData } from '../../userStore/userData';
 import { motion } from 'motion/react';
 import { apis } from '../../types';
 import axios from 'axios';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const SubscriptionForm = ({ id }) => {
+  const navigate = useNavigate();
   const [subscripTgl, setSubscripTgl] = useRecoilState(toggleState);
   const currentUserData = useRecoilValue(userData);
   const user = currentUserData.user;
   const userId = user?.id || user?._id;
 
-  const [isProcessing, setIsProcessing] = React.useState(false);
-  const [agent, setAgent] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [agent, setAgent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedPlanId, setSelectedPlanId] = useState('monthly');
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchAgent = async () => {
       try {
         const res = await axios.get(`${apis.agents}/${id}`);
         setAgent(res.data);
+        // If agent has custom plans, set the first one as default
+        if (res.data?.pricing?.plans?.length > 0) {
+          setSelectedPlanId(res.data.pricing.plans[0].id || res.data.pricing.plans[0]._id || res.data.pricing.plans[0].name.toLowerCase());
+        }
       } catch (err) {
         console.error("Error fetching agent details:", err);
       } finally {
@@ -33,83 +41,78 @@ const SubscriptionForm = ({ id }) => {
 
   const defaultPlans = [
     { id: 'free', name: 'Free', price: 0, desc: 'Ideal for trying out the agent capabilities.' },
-    { id: 'monthly', name: 'Monthly plan', price: 49, desc: 'Best for power users and frequent tasks.' },
-    { id: 'annual', name: 'Annual plan', price: 228, desc: '₹19/month billed in a year', reduction: 'Save 20%' }
+    { id: 'monthly', name: 'Pro Plan', price: 499, desc: `Allows 3 ${agent?.agentName || 'tool'} generations per day.` },
+    { id: 'annual', name: 'Enterprise Plan', price: 5000, desc: 'Unlimited access and priority processing.', reduction: 'Unlimited' }
   ];
 
   const plans = agent?.pricing?.plans?.length > 0 ? agent.pricing.plans : defaultPlans;
 
-  function buyAgent(e) {
-    e.preventDefault();
+  const handlePlanSelect = (planId) => {
+    setSelectedPlanId(planId);
+  };
+
+  const buyAgent = async () => {
     if (isProcessing) return;
 
     if (!userId) {
-      console.error("User ID missing or not logged in");
+      toast.error("Please login to subscribe");
+      navigate('/login');
       return;
     }
 
-    const form = e.target.closest('form');
-    const selectedValue = form.querySelector('input[name="plan"]:checked')?.value;
-
-    // Find matching plan by ID, _id, or lowercase name
     const selectedPlan = plans.find(p =>
-      (p.id && String(p.id) === selectedValue) ||
-      (p._id && String(p._id) === selectedValue) ||
-      (p.name && p.name.toLowerCase() === String(selectedValue).toLowerCase())
+      (p.id && String(p.id) === selectedPlanId) ||
+      (p._id && String(p._id) === selectedPlanId) ||
+      (p.name && p.name.toLowerCase() === String(selectedPlanId).toLowerCase())
     );
 
-    const amount = selectedPlan ? selectedPlan.price : 0;
-    const planName = selectedPlan?.name || selectedValue;
+    if (!selectedPlan) {
+      toast.error("Please select a valid plan");
+      return;
+    }
 
-    console.log('[PAYMENT DEBUG] Selected Plan:', selectedPlan);
-    console.log('[PAYMENT DEBUG] Amount:', amount);
-    console.log('[PAYMENT DEBUG] Plan Name:', planName);
-    console.log('[PAYMENT DEBUG] User ID:', userId);
-    console.log('[PAYMENT DEBUG] User Object:', user);
+    const amount = selectedPlan.price;
+    const planName = selectedPlan.name;
 
     if (amount === 0) {
       setIsProcessing(true);
-      console.log('[FREE PLAN] Sending request with userId:', userId);
-
-      axios.post(`${apis.buyAgent}/${id}`, { userId })
-        .then(() => {
-          setSubscripTgl({ ...subscripTgl, subscripPgTgl: false, notify: true });
-          // Reload to refresh agent list
-          setTimeout(() => window.location.reload(), 500);
-        })
-        .catch(err => {
-          console.error('Free plan subscription failed:', err);
-          alert(err.response?.data?.error || 'Failed to add agent. Please try again.');
-        })
-        .finally(() => setIsProcessing(false));
+      try {
+        await axios.post(`${apis.buyAgent}/${id}`, { userId });
+        toast.success(`${agent?.agentName || 'Agent'} subscribed successfully!`);
+        setSubscripTgl({ ...subscripTgl, subscripPgTgl: false, notify: true });
+        navigate('/dashboard/chat', { state: { activated: true, toolName: agent?.agentName } });
+      } catch (err) {
+        console.error('Free plan subscription failed:', err);
+        const msg = err.response?.data?.error || 'Failed to subscribe. Please try again.';
+        toast.error(msg);
+      } finally {
+        setIsProcessing(false);
+      }
       return;
     }
 
+    // Paid Plan logic
     setIsProcessing(true);
+    try {
+      const orderRes = await axios.post(apis.createOrder, {
+        amount,
+        agentId: id,
+        plan: planName
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
 
-    // 1. Create Order on Backend
-    axios.post(apis.createOrder, {
-      amount,
-      agentId: id,
-      plan: planName
-    }, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => {
-        const { orderId, currency, keyId } = res.data;
+      const { orderId, currency, keyId } = orderRes.data;
 
-        // 2. Open Razorpay Checkout
-        const options = {
-          key: keyId,
-          amount: amount * 100,
-          currency: currency,
-          name: "A-Series",
-          description: `Subscription for Agent ${agent?.agentName || id}`,
-          order_id: orderId,
-          handler: function (response) {
-            console.log('[RAZORPAY] Payment response received:', response);
-
-            // 3. Verify Payment on Backend
+      const options = {
+        key: keyId,
+        amount: amount * 100,
+        currency: currency,
+        name: "A-Series",
+        description: `Subscription for ${agent?.agentName || id}`,
+        order_id: orderId,
+        handler: async function (response) {
+          try {
             const verifyData = {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -119,125 +122,129 @@ const SubscriptionForm = ({ id }) => {
               plan: planName
             };
 
-            console.log('[RAZORPAY] Sending verification request:', verifyData);
-
-            axios.post(apis.verifyPayment, verifyData, {
+            await axios.post(apis.verifyPayment, verifyData, {
               headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-            })
-              .then((verifyRes) => {
-                console.log('[RAZORPAY] Verification successful:', verifyRes.data);
-                setSubscripTgl({ ...subscripTgl, subscripPgTgl: false, notify: true });
-                // Reload to refresh agent list
-                setTimeout(() => window.location.reload(), 500);
-              })
-              .catch(err => {
-                console.error("Verification failed", err);
-                const backendError = err.response?.data?.error;
-                const backendDetails = err.response?.data?.details;
-                const errorMsg = backendError
-                  ? `${backendError}${backendDetails ? ': ' + backendDetails : ''}`
-                  : "Payment verification failed. Please contact support.";
+            });
 
-                alert(errorMsg);
-                setIsProcessing(false);
-              });
-          },
-          prefill: {
-            name: user.name,
-            email: user.email,
-          },
-          theme: {
-            color: "#2563eb",
-          },
-        };
-
-        const rzp1 = new window.Razorpay(options);
-        rzp1.open();
-      })
-      .catch(err => {
-        console.error("Order creation failed", err);
-        const errorMsg = err.response?.data?.error || err.message || "Order creation failed. Check backend console and .env keys.";
-
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          alert("Your session has expired. Please log in again.");
-          window.location.href = '/login';
-          return;
+            toast.success("Payment successful! Agent activated.");
+            setSubscripTgl({ ...subscripTgl, subscripPgTgl: false, notify: true });
+            navigate('/dashboard/chat', { state: { activated: true, toolName: agent?.agentName } });
+          } catch (err) {
+            console.error("Verification failed", err);
+            toast.error("Payment verification failed. Please contact support.");
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: user?.name,
+          email: user?.email,
+        },
+        theme: { color: "#2563eb" },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+          }
         }
+      };
 
-        alert(errorMsg);
-      })
-      .finally(() => setIsProcessing(false));
-  }
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
+    } catch (err) {
+      console.error("Order creation failed", err);
+      const errorMsg = err.response?.data?.error || "Payment gateway error. Please try again later.";
+      toast.error(errorMsg);
+      setIsProcessing(false);
+    }
+  };
 
   return (
-    <div className='fixed inset-0 z-[100] flex justify-center items-center p-4 bg-white/5 dark:bg-black/10 backdrop-blur-md transition-all'>
+    <div className='fixed inset-0 z-[100] flex justify-center items-center p-4 bg-black/40 backdrop-blur-sm transition-all'>
       <StyledWrapper>
-        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
-          <form className="plan-chooser">
-            <div className='flex justify-end items-center'>
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}>
+          <div className="plan-chooser">
+            <div className='flex justify-end items-center mb-2'>
               <button
                 type="button"
                 onClick={() => setSubscripTgl({ ...subscripTgl, subscripPgTgl: false })}
-                className="hover:bg-gray-100 p-1 rounded-full transition-colors"
+                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 text-subtext transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <div className="header">
               <span className="title">Choose your plan</span>
               <p className="desc">{agent?.agentName ? `Select a plan for ${agent.agentName}` : 'Select a subscription plan that works for you.'}</p>
             </div>
 
             {loading ? (
-              <div className="flex flex-col items-center py-10">
-                <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-2" />
-                <p className="text-sm text-subtext">Fetching plans...</p>
+              <div className="flex flex-col items-center py-12">
+                <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
+                <p className="text-sm font-medium text-subtext">Preparing plans...</p>
               </div>
             ) : (
               <>
-                <div className="space-y-3 mb-6">
-                  {plans.map((plan, index) => (
-                    <div className="plan-option" key={plan.id || plan._id || index}>
-                      <input
-                        defaultValue={plan.id || plan._id || plan.name.toLowerCase()}
-                        id={plan.id || plan._id || `plan-${index}`}
-                        name="plan"
-                        type="radio"
-                        defaultChecked={index === 1}
-                      />
-                      <label htmlFor={plan.id || plan._id || `plan-${index}`}>
-                        <div className="plan-info">
-                          <span className="plan-cost">
-                            {typeof plan.price === 'object' && plan.price !== null
-                              ? `₹${plan.price.monthly || plan.price.yearly || plan.price.amount || 0}`
-                              : `₹${plan.price}`}
-                          </span>
-                          <span className="plan-name">{plan.name}</span>
-                          {plan.desc && <span className="text-[10px] text-subtext mt-1">{plan.desc}</span>}
+                <div className="plans-container">
+                  {plans.map((plan, index) => {
+                    const planId = plan.id || plan._id || plan.name.toLowerCase();
+                    const isSelected = selectedPlanId === planId;
+                    return (
+                      <div
+                        className={`plan-option ${isSelected ? 'active' : ''}`}
+                        key={planId}
+                        onClick={() => handlePlanSelect(planId)}
+                      >
+                        <input
+                          type="radio"
+                          name="plan"
+                          value={planId}
+                          checked={isSelected}
+                          onChange={() => handlePlanSelect(planId)}
+                          className="hidden"
+                        />
+                        <div className="plan-label">
+                          <div className="plan-info">
+                            <span className="plan-cost">
+                              {typeof plan.price === 'object' && plan.price !== null
+                                ? `₹${plan.price.monthly || plan.price.yearly || plan.price.amount || 0}`
+                                : `₹${plan.price}`}
+                            </span>
+                            <span className="plan-name">{plan.name}</span>
+                            {plan.desc && <span className="plan-desc">{plan.desc}</span>}
+                          </div>
+                          <div className="plan-status">
+                            {isSelected ? (
+                              <div className="check-circle active">
+                                <Check className="w-3 h-3 text-white" />
+                              </div>
+                            ) : (
+                              <div className="check-circle" />
+                            )}
+                            {plan.reduction && <span className="reduction-tag">{plan.reduction}</span>}
+                          </div>
                         </div>
-                        {plan.reduction && <span className="reduction">{plan.reduction}</span>}
-                      </label>
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <button
                   type="button"
                   onClick={buyAgent}
                   disabled={isProcessing}
-                  className={`choose-btn ${isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
-                  title="Start subscription"
+                  className={`start-btn ${isProcessing ? 'loading' : ''}`}
                 >
                   {isProcessing ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Processing...
+                    <div className="loader-container">
+                      <div className="loader" />
+                      <span>Processing...</span>
                     </div>
                   ) : 'Start'}
                 </button>
               </>
             )}
-          </form>
+          </div>
         </motion.div>
       </StyledWrapper>
     </div>
@@ -246,96 +253,168 @@ const SubscriptionForm = ({ id }) => {
 
 const StyledWrapper = styled.div`
   .plan-chooser {
-    background-color: rgba(255, 255, 255, 1);
-    width: 100%;
-    max-width: 320px;
-    border-radius: 20px;
+    background: #fff;
+    width: 360px;
+    border-radius: 24px;
     padding: 24px;
-    color: #000;
-    box-shadow: 0px 20px 50px rgba(0,0,0,0.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 
   .header {
     text-align: center;
-    margin-top: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 24px;
   }
 
   .title {
     font-size: 1.5rem;
     font-weight: 800;
-    color: #111;
+    color: #1a1a1a;
+    display: block;
   }
 
   .desc {
-    margin-top: 0.5rem;
     font-size: 0.875rem;
     color: #666;
+    margin-top: 6px;
+  }
+
+  .plans-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
   }
 
   .plan-option {
-    margin-bottom: 12px;
-  }
-
-  .plan-option label {
     cursor: pointer;
     border: 2px solid #f1f5f9;
-    border-radius: 12px;
-    background-color: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    border-radius: 16px;
+    background: #f8fafc;
     padding: 16px;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .plan-option:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .plan-option.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+  }
+
+  .plan-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
   }
 
   .plan-info {
     display: flex;
     flex-direction: column;
+    gap: 2px;
   }
 
   .plan-cost {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #111;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1a1a1a;
   }
 
   .plan-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4b5563;
+  }
+
+  .plan-desc {
     font-size: 0.75rem;
-    color: #64748b;
+    color: #6b7280;
+    margin-top: 4px;
+    line-height: 1.4;
   }
 
-  .reduction {
-    background-color: #dcfce7;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #166534;
+  .plan-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
   }
 
-  .plan-option input:checked + label {
-    border-color: #2563eb;
-    background-color: #eff6ff;
-  }
-
-  .choose-btn {
-    width: 100%;
-    margin-top: 8px;
-    padding: 14px;
-    border-radius: 12px;
-    background-color: #2563eb;
-    font-weight: 700;
-    color: #fff;
+  .check-circle {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s ease;
   }
 
-  .choose-btn:hover {
-    background-color: #1d4ed8;
+  .check-circle.active {
+    background: #2563eb;
+    border-color: #2563eb;
   }
 
-  .plan-option input {
-    display: none;
+  .reduction-tag {
+    background: #dcfce7;
+    color: #166534;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: 8px;
+    text-transform: uppercase;
+  }
+
+  .start-btn {
+    width: 100%;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    padding: 16px;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+  }
+
+  .start-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 15px 20px -5px rgba(37, 99, 235, 0.4);
+  }
+
+  .start-btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .start-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .loader-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .loader {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animate: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 `;
 
