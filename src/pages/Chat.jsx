@@ -252,6 +252,14 @@ const getToolIcon = (slug) => {
     case 'tool-blip2': return ImageIcon;
     case 'tool-path-foundation': return ShieldCheck;
     case 'tool-derm-foundation': return Stethoscope;
+    case 'tool-openai-content': return Edit2;
+    case 'tool-openai-chat': return MessageSquare;
+    case 'tool-openai-image': return Camera;
+    case 'tool-openai-tts': return Volume2;
+    case 'tool-openai-stt': return Mic;
+    case 'tool-openai-code': return Code;
+    case 'tool-openai-document': return FileText;
+    case 'tool-openai-vision': return Eye;
     default: return ImageIcon;
   }
 };
@@ -357,6 +365,27 @@ const Chat = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isAttachMenuOpen, isToolsMenuOpen]);
+
+  // Fetch user's subscribed agents
+  useEffect(() => {
+    const fetchUserAgents = async () => {
+      const user = getUserData("user");
+      const userId = user?.id || user?._id;
+      if (!userId) return;
+
+      try {
+        const response = await axios.post(apis.getUserAgents, { userId });
+        if (response.data && response.data.agents) {
+          console.log("[Chat] Fetched User Agents:", response.data.agents);
+          setUserAgents(response.data.agents);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user agents in Chat:", error);
+      }
+    };
+
+    fetchUserAgents();
+  }, [tglState]);
 
   // Handle successful activation redirect
   useEffect(() => {
@@ -4675,17 +4704,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     onClick={(e) => {
                       e.stopPropagation();
 
-                      const ownedToolsCount = [
-                        'tool-image-gen', 'tool-video-gen', 'tool-deep-search', 'tool-audio-convert',
-                        'tool-universal-converter', 'tool-code-writer', 'tool-ai-personal-assistant',
-                        'tool-image-editing-customization', 'tool-fast-video-generator', 'tool-lyria-for-music',
-                        'tool-ai-document', 'tool-ai-blur', 'tool-ai-detector', 'tool-time-series-forecasting', 'tool-llm-auditor', 'tool-personalized-shopping',
-                        'tool-brand-search-optimization', 'tool-fomc-research', 'tool-image-scoring',
-                        'tool-data-science', 'tool-rag-engine', 'tool-financial-advisor',
-                        'tool-marketing-agency', 'tool-customer-service', 'tool-academic-research',
-                        'tool-bug-assistant', 'tool-travel-concierge', 'tool-nvidia-nemotron-nano-12b',
-                        'tool-claude-sonnet-4-5', 'tool-blip2', 'tool-path-foundation', 'tool-derm-foundation'
-                      ].filter(slug => userAgents.some(a => a.slug === slug || `tool-${a.slug}` === slug)).length;
+                      const ownedToolsCount = userAgents.length;
 
                       if (ownedToolsCount === 0) {
                         toast("You haven't activated any AI tools yet. Redirecting to Marketplace...", {
@@ -4722,40 +4741,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     className="absolute bottom-full left-0 mb-4 z-50 pointer-events-none"
                   >
                     {(() => {
-                      const ownedToolsCount = [
-                        'tool-image-gen',
-                        'tool-video-gen',
-                        'tool-deep-search',
-                        'tool-audio-convert',
-                        'tool-universal-converter',
-                        'tool-code-writer',
-                        'tool-ai-personal-assistant',
-                        'tool-image-editing-customization',
-                        'tool-fast-video-generator',
-                        'tool-lyria-for-music',
-                        'tool-ai-document',
-                        'tool-ai-blur',
-                        'tool-ai-detector',
-                        'tool-time-series-forecasting',
-                        'tool-llm-auditor',
-                        'tool-personalized-shopping',
-                        'tool-brand-search-optimization',
-                        'tool-fomc-research',
-                        'tool-image-scoring',
-                        'tool-data-science',
-                        'tool-rag-engine',
-                        'tool-financial-advisor',
-                        'tool-marketing-agency',
-                        'tool-customer-service',
-                        'tool-academic-research',
-                        'tool-bug-assistant',
-                        'tool-travel-concierge',
-                        'tool-nvidia-nemotron-nano-12b',
-                        'tool-claude-sonnet-4-5',
-                        'tool-blip2',
-                        'tool-path-foundation',
-                        'tool-derm-foundation'
-                      ].filter(slug => userAgents.some(a => a.slug === slug || `tool-${a.slug}` === slug)).length;
+                      const ownedToolsCount = userAgents.length;
 
                       if (ownedToolsCount === 0) return null;
 
@@ -4766,11 +4752,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
                               {[
                                 {
-                                  id: 'image',
+                                  id: 'image-gen',
                                   slug: 'tool-image-gen',
-                                  title: 'Generate Image',
-                                  desc: 'Turn text into stunning AI visuals.',
-                                  icon: ImageIcon,
+                                  title: 'Image Gen',
+                                  desc: 'Create high-quality AI images.',
+                                  icon: Sparkles,
+                                  avatar: '/AGENTS_IMG/deepart.png',
                                   color: 'text-fuchsia-500 dark:text-fuchsia-400',
                                   bgColor: 'bg-fuchsia-500/10',
                                   active: isImageGeneration,
@@ -4791,11 +4778,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   }
                                 },
                                 {
-                                  id: 'video',
+                                  id: 'video-gen',
                                   slug: 'tool-video-gen',
-                                  title: 'Generate Video',
-                                  desc: 'Turn text into cinematic AI videos.',
+                                  title: 'Video Gen',
+                                  desc: 'Short cinematic AI videos.',
                                   icon: Video,
+                                  avatar: '/AGENTS_IMG/AIVIDEO.png',
                                   color: 'text-indigo-500 dark:text-indigo-400',
                                   bgColor: 'bg-indigo-500/10',
                                   active: isVideoGeneration,
@@ -4816,11 +4804,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   }
                                 },
                                 {
-                                  id: 'search',
+                                  id: 'deep-search',
                                   slug: 'tool-deep-search',
                                   title: 'Deep Search',
-                                  desc: 'Advanced research & data analysis.',
+                                  desc: 'Advanced reasoning & web research.',
                                   icon: Search,
+                                  avatar: '/AGENTS_IMG/deepsearch.png',
                                   color: 'text-blue-500 dark:text-blue-400',
                                   bgColor: 'bg-blue-500/10',
                                   active: isDeepSearch,
@@ -4841,11 +4830,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   }
                                 },
                                 {
-                                  id: 'audio',
+                                  id: 'audio-convert',
                                   slug: 'tool-audio-convert',
-                                  title: 'Convert to Audio',
-                                  desc: 'Transform docs into natural speech.',
+                                  title: 'Text to Audio',
+                                  desc: 'Natural Voice synthesis.',
                                   icon: Headphones,
+                                  avatar: '/AGENTS_IMG/AIVOICE.png',
                                   color: 'text-violet-500 dark:text-violet-400',
                                   bgColor: 'bg-violet-500/10',
                                   active: isAudioConvertMode,
@@ -4872,6 +4862,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'AI Document Analysis',
                                   desc: 'Extract text & insights from docs.',
                                   icon: FileText,
+                                  avatar: '/AGENTS_IMG/AIDOC.png',
                                   color: 'text-emerald-500 dark:text-emerald-400',
                                   bgColor: 'bg-emerald-500/10',
                                   active: activeAgent.slug === 'tool-ai-document',
@@ -4894,6 +4885,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'AI Blur (Privacy)',
                                   desc: 'Auto-blur faces & objects in video.',
                                   icon: Eye, // Using Eye icon for privacy/visibility
+                                  avatar: '/AGENTS_IMG/AIPRIVACY.png',
                                   color: 'text-gray-500 dark:text-gray-400',
                                   bgColor: 'bg-gray-500/10',
                                   active: activeAgent.slug === 'tool-ai-blur' || activeAgent.slug === 'ai-blur',
@@ -4914,6 +4906,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'AI Detector',
                                   desc: 'Identify objects & people in video.',
                                   icon: Target, // Using Target icon for detection
+                                  avatar: '/AGENTS_IMG/AISCAN.png',
                                   color: 'text-teal-500 dark:text-teal-400',
                                   bgColor: 'bg-teal-500/10',
                                   active: activeAgent.slug === 'tool-ai-detector' || activeAgent.slug === 'ai-detector',
@@ -4934,6 +4927,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Universal Document Converter',
                                   desc: 'Bidirectional conversion for PDF, DOCX, PPTX, XLSX, and Images.',
                                   icon: FileText,
+                                  avatar: '/AGENTS_IMG/AICONVERT.png',
                                   color: 'text-amber-500 dark:text-amber-400',
                                   bgColor: 'bg-amber-500/10',
                                   active: isDocumentConvert,
@@ -4959,6 +4953,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Code Writer',
                                   desc: 'Expert coding & debugging.',
                                   icon: Code,
+                                  avatar: '/AGENTS_IMG/AISCRIPT.png',
                                   color: 'text-emerald-500 dark:text-emerald-400',
                                   bgColor: 'bg-emerald-500/10',
                                   active: isCodeWriter,
@@ -4984,6 +4979,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'AI Personal Assistant',
                                   desc: 'Your dedicated AI assistant for scheduling and tasks.',
                                   icon: CalendarIcon,
+                                  avatar: '/AGENTS_IMG/AIPERSONAL.png',
                                   color: 'text-rose-500 dark:text-rose-400',
                                   bgColor: 'bg-rose-500/10',
                                   active: activeAgent.slug === 'tool-ai-personal-assistant',
@@ -4993,11 +4989,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   }
                                 },
                                 {
-                                  id: 'image-edit',
+                                  id: 'image-editing',
                                   slug: 'tool-image-editing-customization',
-                                  title: 'Image Editing',
-                                  desc: 'Edit and customize existing images.',
+                                  title: 'Image Editor',
+                                  desc: 'AI-powered image modification.',
                                   icon: Edit2,
+                                  avatar: '/AGENTS_IMG/AIMARKET.png',
                                   color: 'text-purple-500 dark:text-purple-400',
                                   bgColor: 'bg-purple-500/10',
                                   active: activeAgent.slug === 'tool-image-editing-customization',
@@ -5013,6 +5010,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Fast Video Gen',
                                   desc: 'Rapidly generate AI videos from prompts.',
                                   icon: Zap,
+                                  avatar: '/AGENTS_IMG/AIVIDEO.png',
                                   color: 'text-yellow-500 dark:text-yellow-400',
                                   bgColor: 'bg-yellow-500/10',
                                   active: activeAgent.slug === 'tool-fast-video-generator',
@@ -5028,6 +5026,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Music Generation',
                                   desc: 'High-fidelity AI music generation.',
                                   icon: Music,
+                                  avatar: '/AGENTS_IMG/AIMUSIC.png',
                                   color: 'text-pink-500 dark:text-pink-400',
                                   bgColor: 'bg-pink-500/10',
                                   active: activeAgent.slug === 'tool-lyria-for-music',
@@ -5043,6 +5042,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Predictive Analytics',
                                   desc: 'Automated BQML forecasting.',
                                   icon: TrendingUp,
+                                  avatar: '/AGENTS_IMG/AICRAFT.png',
                                   color: 'text-blue-600 dark:text-blue-400',
                                   bgColor: 'bg-blue-600/10',
                                   active: activeAgent.slug === 'tool-time-series-forecasting',
@@ -5058,6 +5058,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'LLM Auditor',
                                   desc: 'Verify AI response accuracy.',
                                   icon: ShieldCheck,
+                                  avatar: '/AGENTS_IMG/AILEGAL.png',
                                   color: 'text-slate-600 dark:text-slate-400',
                                   bgColor: 'bg-slate-600/10',
                                   active: activeAgent.slug === 'tool-llm-auditor',
@@ -5073,6 +5074,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Smart Shopping',
                                   desc: 'Brand-tailored recommendations.',
                                   icon: ShoppingBag,
+                                  avatar: '/AGENTS_IMG/AIMARKET.png',
                                   color: 'text-rose-500 dark:text-rose-400',
                                   bgColor: 'bg-rose-500/10',
                                   active: activeAgent.slug === 'tool-personalized-shopping',
@@ -5088,6 +5090,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Brand SEO',
                                   desc: 'Competitor & keyword analysis.',
                                   icon: Globe,
+                                  avatar: '/AGENTS_IMG/AIBRAND.png',
                                   color: 'text-orange-600 dark:text-orange-400',
                                   bgColor: 'bg-orange-600/10',
                                   active: activeAgent.slug === 'tool-brand-search-optimization',
@@ -5103,6 +5106,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'FOMC Research',
                                   desc: 'Financial data analysis.',
                                   icon: DollarSign,
+                                  avatar: '/AGENTS_IMG/AICORE.png',
                                   color: 'text-emerald-700 dark:text-emerald-500',
                                   bgColor: 'bg-emerald-700/10',
                                   active: activeAgent.slug === 'tool-fomc-research',
@@ -5118,6 +5122,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Image Scoring',
                                   desc: 'Policy-compliant evaluation.',
                                   icon: Target,
+                                  avatar: '/AGENTS_IMG/AISCAN.png',
                                   color: 'text-blue-700 dark:text-blue-500',
                                   bgColor: 'bg-blue-700/10',
                                   active: activeAgent.slug === 'tool-image-scoring',
@@ -5133,6 +5138,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Data Science',
                                   desc: 'Natural language data modeling.',
                                   icon: Database,
+                                  avatar: '/AGENTS_IMG/AILAB.png',
                                   color: 'text-cyan-600 dark:text-cyan-400',
                                   bgColor: 'bg-cyan-600/10',
                                   active: activeAgent.slug === 'tool-data-science',
@@ -5148,6 +5154,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'RAG Engine',
                                   desc: 'Context-aware grounded AI.',
                                   icon: Brain,
+                                  avatar: '/AGENTS_IMG/AIMIND.png',
                                   color: 'text-teal-600 dark:text-teal-400',
                                   bgColor: 'bg-teal-600/10',
                                   active: activeAgent.slug === 'tool-rag-engine',
@@ -5163,6 +5170,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Finance Advisor',
                                   desc: 'Investment & finance AI.',
                                   icon: Briefcase,
+                                  avatar: '/AGENTS_IMG/AIPAY.png',
                                   color: 'text-green-700 dark:text-green-500',
                                   bgColor: 'bg-green-700/10',
                                   active: activeAgent.slug === 'tool-financial-advisor',
@@ -5178,6 +5186,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Marketing AI',
                                   desc: 'Full-stack marketing automation.',
                                   icon: Megaphone,
+                                  avatar: '/AGENTS_IMG/AIMARKET.png',
                                   color: 'text-purple-700 dark:text-purple-500',
                                   bgColor: 'bg-purple-700/10',
                                   active: activeAgent.slug === 'tool-marketing-agency',
@@ -5193,6 +5202,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Customer Service',
                                   desc: 'Video & image-based support.',
                                   icon: Headset,
+                                  avatar: '/AGENTS_IMG/AICARE.png',
                                   color: 'text-sky-600 dark:text-sky-400',
                                   bgColor: 'bg-sky-600/10',
                                   active: activeAgent.slug === 'tool-customer-service',
@@ -5208,6 +5218,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Academic Assistant',
                                   desc: 'Scholarly publication analysis.',
                                   icon: GraduationCap,
+                                  avatar: '/AGENTS_IMG/AIDOC.png',
                                   color: 'text-rose-700 dark:text-rose-500',
                                   bgColor: 'bg-rose-700/10',
                                   active: activeAgent.slug === 'tool-academic-research',
@@ -5223,6 +5234,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Bug Assistant',
                                   desc: 'Software bug resolution.',
                                   icon: Bug,
+                                  avatar: '/AGENTS_IMG/AISCRIPT.png',
                                   color: 'text-zinc-700 dark:text-zinc-500',
                                   bgColor: 'bg-zinc-700/10',
                                   active: activeAgent.slug === 'tool-bug-assistant',
@@ -5238,6 +5250,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Travel Concierge',
                                   desc: 'Real-time itinerary planning.',
                                   icon: MapPin,
+                                  avatar: '/AGENTS_IMG/AITRANS.png',
                                   color: 'text-orange-600 dark:text-orange-400',
                                   bgColor: 'bg-orange-600/10',
                                   active: activeAgent.slug === 'tool-travel-concierge',
@@ -5253,12 +5266,13 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'NVIDIA Nemotron',
                                   desc: 'Efficient 12B model for speed and accuracy.',
                                   icon: Zap,
+                                  avatar: '/AGENTS_IMG/default.png',
                                   color: 'text-green-600 dark:text-green-400',
                                   bgColor: 'bg-green-600/10',
                                   active: activeAgent.slug === 'tool-nvidia-nemotron-nano-12b',
                                   onClick: () => {
                                     setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
-                                    setActiveAgent({ agentName: 'NVIDIA Nemotron', category: 'Data & Intelligence', slug: 'tool-nvidia-nemotron-nano-12b', avatar: '/AGENTS_IMG/default.png' });
+                                    setActiveAgent({ agentName: 'NVIDIA Nemotron', category: 'Data & Intelligence', slug: 'tool-nvidia-nemotron-nano-12b', avatar: '/AGENTS_IMG/personal-assistant.png' });
                                     setIsToolsMenuOpen(false);
                                   }
                                 },
@@ -5268,12 +5282,13 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Claude Sonnet 4.5',
                                   desc: 'Leading model for research & coding.',
                                   icon: Brain,
+                                  avatar: '/AGENTS_IMG/default.png',
                                   color: 'text-orange-600 dark:text-orange-400',
                                   bgColor: 'bg-orange-600/10',
                                   active: activeAgent.slug === 'tool-claude-sonnet-4-5',
                                   onClick: () => {
                                     setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
-                                    setActiveAgent({ agentName: 'Claude Sonnet 4.5', category: 'Data & Intelligence', slug: 'tool-claude-sonnet-4-5', avatar: '/AGENTS_IMG/default.png' });
+                                    setActiveAgent({ agentName: 'Claude Sonnet 4.5', category: 'Data & Intelligence', slug: 'tool-claude-sonnet-4-5', avatar: '/AGENTS_IMG/deep-search.png' });
                                     setIsToolsMenuOpen(false);
                                   }
                                 },
@@ -5283,12 +5298,13 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'AI Image Analysis',
                                   desc: 'Advanced vision-language reasoning.',
                                   icon: ImageIcon,
+                                  avatar: '/AGENTS_IMG/default.png',
                                   color: 'text-blue-500 dark:text-blue-400',
                                   bgColor: 'bg-blue-500/10',
                                   active: activeAgent.slug === 'tool-blip2',
                                   onClick: () => {
                                     setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
-                                    setActiveAgent({ agentName: 'BLIP2 Vision', category: 'Data & Intelligence', slug: 'tool-blip2', avatar: '/AGENTS_IMG/default.png' });
+                                    setActiveAgent({ agentName: 'BLIP2 Vision', category: 'Data & Intelligence', slug: 'tool-blip2', avatar: '/AGENTS_IMG/image-gen.png' });
                                     setIsToolsMenuOpen(false);
                                   }
                                 },
@@ -5298,12 +5314,13 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Pathology Research',
                                   desc: 'AI for pathology diagnostics research.',
                                   icon: ShieldCheck,
+                                  avatar: '/AGENTS_IMG/default.png',
                                   color: 'text-red-500 dark:text-red-400',
                                   bgColor: 'bg-red-500/10',
                                   active: activeAgent.slug === 'tool-path-foundation',
                                   onClick: () => {
                                     setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
-                                    setActiveAgent({ agentName: 'Path Foundation', category: 'Medical AI', slug: 'tool-path-foundation', avatar: '/AGENTS_IMG/default.png' });
+                                    setActiveAgent({ agentName: 'Path Foundation', category: 'Medical AI', slug: 'tool-path-foundation', avatar: '/AGENTS_IMG/rag.png' });
                                     setIsToolsMenuOpen(false);
                                   }
                                 },
@@ -5313,16 +5330,46 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   title: 'Dermatology AI',
                                   desc: 'Skin condition identification AI.',
                                   icon: MapPin,
+                                  avatar: '/AGENTS_IMG/default.png',
                                   color: 'text-yellow-600 dark:text-yellow-400',
                                   bgColor: 'bg-yellow-600/10',
-                                  active: activeAgent.slug === 'tool-derm-foundation',
+                                  active: activeAgent?.slug === 'tool-derm-foundation',
                                   onClick: () => {
                                     setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
-                                    setActiveAgent({ agentName: 'Derm Foundation', category: 'Medical AI', slug: 'tool-derm-foundation', avatar: '/AGENTS_IMG/default.png' });
+                                    setActiveAgent({ agentName: 'Derm Foundation', category: 'Medical AI', slug: 'tool-derm-foundation', avatar: '/AGENTS_IMG/dermatology.png' });
                                     setIsToolsMenuOpen(false);
                                   }
                                 }
-                              ].filter(tool => userAgents.some(a => a.slug === tool.slug || `tool-${a.slug}` === tool.slug)).map((tool) => (
+                              ].concat(
+                                userAgents
+                                  .filter(agent => agent && agent.slug && ![
+                                    'tool-image-gen', 'tool-video-gen', 'tool-deep-search', 'tool-audio-convert',
+                                    'tool-universal-converter', 'tool-code-writer', 'tool-ai-personal-assistant',
+                                    'tool-image-editing-customization', 'tool-fast-video-generator', 'tool-lyria-for-music',
+                                    'tool-ai-document', 'tool-ai-blur', 'tool-ai-detector', 'tool-time-series-forecasting', 'tool-llm-auditor', 'tool-personalized-shopping',
+                                    'tool-brand-search-optimization', 'tool-fomc-research', 'tool-image-scoring',
+                                    'tool-data-science', 'tool-rag-engine', 'tool-financial-advisor',
+                                    'tool-marketing-agency', 'tool-customer-service', 'tool-academic-research',
+                                    'tool-bug-assistant', 'tool-travel-concierge', 'tool-nvidia-nemotron-nano-12b',
+                                    'tool-claude-sonnet-4-5', 'tool-blip2', 'tool-path-foundation', 'tool-derm-foundation'
+                                  ].includes(agent.slug?.startsWith('tool-') ? agent.slug : `tool-${agent.slug}`))
+                                  .map(agent => ({
+                                    id: agent.slug,
+                                    slug: agent.slug?.startsWith('tool-') ? agent.slug : `tool-${agent.slug}`,
+                                    title: agent.agentName,
+                                    desc: agent.description || agent.category,
+                                    icon: getToolIcon(agent.slug?.startsWith('tool-') ? agent.slug : `tool-${agent.slug}`),
+                                    avatar: agent.avatar,
+                                    color: 'text-primary',
+                                    bgColor: 'bg-primary/10',
+                                    active: activeAgent?.slug === agent.slug || activeAgent?.slug === (agent.slug?.startsWith('tool-') ? agent.slug : `tool-${agent.slug}`),
+                                    onClick: () => {
+                                      setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
+                                      setActiveAgent({ agentName: agent.agentName, category: agent.category, slug: agent.slug, avatar: agent.avatar || '/AGENTS_IMG/default.png' });
+                                      setIsToolsMenuOpen(false);
+                                    }
+                                  }))
+                              ).filter(tool => userAgents.some(a => a && a.slug && (a.slug === tool.slug || `tool-${a.slug}` === tool.slug || a.slug === tool.slug.replace('tool-', '')))).map((tool) => (
                                 <button
                                   key={tool.id}
                                   onClick={(e) => {
@@ -5337,8 +5384,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                     }
                                 `}
                                 >
-                                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${tool.active ? 'bg-primary text-white shadow-md' : `${tool.bgColor} ${tool.color}`}`}>
-                                    <tool.icon size={20} strokeWidth={2.5} />
+                                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 overflow-hidden ${tool.active ? 'bg-primary text-white shadow-md' : `${tool.bgColor} ${tool.color}`}`}>
+                                    {tool.avatar ? (
+                                      <img src={tool.avatar} alt={tool.title} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <tool.icon size={20} strokeWidth={2.5} />
+                                    )}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-2">
@@ -5389,8 +5440,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                       {/* Agent Tool Pill (Primary) */}
                       {activeAgent.slug && activeAgent.slug.startsWith('tool-') && (
                         <motion.div initial={{ opacity: 0, y: 5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 bg-primary/20 text-primary rounded-xl text-xs font-bold border border-primary/30 backdrop-blur-xl whitespace-nowrap shrink-0 shadow-lg shadow-primary/10 group transition-all hover:scale-105">
-                          <div className="p-1 bg-primary/20 rounded-lg">
-                            {React.createElement(getToolIcon(activeAgent.slug), { size: 14, strokeWidth: 3, className: "shrink-0" })}
+                          <div className="w-5 h-5 rounded-md overflow-hidden shrink-0">
+                            {activeAgent.avatar ? (
+                              <img src={activeAgent.avatar} alt={activeAgent.agentName} className="w-full h-full object-cover" />
+                            ) : (
+                              React.createElement(getToolIcon(activeAgent.slug), { size: 14, strokeWidth: 3, className: "shrink-0" })
+                            )}
                           </div>
                           <span className="hidden sm:inline uppercase tracking-widest">{activeAgent.agentName}</span>
                           <button

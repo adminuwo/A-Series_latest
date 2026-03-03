@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Download, Check, Star, FileText, Play, X, Calendar, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin } from 'lucide-react';
+import { Search, Download, Check, Star, FileText, Play, X, Calendar, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { getUserData, toggleState } from '../userStore/userData';
@@ -129,7 +129,15 @@ const Marketplace = () => {
       case 'tool-bug-assistant': return Bug;
       case 'tool-travel-concierge': return MapPin;
       case 'tool-ai-personal-assistant': return Calendar;
-      default: return ImageIcon; // Fallback to avoid null component crashes
+      case 'tool-openai-content': return Edit;
+      case 'tool-openai-chat': return MessageSquare;
+      case 'tool-openai-image': return ImageIcon;
+      case 'tool-openai-tts': return Headphones;
+      case 'tool-openai-stt': return Mic;
+      case 'tool-openai-code': return Code;
+      case 'tool-openai-document': return FileText;
+      case 'tool-openai-vision': return Eye;
+      default: return ImageIcon;
     }
   };
 
@@ -221,6 +229,12 @@ const Marketplace = () => {
                         </div>
                       </div>
                     </div>
+                    {selectedTool.provider === 'openai' && (
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                        <Sparkles className="w-3 h-3 text-emerald-500" />
+                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-tighter">OpenAI</span>
+                      </div>
+                    )}
                     <button
                       onClick={() => {
                         const name = (selectedTool.agentName || "").toUpperCase().replace(/\s+/g, '');
@@ -348,8 +362,14 @@ const Marketplace = () => {
                 className="group bg-card border border-border hover:border-primary/50 p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden rounded-2xl cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-4 relative z-10">
-                  <div className={`w-20 h-20 rounded-xl ${agent.bgGradient || 'bg-gradient-to-br from-gray-500 to-gray-600'} flex items-center justify-center shadow-lg`}>
-                    {ToolIcon ? <ToolIcon className="w-10 h-10 text-white" /> : <ImageIcon className="w-10 h-10 text-white" />}
+                  <div className={`w-20 h-20 rounded-xl ${agent.bgGradient || 'bg-gradient-to-br from-gray-500 to-gray-600'} flex items-center justify-center shadow-lg overflow-hidden`}>
+                    {agent.avatar ? (
+                      <img src={agent.avatar} alt={agent.agentName} className="w-full h-full object-cover" />
+                    ) : ToolIcon ? (
+                      <ToolIcon className="w-10 h-10 text-white" />
+                    ) : (
+                      <ImageIcon className="w-10 h-10 text-white" />
+                    )}
                   </div>
                   <div className="bg-surface border border-border px-2 py-1 rounded-lg flex items-center gap-1">
                     <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
@@ -361,7 +381,15 @@ const Marketplace = () => {
                   <h3 className="text-lg font-bold text-maintext">{agent.agentName}</h3>
                 </div>
 
-                <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3 relative z-10">AI Tool</span>
+                <div className="flex items-center justify-between mb-3 relative z-10">
+                  <span className="text-xs text-primary uppercase tracking-wider font-semibold">AI Tool</span>
+                  {agent.provider === 'openai' && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                      <Sparkles className="w-2.5 h-2.5 text-emerald-500" />
+                      <span className="text-[9px] font-bold text-emerald-500 uppercase">OpenAI</span>
+                    </div>
+                  )}
+                </div>
 
                 <p className="text-sm text-subtext mb-6 flex-1 relative z-10 line-clamp-3">
                   {agent.description}
