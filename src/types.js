@@ -68,7 +68,15 @@ export const AppRoute = {
 
 
 
-export const API = import.meta.env.VITE_API_BASE_URL;
+const PROD_API = "https://backend-ttl8.onrender.com/api";
+const DEV_API = "http://localhost:8080/api";
+
+// Robust check: if we are on the live domain, FORCE the prod API
+const isLiveDomain = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
+
+export const API = isLiveDomain
+  ? PROD_API
+  : (import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? PROD_API : DEV_API));
 console.log('api', API);
 
 export const apis = {
@@ -87,6 +95,8 @@ export const apis = {
   getMyAgents: `${API}/agents/me`,
   chatAgent: `${API}/chat`,
   aibiz: `${API}/aibiz`,
+  aiwrite: `${API}/aiwrite`,
+  aihealth: `${API}/aihealth`,
   support: `${API}/support`,
   resetPasswordEmail: `${API}/auth/reset-password-email`,
   feedback: `${API}/feedback`,
@@ -103,4 +113,5 @@ export const apis = {
   webSearch: `${API}/search/web`,
   conversion: `${API}/conversion`,
   reminders: `${API}/reminders`,
+  backendUrl: API,
 };

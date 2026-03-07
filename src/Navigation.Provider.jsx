@@ -185,7 +185,8 @@ const NavigateProvider = () => {
           <Route path="chat" element={<Chat />} />
           <Route path="chat/:sessionId" element={<Chat />} />
           <Route path="workspace" element={<AISAWorkSpace />} />
-          <Route path="workspace/:sessionId" element={<AISAWorkSpace />} />
+          <Route path="workspace/:agentId" element={<AISAWorkSpace />} />
+          <Route path="workspace/:agentId/:sessionId" element={<AISAWorkSpace />} />
           <Route path="overview" element={<ProtectedRoute><DashboardOverview /></ProtectedRoute>} />
           <Route path="marketplace" element={<Marketplace />} />
           <Route path="ai-personal-assistant" element={<ProtectedRoute><AiPersonalAssistantDashboard /></ProtectedRoute>} />

@@ -156,7 +156,7 @@ const MyAgents = () => {
                                         onClick={() => {
                                             const name = (agent.agentName || "").toUpperCase().replace(/\s+/g, '');
                                             // Agents that use the new AISAWorkSpace interface
-                                            const workspaceAgents = ['AISALES', 'AIWRITE', 'AIBIZ', 'AIHIRE', 'AIDESK'];
+                                            const workspaceAgents = ['AISALES', 'AIWRITE', 'AIBIZ', 'AIHIRE', 'AIDESK', 'AIHEALTH'];
 
                                             // Agents that use the generic Chat interface
                                             const chatAgents = [

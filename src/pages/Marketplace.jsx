@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Download, Check, Star, FileText, Play, X, Calendar, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles, BookOpen, PenTool } from 'lucide-react';
+import { Search, Download, Check, Star, FileText, Play, X, Calendar, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles, BookOpen, PenTool, BarChart3, Users } from 'lucide-react';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { getUserData, toggleState } from '../userStore/userData';
@@ -136,6 +136,13 @@ const Marketplace = () => {
       case 'tool-openai-image-edit-lite': return Edit;
       case 'tool-vertex-music-gen': return Music;
       case 'tool-vertex-stt': return Mic;
+      // Workspace Agents
+      case 'tool-aibiz': return BarChart3;
+      case 'tool-aihire': return Users;
+      case 'tool-aihealth': return Heart;
+      case 'tool-aiwrite': return FileText;
+      case 'tool-aisales': return Target;
+      case 'tool-aidesk': return MessageSquare;
       default: return ImageIcon;
     }
   };
@@ -238,8 +245,12 @@ const Marketplace = () => {
                       onClick={() => {
                         const name = (selectedTool.agentName || "").toUpperCase().replace(/\s+/g, '');
                         setSelectedTool(null);
+                        const workspaceAgents = ['AIBIZ', 'AIHIRE', 'AIHEALTH', 'AIWRITE', 'AISALES', 'AIDESK'];
+
                         if (name === 'AIPERSONALASSISTANT') {
                           navigate('/dashboard/ai-personal-assistant');
+                        } else if (workspaceAgents.includes(name)) {
+                          navigate(`/dashboard/workspace/${name}`);
                         } else {
                           navigate('/dashboard/chat', { state: { agentType: name, agent: selectedTool } });
                         }

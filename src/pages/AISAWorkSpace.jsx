@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import mammoth from 'mammoth';
+
 import {
     BarChart3,
     Mail,
@@ -7,11 +9,11 @@ import {
     MessageSquare,
     FileText,
     Zap,
-    Search,
     Filter,
     Plus,
     MoreHorizontal,
     ChevronRight,
+    ChevronDown,
     User,
     Layout,
     Settings,
@@ -25,133 +27,308 @@ import {
     CheckCircle2,
     AlertCircle,
     FilePieChart,
-    Search as SearchIcon
+    Search as SearchIcon,
+    Menu,
+    X,
+    Trash2,
+    History,
+    IndianRupee,
+    Globe,
+    Building2,
+    Hash,
+    CalendarDays,
+    Heart,
+    Utensils,
+    Scale,
+    Stethoscope,
+    Dna,
+    Salad,
+    Minus,
+    Cpu,
+    Layers,
+    Settings2,
+    ShieldCheck,
+    Bot,
+    CalendarClock,
+    FileSpreadsheet,
+    UploadCloud,
+    Phone,
+    Trophy,
+    Target as TargetIcon,
+    BrainCircuit,
+    GraduationCap,
+    Rocket,
+    UserCheck,
+    Instagram,
+    Facebook,
+    Network,
+    Activity,
+    Newspaper,
+    GitGraph,
+    PenTool,
+    Calculator,
+    TrendingDown,
+    Sparkles,
+    Twitter,
+    Share2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { useLanguage } from '../context/LanguageContext';
+import {
+    PieChart, Pie, Cell, ResponsiveContainer,
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend
+} from 'recharts';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import { getUserData } from '../userStore/userData';
-import { generateChatResponse } from '../services/geminiService';
+import { generateChatResponse, generateAIWriteResponse, generateAIHealthSymptomCheck, generateAIHealthWellnessPlan, generateAIHealthMentalSupport, generateAIHealthTreatmentGuide, generateAIHealthReportAnalysis, generateAIHealthAutomation, generateAIHealthLogData, analyzeAIBizCRM, scoreAIBizLead, segmentAIBizCustomers, generateAIBizCampaign } from '../services/aisaService';
 import { chatStorageService } from '../services/chatStorageService';
+import axios from 'axios';
+import { apis } from '../types';
 import { useNavigate, useParams } from 'react-router';
+import { useLanguage } from '../context/LanguageContext';
 
-const AGENTS = [
-    { id: 'AISALES', name: 'Sales Engine', icon: Target, category: 'Sales & Growth', color: 'blue', theme: 'from-blue-500/10 to-indigo-500/10' },
-    { id: 'AIWRITE', name: 'Content Engine', icon: FileText, category: 'Marketing', color: 'pink', theme: 'from-pink-500/10 to-rose-500/10' },
-    { id: 'AIDESK', name: 'Service Engine', icon: MessageSquare, category: 'Support', color: 'emerald', theme: 'from-emerald-500/10 to-teal-500/10' },
-    { id: 'AIHIRE', name: 'Talent Engine', icon: Users, category: 'HR & People', color: 'amber', theme: 'from-amber-500/10 to-orange-500/10' },
-    { id: 'AIBIZ', name: 'Strategy Engine', icon: BarChart3, category: 'Operations', color: 'purple', theme: 'from-purple-500/10 to-violet-500/10' },
-];
-
-export const agentUIConfig = {
-    AISALES: {
-        displayName: "AI Sales Specialist",
-        accentColor: "blue",
-        inputs: [
-            { type: "select", name: "leadType", label: "Lead Type", options: ["Enterprise", "Small Business", "SaaS Startup", "Digital Agency"] },
-            { type: "select", name: "tone", label: "Tone", options: ["Professional", "Friendly", "Persuasive", "Consultative"] }
-        ],
-        outputSections: [
-            "EMAIL SUBJECT",
-            "EMAIL BODY",
-            "FOLLOW-UP SEQUENCE",
-            "OBJECTION HANDLING"
-        ]
-    },
-
-    AIWRITE: {
-        displayName: "AI Content Engine",
-        accentColor: "pink",
-        inputs: [
-            { type: "select", name: "contentType", label: "Content Type", options: ["Blog Post", "Landing Page", "Ad Copy", "Email Campaign", "LinkedIn Post", "Twitter Thread", "Product Description", "SEO Article"] },
-            { type: "select", name: "tone", label: "Tone of Voice", options: ["Professional", "Casual", "Bold", "Minimal", "Luxury"] },
-            { type: "select", name: "targetAudience", label: "Target Audience", options: ["Startup Founders", "Marketing Teams", "Agencies", "SaaS Companies", "E-commerce Brands", "Personal Brands", "Content Creators", "B2B Decision Makers", "Developers / Tech"] },
-            { type: "text", name: "brandPersonality", label: "Brand Personality (Keywords)" },
-            { type: "select", name: "objective", label: "Objective", options: ["Traffic (SEO)", "Conversion (Sales)", "Brand Awareness", "Engagement"] },
-            { type: "range", name: "writingLength", label: "Word Count Preference (Short/Med/Long)", min: 1, max: 3, step: 1 },
-            { type: "checkbox", name: "isSeoMode", label: "Enable SEO Mode" },
-            { type: "checkbox", name: "isConversionMode", label: "Enable Conversion Mode" },
-            { type: "checkbox", name: "isRepurposeMode", label: "Auto-Repurpose Content" },
-            { type: "text", name: "seoKeyword", label: "Primary Keyword / Topic" },
-            { type: "textarea", name: "contentContext", label: "Key Points / Context" }
-        ],
-        outputSections: [
-            "MAIN CONTENT",
-            "SEO ANALYSIS",
-            "CTA OPTIMIZATION",
-            "REPURPOSED CONTENT"
-        ]
-    },
-
-    AIDESK: {
-        displayName: "AI Support Agent",
-        accentColor: "emerald",
-        inputs: [
-            { type: "select", name: "ticketCategory", label: "Category", options: ["Technical", "Billing", "Account", "General"] },
-            { type: "select", name: "urgency", label: "Urgency", options: ["Low", "Medium", "High", "Critical"] }
-        ],
-        outputSections: [
-            "SUPPORT REPLY",
-            "RESOLUTION SUMMARY",
-            "SENTIMENT ANALYSIS"
-        ]
-    },
-
-    AIHIRE: {
-        displayName: "AI Talent Intelligence",
-        accentColor: "green",
-        inputs: [
-            { type: "select", name: "industry", label: "Industry", options: ["SaaS", "Ecommerce", "FinTech", "HealthTech", "DevTools"] },
-            { type: "select", name: "businessStage", label: "Business Stage", options: ["Seed (1-10)", "Growth (10-50)", "Scale-up (50-200)", "Enterprise"] },
-            { type: "select", name: "teamSize", label: "Current Team Size", options: ["1-5", "5-20", "20-50", "50+"] },
-            { type: "select", name: "hiringMode", label: "Hiring Mode", options: ["Growth Hiring", "Replacement Hiring", "Founding Team Hiring", "Scaling Team Hiring"] },
-            { type: "select", name: "hiringUrgency", label: "Urgency", options: ["Low", "Medium", "High"] },
-            { type: "range", name: "budgetRange", label: "Budget Range (k)", min: 50, max: 500, step: 10 }
-        ],
-        outputSections: [
-            "HIRING PLAN",
-            "ROLE BREAKDOWN",
-            "INTERVIEW FRAMEWORK",
-            "TIMELINE ROADMAP",
-            "HIRING KPI DASHBOARD"
-        ]
-    },
-
-    AIBIZ: {
-        displayName: "AI Business Strategist",
-        badge: "Strategy Consultant",
-        accentColor: "red",
-        inputs: [
-            { type: "select", name: "industry", label: "Industry", options: ["SaaS", "Ecommerce", "Agency", "EdTech", "FinTech", "Healthcare"] },
-            { type: "select", name: "businessStage", label: "Business Stage", options: ["Idea Stage", "Early Startup", "Growth Stage", "Scaling Stage"] },
-            { type: "select", name: "marketType", label: "Market Type", options: ["B2B", "B2C", "Hybrid"] },
-            { type: "textarea", name: "businessDescription", label: "Describe Your Business" }
-        ],
-        outputSections: [
-            "SWOT ANALYSIS",
-            "PRICING STRATEGY",
-            "POSITIONING STRATEGY",
-            "GROWTH ROADMAP"
-        ]
-    }
-};
+// Import New Components
+import CustomSelect from '../Components/AISAWorkSpace/CustomSelect.jsx';
+import AISALESInputs from '../agents/AISALES/AISALESInputs.jsx';
+import AIWRITEInputs from '../agents/AIWRITE/AIWRITEInputs.jsx';
+import AIBIZInputs from '../agents/AIBIZ/AIBIZInputs.jsx';
+import AIHIREInputs from '../agents/AIHIRE/AIHIREInputs.jsx';
+import AIHEALTHInputs from '../agents/AIHEALTH/AIHEALTHInputs.jsx';
+import AIDESKInputs from '../agents/AIDESK/AIDESKInputs.jsx';
+import AgentActions from '../components/AISAWorkSpace/AgentActions.jsx';
+import { buildAISalesPrompt } from '../agents/AISALES/promptBuilder.js';
+import { AGENTS } from '../components/AISAWorkSpace/constants.js';
+import { PERSONAS, DEAL_STAGES } from '../agents/AISALES/constants.js';
 
 const AISAWorkSpace = () => {
-    const { t } = useLanguage();
+
+
     const navigate = useNavigate();
-    const { sessionId } = useParams();
-    const [activeAgent, setActiveAgent] = useState(AGENTS[0]);
+    const { agentId, sessionId } = useParams();
+    const { language } = useLanguage();
+
+    // 1. Initialize Active Agent directly from URL to avoid initial state mismatch
+    const getInitialAgent = () => {
+        if (agentId) {
+            const found = AGENTS.find(a => a.id === agentId.toUpperCase());
+            if (found) return found;
+        }
+        return AGENTS[0]; // Default to AISALES if nothing else
+    };
+
+    const [activeAgent, setActiveAgent] = useState(getInitialAgent);
     const [inputValue, setInputValue] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [sessionToDelete, setSessionToDelete] = useState(null);
     const [messages, setMessages] = useState([]);
     const [currentSessionId, setCurrentSessionId] = useState(sessionId || 'new');
 
+    // Sync state with URL changes (when navigating sidebar)
+    useEffect(() => {
+        if (agentId) {
+            const found = AGENTS.find(a => a.id === agentId.toUpperCase());
+            if (found && found.id !== activeAgent?.id) {
+                setActiveAgent(found);
+            }
+        }
+        if (sessionId !== currentSessionId) {
+            setCurrentSessionId(sessionId || 'new');
+        }
+    }, [agentId, sessionId]);
+
+    // AIHEALTH Specialized States
+    const [healthMode, setHealthMode] = useState('WELLNESS PLANNER');
+    const HEALTH_MODES = [
+        'SYMPTOM CHECKER',
+        'REPORT ANALYZER',
+        'WELLNESS PLANNER',
+        'MENTAL SUPPORT',
+        'TREATMENT ADVISOR',
+        'AUTOMATION'
+    ];
+
     // AISALES Specialized States
-    const [salesTab, setSalesTab] = useState('Cold Email');
+    const [salesMode, setSalesMode] = useState('Write Email');
     const [leadType, setLeadType] = useState('Enterprise');
     const [tone, setTone] = useState('Professional');
-    const [emailType, setEmailType] = useState('Cold Outreach');
+
+    // AISALES Advanced Features - Phase 1: Core Intelligence
+    const [dealValue, setDealValue] = useState('');
+    const [dealStage, setDealStage] = useState('Discovery');
+    const [lastContactDate, setLastContactDate] = useState('');
+    const [competitorInvolved, setCompetitorInvolved] = useState(false);
+    const [companySize, setCompanySize] = useState('51-200');
+    const [engagementLevel, setEngagementLevel] = useState('Medium');
+    const [prospectReply, setProspectReply] = useState('');
+
+    // AISALES Advanced Features - Phase 2: AI-Powered Messaging
+    const [targetPersona, setTargetPersona] = useState('CEO');
+    const [personaGoals, setPersonaGoals] = useState('');
+    const [personaPainPoints, setPersonaPainPoints] = useState('');
+    const [generateVariants, setGenerateVariants] = useState(true);
+    const [ctaType, setCtaType] = useState('Medium-Commitment');
+    const [outreachChannel, setOutreachChannel] = useState('Email');
+
+    // AIHIRE Specialized States
+    const [hiringMode, setHiringMode] = useState('Strategy');
+
+    const [hireRole, setHireRole] = useState('');
+    const [hireDepartment, setHireDepartment] = useState('Engineering');
+    const [hireSeniority, setHireSeniority] = useState('Senior');
+    const [hireLocation, setHireLocation] = useState('Remote');
+    const [hireBudget, setHireBudget] = useState(1500000);
+    const [hireUrgency, setHireUrgency] = useState('Medium');
+    const [hireTradeoff, setHireTradeoff] = useState(50);
+    const [hireExtraNotes, setHireExtraNotes] = useState('');
+    const [hireTeamSize, setHireTeamSize] = useState('1-5');
+    const [hireIndustry, setHireIndustry] = useState('SaaS');
+    const [hireBusinessStage, setHireBusinessStage] = useState('Early Startup');
+    const [hireRiskTolerance, setHireRiskTolerance] = useState('Medium');
+    const [hireTimelineWeeks, setHireTimelineWeeks] = useState(8);
+    const [hireSourcingChannels, setHireSourcingChannels] = useState('LinkedIn');
+    const [hireCandidateProfiles, setHireCandidateProfiles] = useState('');
+    const [hireJobDescription, setHireJobDescription] = useState('');
+    const [hireScorecardCriteria, setHireScorecardCriteria] = useState('Technical Skills, Culture Fit, Communication');
+    const [hireBiasCheck, setHireBiasCheck] = useState(true);
+    const [hireUploadedFiles, setHireUploadedFiles] = useState([]);
+    const [hireFileAttachments, setHireFileAttachments] = useState([]);
+    const [hireUploadDragging, setHireUploadDragging] = useState(false);
+    const hireFileInputRef = React.useRef(null);
+    const [hireOfferSalary, setHireOfferSalary] = useState('');
+    const [hireEquityPercent, setHireEquityPercent] = useState('');
+    const [hireCompetitorSalary, setHireCompetitorSalary] = useState('');
+    const [hireOfferPerks, setHireOfferPerks] = useState('');
+    const [hireCandidateLeverage, setHireCandidateLeverage] = useState('Medium');
+    const [hireOrgStructure, setHireOrgStructure] = useState('Flat');
+    const [hireCulturalValues, setHireCulturalValues] = useState('Speed, Ownership, Transparency');
+
+    const handleResumeFiles = async (files) => {
+        if (!files) return;
+        const newFiles = Array.from(files);
+
+        for (const file of newFiles) {
+            setHireUploadedFiles(prev => [...prev, file.name]);
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Content = e.target.result;
+
+                // Add to attachments for AI
+                setHireFileAttachments(prev => [...prev, {
+                    url: base64Content,
+                    name: file.name,
+                    type: file.type
+                }]);
+
+                // Extract text for UI if possible
+                if (file.name.endsWith('.docx')) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    setHireCandidateProfiles(prev => prev + `\n\n--- FILE: ${file.name} ---\n` + result.value);
+                } else if (file.type.startsWith('text/') || file.name.endsWith('.txt')) {
+                    const textReader = new FileReader();
+                    textReader.onload = (ev) => {
+                        setHireCandidateProfiles(prev => prev + `\n\n--- FILE: ${file.name} ---\n` + ev.target.result);
+                    };
+                    textReader.readAsText(file);
+                } else if (file.name.endsWith('.pdf')) {
+                    setHireCandidateProfiles(prev => prev + `\n\n--- FILE: ${file.name} ---\n[PDF Content is sent as attachment to AI]`);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // AISALES Advanced Features - Phase 3: Analysis & Intelligence
+    const [prospectObjection, setProspectObjection] = useState('');
+
+    const [yourPrice, setYourPrice] = useState('');
+    const [competitorPrice, setCompetitorPrice] = useState('');
+    const [valueProps, setValueProps] = useState('');
+    const [mainCompetitor, setMainCompetitor] = useState('');
+    const [competitorStrength, setCompetitorStrength] = useState('');
+    const [subjectLine, setSubjectLine] = useState('');
+
+    // AISALES Advanced Features - Phase 4: Strategic Planning
+    const [targetAccount, setTargetAccount] = useState('');
+    const [accountSize, setAccountSize] = useState('Enterprise');
+    const [stakeholders, setStakeholders] = useState([
+        { role: 'CEO', name: '', priority: 'High' },
+        { role: 'CTO', name: '', priority: 'Medium' }
+    ]);
+    const [playbookType, setPlaybookType] = useState('Enterprise Sales');
+    const [auditLogs, setAuditLogs] = useState('');
+
+    // AISALES Sales Bot / Automation Features
+    const [followUpReminders, setFollowUpReminders] = useState([
+        { id: 1, text: 'Follow up with Ravi regarding demo', date: '2026-02-18', status: 'pending' },
+        { id: 2, text: 'Send pricing sheet to T-Series', date: '2026-02-20', status: 'pending' }
+    ]);
+    const [excelFile, setExcelFile] = useState(null);
+    const [showReminderForm, setShowReminderForm] = useState(false);
+
+
+    // AISALES Advanced Features - Phase 5: Lead Center & Scripts
+
+    const [scriptType, setScriptType] = useState('Cold Call');
+
+    // AISALES Advanced Features - Phase 6: Network & Value Intelligence
+    const [stakeholderMap, setStakeholderMap] = useState([
+        { id: 1, role: 'CEO', name: 'Alok Nath', relationship: 'Positive', influence: 100, type: 'Decision Maker' },
+        { id: 2, role: 'CTO', name: 'Ravi Gupta', relationship: 'Neutral', influence: 80, type: 'Technical Buyer' },
+        { id: 3, role: 'Procurement', name: 'Sneha Kapur', relationship: 'Negative', influence: 60, type: 'Blocker' }
+    ]);
+    const [roiCalc, setRoiCalc] = useState({
+        currentCost: 1000000,
+        expectedEfficiency: 30,
+        paybackPeriod: 4, // months
+        totalSavings: 300000
+    });
+    const [newsItems, setNewsItems] = useState([
+        { id: 1, tag: 'Funding', title: 'Target raised $50M in Series B', time: '2h ago', sentiment: 'Positive' },
+        { id: 2, tag: 'Staffing', title: 'New VP of Engineering hired', time: '5h ago', sentiment: 'Neutral' }
+    ]);
+
+    const [liveSignals, setLiveSignals] = useState([
+        { id: 1, type: 'Intent', source: 'LinkedIn', message: 'Decision maker viewed pricing page', time: 'Just now', intensity: 'High' },
+        { id: 2, type: 'Sentiment', source: 'Email', message: 'Replied with "Send more info"', time: '1m ago', intensity: 'Medium' }
+    ]);
+
+    // Real-Time Signal Simulation Engine
+    useEffect(() => {
+        if (activeAgent.id === 'AISALES') {
+            const interval = setInterval(() => {
+                const signalTypes = ['Intent', 'Sentiment', 'Movement', 'Market'];
+                const sources = ['LinkedIn', 'Email', 'CRM', 'Web'];
+                const messages = [
+                    'Stakeholder added to committee',
+                    'Pricing page dwell time > 5m',
+                    'Competitor mention in email sync',
+                    'Social engagement from CEO',
+                    'Quarterly report released'
+                ];
+
+                const newSignal = {
+                    id: Date.now(),
+                    type: signalTypes[Math.floor(Math.random() * signalTypes.length)],
+                    source: sources[Math.floor(Math.random() * sources.length)],
+                    message: messages[Math.floor(Math.random() * messages.length)],
+                    time: 'Just now',
+                    intensity: Math.random() > 0.5 ? 'High' : 'Medium'
+                };
+
+                setLiveSignals(prev => [newSignal, ...prev.slice(0, 4)]);
+            }, 8000); // New signal every 8 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [activeAgent.id]);
+
+
 
     // AIWRITE Specialized States
+    const [writeSegment, setWriteSegment] = useState('students');
     const [contentType, setContentType] = useState('SEO Blog Post');
     const [seoKeyword, setSeoKeyword] = useState('');
     const [targetAudience, setTargetAudience] = useState('B2B Decision Makers');
@@ -162,72 +339,467 @@ const AISAWorkSpace = () => {
     const [isSeoMode, setIsSeoMode] = useState(true);
     const [isConversionMode, setIsConversionMode] = useState(false);
     const [isRepurposeMode, setIsRepurposeMode] = useState(false);
-    // tone is reused from AISALES shared state or can be independent. Using shared 'tone' state.
+
+    // AIWRITE - Student Mode
+    const [studentSubject, setStudentSubject] = useState('');
+    const [studentTopic, setStudentTopic] = useState('');
+    const [studentWordCount, setStudentWordCount] = useState('1000');
+    const [studentTone, setStudentTone] = useState('Academic');
+    const [isAcademicFormat, setIsAcademicFormat] = useState(true);
+    const [studentFeature, setStudentFeature] = useState('assignment_writer');
+
+    // AIWRITE - Agency Mode
+    const [agencyClientName, setAgencyClientName] = useState('Client A');
+    const [agencyIndustry, setAgencyIndustry] = useState('Tech & AI');
+    const [agencyTargetAudience, setAgencyTargetAudience] = useState('Business Owner');
+    const [agencySocialGoal, setAgencySocialGoal] = useState('Brand Awareness');
+    const [agencyPlatforms, setAgencyPlatforms] = useState(['Instagram']);
+    const [agencyMonth, setAgencyMonth] = useState('February');
+    const [agencyFrequency, setAgencyFrequency] = useState('3x per week');
+    const [agencyTone, setAgencyTone] = useState('Professional');
+
+    const [agencyView, setAgencyView] = useState('planner');
+    const [agencyUSP, setAgencyUSP] = useState('');
+    const [agencyKeyword, setAgencyKeyword] = useState('');
+    const [agencyWordCount, setAgencyWordCount] = useState('1000');
+    const [agencyPageDescription, setAgencyPageDescription] = useState('');
+
+    // AIWRITE - Startup Mode
+    const [startupName, setStartupName] = useState('');
+    const [startupProduct, setStartupProduct] = useState('');
+    const [startupProblem, setStartupProblem] = useState('');
+    const [startupSolution, setStartupSolution] = useState('');
+    const [startupTone, setStartupTone] = useState('Energetic');
+    const [startupPlatform, setStartupPlatform] = useState('Google/Facebook Ads');
+    const [startupFeature, setStartupFeature] = useState('ad_copy');
+    const [startupAudience, setStartupAudience] = useState('Business Owner');
+
+    // AIWRITE - Freelancer Mode
+    const [freelancerService, setFreelancerService] = useState('');
+    const [freelancerClientType, setFreelancerClientType] = useState('');
+    const [freelancerBudget, setFreelancerBudget] = useState('');
+    const [freelancerTone, setFreelancerTone] = useState('Professional');
+    const [freelancerFeature, setFreelancerFeature] = useState('proposal_generator');
+
+    // AIWRITE - Influencer Mode
+    const [influencerNiche, setInfluencerNiche] = useState('Fitness');
+    const [influencerMood, setInfluencerMood] = useState('Motivational');
+    const [useEmojis, setUseEmojis] = useState(true);
+    const [hashtagCount, setHashtagCount] = useState('10');
+    const [influencerFeature, setInfluencerFeature] = useState('insta_caption');
+
+    // AIWRITE - Author Mode
+    const [authorStoryTopic, setAuthorStoryTopic] = useState('');
+    const [authorGenre, setAuthorGenre] = useState('Fiction');
+    const [authorTone, setAuthorTone] = useState('Creative');
+    const [authorFeature, setAuthorFeature] = useState('manuscript_editor');
+    const [authorTheme, setAuthorTheme] = useState('');
+    const [authorMood, setAuthorMood] = useState('Mysterious');
+    const [authorStyle, setAuthorStyle] = useState('Free Verse');
+    const [authorRhyme, setAuthorRhyme] = useState(false);
+    const [authorCharacters, setAuthorCharacters] = useState('');
+    const [authorScript, setAuthorScript] = useState('');
+    const [authorContext, setAuthorContext] = useState('');
+    const [authorLength, setAuthorLength] = useState('Medium');
+    const [authorLanguage, setAuthorLanguage] = useState('English');
+    const [authorFile, setAuthorFile] = useState(null);
+
+    // AIWRITE - Agency Feature
+    const [agencyFeature, setAgencyFeature] = useState('daily_ideas');
+
+    // AIWRITE - Automation Mode
+    const [automationWorkflows, setAutomationWorkflows] = useState([
+        { id: 1, title: 'Monday Assignment Draft', schedule: 'Every Monday', active: true, type: 'draft' },
+        { id: 2, title: 'Auto-Write New Topics', schedule: 'On Topic Added', active: false, type: 'auto' }
+    ]);
+    const [automationDeadlines, setAutomationDeadlines] = useState([
+        { id: 1, topic: 'Machine Learning Ethics', date: '2026-03-05', status: 'Pending' }
+    ]);
+    const [isMultiOutputEnabled, setIsMultiOutputEnabled] = useState(false);
+
 
     // AIDESK Specialized States
     const [ticketCategory, setTicketCategory] = useState('Technical');
     const [urgency, setUrgency] = useState('Medium');
 
-    // AIHIRE Specialized States
-    const [teamSize, setTeamSize] = useState('1-5');
-    const [hiringMode, setHiringMode] = useState('Founding Team Hiring');
-    const [hiringUrgency, setHiringUrgency] = useState('Medium');
-    const [budgetRange, setBudgetRange] = useState(100);
-    // Reusing industry, businessStage, marketType, jobDescription from AIBIZ/Shared or local
-    // Since AIBIZ uses industry/stage/market, we can share or duplicate if needed. 
-    // Let's ensure they are available.
-    // NOTE: In this single file component, states like 'industry' are shared at top level.
-    // We just need to make sure they are used correctly.
+    // AIHEALTH Specialized States
+    const [healthName, setHealthName] = useState('');
+    const [healthAge, setHealthAge] = useState(25);
+    const [healthGender, setHealthGender] = useState('Male');
+    const [healthWeight, setHealthWeight] = useState(70);
+    const [healthHeight, setHealthHeight] = useState(170);
+    const [healthGoal, setHealthGoal] = useState('Weight Loss');
+    const [healthDietaryType, setHealthDietaryType] = useState('Vegetarian');
+    const [healthAllergies, setHealthAllergies] = useState('');
+    const [healthCuisine, setHealthCuisine] = useState('');
+    const [healthActiveMonth, setHealthActiveMonth] = useState('March 2026');
+    const [includeAyurveda, setIncludeAyurveda] = useState(true);
+
+    // AIHEALTH Symptom Intel States
+    const [symptoms, setSymptoms] = useState('');
+    const [symptomDuration, setSymptomDuration] = useState('1-3 Days');
+    const [symptomSeverity, setSymptomSeverity] = useState('Medium');
+    const [symptomTreatmentType, setSymptomTreatmentType] = useState('Ayurveda');
+    const [symptomResult, setSymptomResult] = useState(null);
+
+    // AIHEALTH Report Analysis States
+    const [reportManualValues, setReportManualValues] = useState({
+        glucose: '',
+        cholesterol: '',
+        bp_systolic: '',
+        bp_diastolic: '',
+        haemoglobin: ''
+    });
+    const [reportResult, setReportResult] = useState(null);
+    const [reportFile, setReportFile] = useState(null);
+
+    // AIHEALTH Wellness Plan States
+    const [healthActivityLevel, setHealthActivityLevel] = useState('Moderate');
+    const [wellnessPlanResult, setWellnessPlanResult] = useState(null);
+
+    // AIHEALTH Mental Wellness States
+    const [healthMood, setHealthMood] = useState('Happy');
+    const [mentalNote, setMentalNote] = useState('');
+    const [mentalResult, setMentalResult] = useState(null);
+    const [moodHistory, setMoodHistory] = useState([
+        { date: 'Mon', score: 3 },
+        { date: 'Tue', score: 2 },
+        { date: 'Wed', score: 4 },
+        { date: 'Thu', score: 3 },
+        { date: 'Fri', score: 5 },
+        { date: 'Sat', score: 4 }
+    ]);
+    const [wellnessHistory, setWellnessHistory] = useState([
+        { date: 'W1', value: 85 },
+        { date: 'W2', value: 84.2 },
+        { date: 'W3', value: 83.5 },
+        { date: 'W4', value: 82.8 }
+    ]);
+    const [reportHistory, setReportHistory] = useState([
+        { date: 'Jan', anomalies: 2 },
+        { date: 'Feb', anomalies: 4 },
+        { date: 'Mar', anomalies: 1 }
+    ]);
+    const [symptomHistory, setSymptomHistory] = useState([
+        { date: 'Mon', risk: 2 },
+        { date: 'Tue', risk: 3 },
+        { date: 'Wed', risk: 1 },
+        { date: 'Thu', risk: 4 }
+    ]);
+    const [treatmentHistory, setTreatmentHistory] = useState([
+        { date: 'W1', scans: 2 },
+        { date: 'W2', scans: 5 },
+        { date: 'W3', scans: 3 },
+        { date: 'W4', scans: 8 }
+    ]);
+
+    // AIHEALTH Treatment Advisor States
+    const [medicineName, setMedicineName] = useState('');
+    const [treatmentTypeChoice, setTreatmentTypeChoice] = useState('Allopathy');
+    const [healthCondition, setHealthCondition] = useState('');
+    const [treatmentResult, setTreatmentResult] = useState(null);
+
+    // AIHEALTH Automation States
+    const [healthAutomationActive, setHealthAutomationActive] = useState(true);
+    const [healthAutomationLogs, setHealthAutomationLogs] = useState([
+        { id: 1, type: 'Detection', message: 'Sleep pattern irregularity detected (Avg: 5.5h)', time: '6h ago', severity: 'Medium' },
+        { id: 2, type: 'Action', message: 'Generated hydration reminder for 2:00 PM', time: '1h ago', severity: 'Low' },
+        { id: 3, type: 'Decision', message: 'Scheduled preventative report analysis based on recent glucose logs', time: 'Just now', severity: 'High' }
+    ]);
+    const [healthAlerts, setHealthAlerts] = useState([
+        { id: 1, title: 'Health Risk Warning', message: 'High sodium intake detected from recent dinner logs.', date: '2026-02-25', status: 'unread' }
+    ]);
+    const [automationResult, setAutomationResult] = useState(null);
+
+    // AIHEALTH Monitoring States
+    const [healthSleepHours, setHealthSleepHours] = useState(0);
+    const [healthWaterIntake, setHealthWaterIntake] = useState(0);
+    const [healthSteps, setHealthSteps] = useState(0);
+    const [healthHeartRate, setHealthHeartRate] = useState(0);
+    const [healthStressLevel, setHealthStressLevel] = useState(5);
+    const [healthRoutine, setHealthRoutine] = useState(null);
+
 
     // AIBIZ Specialized States
     const [industry, setIndustry] = useState('SaaS');
     const [businessStage, setBusinessStage] = useState('Idea Stage');
     const [marketType, setMarketType] = useState('B2B');
     const [businessDescription, setBusinessDescription] = useState('');
-    const [aibizMode, setAibizMode] = useState('Competitor Analysis');
+    const [aibizMode, setAibizMode] = useState('Dashboard');
+
+    const [sessions, setSessions] = useState([]);
+    const [showResultModal, setShowResultModal] = useState(false);
+    const [aiWriteResult, setAiWriteResult] = useState(null);
+
+    // AIBIZ CRM States (Lifted from AIBIZInputs)
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [customers, setCustomers] = useState([
+        { id: 1, name: 'CloudScale Inc.', industry: 'Enterprise SaaS', health: 92, status: 'Stable', contact: 'Sarah Chen' },
+        { id: 2, name: 'TechFlow Systems', industry: 'FinTech', health: 45, status: 'At Risk', contact: 'Mark Jensen' },
+        { id: 3, name: 'Alpha Logistics', industry: 'Logistics', health: 78, status: 'Growth', contact: 'James Wilson' },
+    ]);
+    const [interactions, setInteractions] = useState([
+        { date: '2024-02-20', type: 'Email', subject: 'Support Ticket #829', sentiment: 'Negative', summary: 'Customer complaining about latency in the dashboard.' },
+        { date: '2024-02-18', type: 'Call', subject: 'Quarterly Review', sentiment: 'Neutral', summary: 'Discussed scaling tiers but budget is a concern.' },
+        { date: '2024-02-15', type: 'Chat', subject: 'Feature Request', sentiment: 'Positive', summary: 'Interested in AI automation for their marketing team.' },
+    ]);
+
+    // Lifted AIBIZ Dashboard States
+    const [aibizHealthScore, setAibizHealthScore] = useState({ score: 72, status: 'Stable', weakAreas: ['Lead conversion', 'Follow-up delays'] });
+    const [aibizGoals, setAibizGoals] = useState([
+        { id: 1, label: 'Monthly Revenue', target: 50000, current: 38400, unit: '$' },
+        { id: 2, label: 'Lead Target', target: 500, current: 320, unit: '' },
+    ]);
+    const [aibizRevenueData, setAibizRevenueData] = useState([
+        { month: 'Jan', mrr: 12000, churn: 2.1 },
+        { month: 'Feb', mrr: 15000, churn: 1.8 },
+        { month: 'Mar', mrr: 19000, churn: 1.5 },
+        { month: 'Apr', mrr: 24000, churn: 1.2 },
+        { month: 'May', mrr: 32000, churn: 0.9 },
+        { month: 'Jun', mrr: 45000, churn: 0.7 },
+    ]);
+    const [aibizSegments, setAibizSegments] = useState([
+        { id: 1, name: 'High-Value Repeat Buyers', rfm: '5-5-5', count: 124, behavior: 'Daily Active', persona: 'Power User', color: '#10b981', details: 'Core revenue drivers. High upsell potential for enterprise tiers.' },
+        { id: 2, name: 'At-Risk Customers', rfm: '1-2-4', count: 42, behavior: 'Declining', persona: 'Frustrated Veteran', color: '#ef4444', details: 'Decreased login frequency in last 30 days. Needs immediate engagement.' },
+        { id: 3, name: 'Enterprise Prospects', rfm: '4-3-1', count: 18, behavior: 'Evaluating', persona: 'Decision Maker', color: '#3b82f6', details: 'Focused on security and scalability features. High monetary potential.' },
+        { id: 4, name: 'Cold Leads', rfm: '1-1-1', count: 850, behavior: 'Inactive', persona: 'Window Shopper', color: '#94a3b8', details: 'Low engagement. Suggest long-term nurture sequence.' },
+    ]);
+    const [aibizLeadMetrics, setAibizLeadMetrics] = useState([
+        { id: 1, name: 'Quantum Leap Labs', frequency: 12, opens: 85, visits: 24, industry: 'DeepTech', budget: '$50k+', score: 94, status: 'Hot' },
+        { id: 2, name: 'Green Horizon', frequency: 4, opens: 20, visits: 5, industry: 'AgriTech', budget: '$10k', score: 32, status: 'Cold' },
+        { id: 3, name: 'FinEdge Solutions', frequency: 8, opens: 60, visits: 12, industry: 'FinTech', budget: '$25k', score: 68, status: 'Warm' },
+    ]);
+
 
     const user = getUserData() || { name: 'Super User', email: 'user@a-series.ai', plan: 'Business' };
 
+    // Load Sessions History
+    useEffect(() => {
+        let isMounted = true;
+        const loadSessions = async () => {
+            if (activeAgent?.id) {
+                try {
+                    const data = await chatStorageService.getSessions(activeAgent.id);
+                    if (isMounted) setSessions(data || []);
+                } catch (error) {
+                    console.error("Failed to load sessions:", error);
+                    if (isMounted) setSessions([]);
+                }
+            }
+        };
+        loadSessions();
+        return () => { isMounted = false; };
+    }, [activeAgent?.id]); // Only refresh sessions when the actual agent changes or session is reset
+
+
+
+    const handleClearWorkspace = () => {
+        setShowClearConfirm(true);
+    };
+
+    const executeClearWorkspace = () => {
+        setShowClearConfirm(false);
+        setMessages([]);
+        setCurrentSessionId('new');
+        setInputValue('');
+        setAiWriteResult(null);
+        setSymptomResult(null);
+        setReportResult(null);
+        setWellnessPlanResult(null);
+        setMentalResult(null);
+        setTreatmentResult(null);
+
+        // Reset AIHEALTH Inputs
+        setHealthName('');
+        setHealthAge(25);
+        setHealthGender('Male');
+        setHealthWeight(70);
+        setHealthHeight(170);
+        setHealthGoal('Weight Loss');
+        setHealthDietaryType('Vegetarian');
+        setHealthAllergies('');
+        setHealthCuisine('');
+        setHealthActiveMonth('March 2026');
+        setIncludeAyurveda(true);
+        setSymptoms('');
+        setSymptomDuration('1-3 Days');
+        setSymptomSeverity('Medium');
+        setSymptomTreatmentType('Ayurveda');
+        setReportManualValues({
+            glucose: '',
+            cholesterol: '',
+            bp_systolic: '',
+            bp_diastolic: '',
+            haemoglobin: ''
+        });
+        setReportFile(null);
+        setHealthActivityLevel('Moderate');
+        setHealthMood('Happy');
+        setMentalNote('');
+        setMedicineName('');
+        setTreatmentTypeChoice('Allopathy');
+        setStudentSubject('');
+        setStudentTopic('');
+        setStudentWordCount('1000');
+        setStudentTone('Academic');
+        setIsAcademicFormat(true);
+        setStudentFeature('assignment_writer');
+        setHealthCondition('');
+        setHealthAutomationActive(true);
+        setHealthAutomationLogs([
+            { id: 1, type: 'Detection', message: 'Sleep pattern irregularity detected (Avg: 5.5h)', time: '6h ago', severity: 'Medium' },
+            { id: 2, type: 'Action', message: 'Generated hydration reminder for 2:00 PM', time: '1h ago', severity: 'Low' },
+            { id: 3, type: 'Decision', message: 'Scheduled preventative report analysis based on recent glucose logs', time: 'Just now', severity: 'High' }
+        ]);
+        setHealthAlerts([
+            { id: 1, title: 'Health Risk Warning', message: 'High sodium intake detected from recent dinner logs.', date: '2026-02-25', status: 'unread' }
+        ]);
+        setAutomationResult(null);
+        setAuthorLanguage('English');
+        setAuthorFile(null);
+
+        // Reset AIBIZ States
+        setAibizMode('Dashboard');
+        setIndustry('SaaS');
+        setBusinessStage('Idea Stage');
+        setMarketType('B2B');
+        setBusinessDescription('');
+        setSelectedCustomer(null);
+        setAibizHealthScore({ score: 72, status: 'Stable', weakAreas: ['Lead conversion', 'Follow-up delays'] });
+
+        // Reset AIHIRE States
+        setHiringMode('Strategy');
+        setHireRole('');
+        setHireDepartment('Engineering');
+        setHireSeniority('Senior');
+        setHireLocation('Remote');
+        setHireBudget(1500000);
+        setHireUrgency('Medium');
+        setHireTradeoff(50);
+        setHireExtraNotes('');
+        setHireCandidateProfiles('');
+        setHireJobDescription('');
+        setHireScorecardCriteria('Technical Skills, Culture Fit, Communication');
+        setHireBiasCheck(true);
+        setHireUploadedFiles([]);
+        setHireFileAttachments([]);
+        setHireOfferSalary('');
+        setHireEquityPercent('');
+        setHireCompetitorSalary('');
+        setHireOfferPerks('');
+        setHireCandidateLeverage('Medium');
+        setHireOrgStructure('Flat');
+        setHireCulturalValues('Speed, Ownership, Transparency');
+
+        navigate(`/dashboard/workspace/${activeAgent.id}/new`);
+    };
+
+    const handleDeleteSession = (e, id) => {
+        e.stopPropagation();
+        setSessionToDelete(id);
+        setShowDeleteConfirm(true);
+    };
+
+    const executeDeleteSession = async () => {
+        if (!sessionToDelete) return;
+        await chatStorageService.deleteSession(sessionToDelete);
+        setSessions(prev => prev.filter(s => s.sessionId !== sessionToDelete));
+        if (currentSessionId === sessionToDelete) {
+            navigate(`/dashboard/workspace/${activeAgent.id}/new`);
+            setCurrentSessionId('new');
+            setMessages([]);
+        }
+        setShowDeleteConfirm(false);
+        setSessionToDelete(null);
+    };
+
     useEffect(() => {
         const initWorkspace = async () => {
-            // Check if the URL param matches a known agent ID (e.g. /workspace/AIWRITE)
-            const agentFromUrl = AGENTS.find(a => a.id === sessionId);
+            // 1. Clear all previous result states to prevent stale data showing in the new session
+            setMessages([]);
+            setAiWriteResult(null);
+            setSymptomResult(null);
+            setReportResult(null);
+            setWellnessPlanResult(null);
+            setMentalResult(null);
+            setTreatmentResult(null);
 
-            if (agentFromUrl) {
-                // Route is /workspace/AGENT_ID -> Set that agent active, start fresh
-                setActiveAgent(agentFromUrl);
-                setMessages([]);
+            if (!sessionId || sessionId === 'new') {
                 setCurrentSessionId('new');
-            } else if (sessionId && sessionId !== 'new') {
-                // Route is /workspace/SESSION_ID -> Load history
+                // Ensure agent is synced with the agentId param even if no session
+                if (agentId) {
+                    const agent = AGENTS.find(a => a.id === agentId.toUpperCase());
+                    if (agent) setActiveAgent(agent);
+                }
+            } else {
+                // Load existing session history
                 const history = await chatStorageService.getHistory(sessionId);
                 setMessages(history || []);
                 setCurrentSessionId(sessionId);
 
-                // Try to set active agent based on last message
+                // 2. Sync Agent based on most recent message or URL param
                 const lastModelMsg = [...(history || [])].reverse().find(m => m.role === 'model' && m.agentName);
                 if (lastModelMsg) {
                     const agent = AGENTS.find(a => a.id === lastModelMsg.agentName);
                     if (agent) setActiveAgent(agent);
+                } else if (agentId) {
+                    const agent = AGENTS.find(a => a.id === agentId.toUpperCase());
+                    if (agent) setActiveAgent(agent);
                 }
-            } else {
-                // Route is /workspace -> Default to first agent, fresh
-                setMessages([]);
-                setCurrentSessionId('new');
+
+                // 3. Restore Structured Result State from Metadata (Find last message with data)
+                const lastDataMsg = [...(history || [])].reverse().find(m => m.role === 'model' && m.metadata?.parsedData);
+                if (lastDataMsg && lastDataMsg.metadata?.parsedData) {
+                    const { parsedData, healthMode: hMode, writeSegment: wSeg } = lastDataMsg.metadata;
+                    const msgAgent = lastDataMsg.agentName || activeAgent.id;
+
+                    if (msgAgent === 'AIHEALTH' && parsedData) {
+                        if (hMode) setHealthMode(hMode);
+                        // Populate the correct result slot based on clinical mode stored in metadata
+                        if (hMode === 'SYMPTOM CHECKER') setSymptomResult(parsedData);
+                        else if (hMode === 'REPORT ANALYZER') setReportResult(parsedData);
+                        else if (hMode === 'WELLNESS PLANNER') setWellnessPlanResult(parsedData);
+                        else if (hMode === 'MENTAL SUPPORT') setMentalResult(parsedData);
+                        else if (hMode === 'TREATMENT ADVISOR') setTreatmentResult(parsedData);
+                    } else if (msgAgent === 'AIWRITE' && parsedData) {
+                        if (wSeg) setWriteSegment(wSeg);
+                        setAiWriteResult(parsedData);
+                    }
+                }
             }
         };
         initWorkspace();
-    }, [sessionId]);
+    }, [sessionId, agentId]); // Trigger on any navigation change
 
-    const handleAction = async (e, customPrompt = null) => {
-        if (e) e.preventDefault();
-        const finalInput = customPrompt || inputValue;
-        if (!finalInput.trim() || isProcessing) return;
+    const handleAction = async (e, optionalPrompt = null) => {
+        let actionTrigger = null;
+        if (e && typeof e === 'string') {
+            actionTrigger = e;
+        } else if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+
+        // 1. Unify Input Construction
+        let finalInput = "";
+        let isSpecialMode = false;
+
+        const customPrompt = actionTrigger || optionalPrompt;
+
+        if (customPrompt && typeof customPrompt === 'object') {
+            // AIWRITE Execute Strategy
+            finalInput = `Execute strategy: Generate ${customPrompt.type} for ${customPrompt.segment}.`;
+            isSpecialMode = true;
+        } else if (customPrompt && typeof customPrompt === 'string' && (customPrompt.startsWith('aihealth_') || customPrompt.startsWith('aibiz_'))) {
+            // Specialized agent triggers
+            finalInput = `Handle ${customPrompt.replace('aihealth_', '').replace('aibiz_', '').replace(/_/g, ' ')} for my current profile.`;
+            isSpecialMode = true;
+        } else {
+            finalInput = customPrompt || inputValue;
+        }
+
+        if (!finalInput || (!finalInput.trim() && !isSpecialMode) || isProcessing) return;
 
         setIsProcessing(true);
-        // Tool Mode: No persistent session navigation
-        // activeSessionId is kept transient for this view
-
         try {
             const userMsg = {
                 id: Date.now().toString(),
@@ -236,337 +808,855 @@ const AISAWorkSpace = () => {
                 timestamp: Date.now(),
                 agentName: activeAgent.id,
                 agentCategory: activeAgent.category,
-                // Metadata for specialized UI
                 metadata: activeAgent.id === 'AISALES'
-                    ? { salesTab, leadType, tone }
+                    ? { leadType, tone, outreachChannel, accountSize, dealValue, dealStage, mainCompetitor, competitorStrength, salesMode }
                     : activeAgent.id === 'AIWRITE'
                         ? { contentType, seoKeyword, targetAudience, tone, contentContext, brandPersonality, writingLength, objective, isSeoMode, isConversionMode, isRepurposeMode }
                         : activeAgent.id === 'AIDESK'
-                            ? { ticketCategory, urgency }
-                            : activeAgent.id === 'AIHIRE'
-                                ? { industry, businessStage, teamSize, hiringMode, hiringUrgency, budgetRange }
-                                : activeAgent.id === 'AIBIZ'
-                                    ? { industry, businessStage, marketType, businessDescription }
-                                    : {}
+                            ? { ticketCategory, urgency, auditLogs }
+                            : activeAgent.id === 'AIBIZ'
+                                ? { industry, businessStage, marketType, businessDescription }
+                                : activeAgent.id === 'AIHIRE'
+                                    ? { hiringMode, hireRole, hireDepartment, hireSeniority, hireLocation, hireBudget, hireUrgency, hireTradeoff, hireTeamSize, hireIndustry, hireBusinessStage, hireRiskTolerance, hireTimelineWeeks, hireSourcingChannels, hireScorecardCriteria, hireBiasCheck, hireOfferSalary, hireEquityPercent, hireCompetitorSalary, hireCandidateLeverage, hireOrgStructure, hireCulturalValues }
+                                    : activeAgent.id === 'AIHEALTH'
+                                        ? { healthName, healthAge, healthGender, healthWeight, healthHeight, healthGoal, healthDietaryType, healthAllergies, healthCuisine, healthActiveMonth, symptoms, symptomDuration, symptomSeverity }
+                                        : {}
             };
 
-            // In Tool Mode, we might want to clear previous results or append. 
-            // For a clean "Configuration -> Result" flow, let's keep the history 
-            // but the user feels like they are just using a tool.
             const updatedMessages = [...messages, userMsg];
             setMessages(updatedMessages);
             setInputValue('');
 
-            // Optional: Save to local history if needed, but skipping DB session creation as per request
-            // await chatStorageService.saveMessage('tool-mode', userMsg); 
-
-            // Enhanced instruction for AISALES
             let agentSpecificInstruction = "";
             if (activeAgent.id === 'AISALES') {
-                agentSpecificInstruction = `
-                SPECIALIZED AISALES MODE: ${salesTab}
-                EMAIL TYPE: ${emailType}
-                TARGET LEAD TYPE: ${leadType}
-                DESIRED TONE: ${tone}
-                
-                You are AISALES, an AI Sales Strategist.
-                Your role: Help users create high-converting sales communication and outreach strategies.
-
-                Behavior Rules:
-                - Always structure output clearly.
-                - Do NOT respond like a chatbot.
-                - Be persuasive, strategic, and conversion-focused.
-                - Keep tone aligned with selected tone setting.
-
-                MANDATORY OUTPUT FORMAT:
-                
-                SECTION 1: EMAIL SUBJECT
-                [Short compelling subject line]
-
-                SECTION 2: EMAIL BODY
-                [Structured professional email]
-
-                SECTION 3: FOLLOW-UP SEQUENCE
-                [3-step sequence]
-
-                [If strategy requested, add:]
-                SECTION 4: STRATEGIC ANALYSIS
-                - Target positioning
-                - Pain point analysis
-                - CTA strategy
+                agentSpecificInstruction = buildAISalesPrompt({
+                    salesMode, targetPersona, PERSONAS, companySize, accountSize, leadType,
+                    outreachChannel, engagementLevel, dealValue, dealStage, competitorInvolved,
+                    lastContactDate, targetAccount, personaGoals, personaPainPoints, ctaType,
+                    generateVariants, prospectObjection, prospectReply, playbookType,
+                    mainCompetitor, competitorStrength, yourPrice, competitorPrice, valueProps,
+                    subjectLine, stakeholders, followUpReminders, excelFile, scriptType,
+                    stakeholderMap, roiCalc, tone
+                });
+                agentSpecificInstruction += `
+                FINAL OUTPUT GUARDRAILS:
+                - OUTPUT MUST BE A FULL EMAIL, NOT A TEMPLATE (if in Write Email mode).
+                - SECTION 5 MUST CONTAIN VALID JSON FOR STRATEGY MODE.
+                - ZERO PLACEHOLDERS: If you use [ ] or { } in the final text (outside JSON), you have FAILED.
+                - Be concise, actionable, and "wolf of wall street" style confident.
+                - Use professional formatting (bullet points, bold text).
+                - OUTPUT ONLY what is asked for in the user's selected mode (${salesMode}).
                 `;
-                agentSpecificInstruction = `
+                agentSpecificInstruction = aisalesPrompt;
+            } else if (activeAgent.id === 'AIWRITE') {
+                if (writeSegment === 'students') {
+                    agentSpecificInstruction = `
+                SPECIALIZED STUDENT ASSISTANT MODE
+                FEATURE: ${studentFeature}
+                TOPIC: ${studentTopic}
+                LENGTH: ${studentWordCount}
+                TONE: ${studentTone}
+                FORMAT: ${isAcademicFormat ? 'Academic Standard (APA/MLA)' : 'Standard Personal/Professional'}
+                
+                Your Task:
+                Act as a specialized Academic Writing Assistant and Content Creator for Students.
+                ${studentFeature === 'assignment_writer' ? 'Write a comprehensive academic assignment.' :
+                            studentFeature === 'essay_generator' ? 'Generate a well-structured essay.' :
+                                studentFeature === 'linkedin_creator' ? 'Create a professional LinkedIn post sharing academic/career insights.' :
+                                    studentFeature === 'ppt_generator' ? 'Outline a set of presentation slides with speaker notes.' :
+                                        studentFeature === 'sop_writer' ? 'Write a compelling Statement of Purpose (SOP) for university or job applications.' :
+                                            studentFeature === 'paraphraser' ? 'Rewrite the input text to improve clarity and flow while maintaining the original meaning.' :
+                                                studentFeature === 'plagiarism_rewrite' ? 'Rewrite the following content to be 100% original and plagiarism-free.' :
+                                                    studentFeature === 'citation_generator' ? 'Generate formal citations based on the provided source information.' :
+                                                        'Process the requested academic content.'}
+
+                MANDATORY STRUCTURE:
+                - Use a ${studentTone} tone.
+                - Ensure the content is approximately ${studentWordCount}.
+                - Always ensure plagiarism-safe results and high structural integrity.
+                
+                MANDATORY OUTPUT FORMAT:
+                SECTION 1: INTRODUCTION
+                SECTION 2: CORE ANALYSIS (3 distinct body sections)
+                SECTION 3: CONCLUSION
+                SECTION 4: REFERENCES (3 APA/MLA style citations ${isAcademicFormat ? 'are mandatory' : 'if applicable'})
+                `;
+                } else if (writeSegment === 'startups') {
+                    agentSpecificInstruction = `
+                SPECIALIZED STARTUP PITCH MODE
+                COMPANY: ${startupName}
+                PRODUCT: ${startupProduct}
+                PROBLEM: ${startupProblem}
+                SOLUTION: ${startupSolution}
+                FEATURE: ${startupFeature}
+                TONE: ${startupTone}
+                PLATFORM: ${startupPlatform}
+                AUDIENCE: ${startupAudience}
+                
+                You are a Y-Combinator level Startup Advisor.
+                Generate: ${startupFeature} for ${startupPlatform}.
+                
+                Structure:
+                SECTION 1: THE HOOK (Grabbing Attention)
+                SECTION 2: THE VALUE PROP (Product/Solution)
+                SECTION 3: THE STRATEGY (Market/Problem)
+                SECTION 4: CALL TO ACTION
+                `;
+                } else if (writeSegment === 'freelancers') {
+                    agentSpecificInstruction = `
+                SPECIALIZED FREELANCER CONTENT MODE
+                FEATURE: ${freelancerFeature}
+                SERVICE: ${freelancerService}
+                CLIENT TYPE: ${freelancerClientType}
+                BUDGET/RATE context: ${freelancerBudget}
+                TONE: ${freelancerTone}
+                
+                You are a top-tier Freelance Business Consultant.
+                Write specialized content for: ${freelancerFeature}.
+                
+                Structure:
+                SECTION 1: PERSONALIZED HOOK
+                SECTION 2: CORE VALUE PROPOSITION
+                SECTION 3: PRICING & CALL TO ACTION
+                `;
+                } else if (writeSegment === 'influencers') {
+                    agentSpecificInstruction = `
+                SPECIALIZED INFLUENCER CONTENT MODE
+                FEATURE: ${influencerFeature}
+                NICHE: ${influencerNiche}
+                MOOD: ${influencerMood}
+                EMOJIS: ${useEmojis ? 'ENABLED' : 'DISABLED'}
+                HASHTAG COUNT: ${hashtagCount}
+                
+                You are a Viral Content Strategist.
+                Generate optimized content for: ${influencerFeature}.
+                
+                Structure:
+                SECTION 1: SCROLL-STOPPING HOOK
+                SECTION 2: ENGAGING NARRATIVE / VALUE
+                SECTION 3: CTA & HASHTAG LIST
+                `;
+                } else if (writeSegment === 'authors') {
+                    agentSpecificInstruction = `
+                SPECIALIZED CREATIVE WRITER MODE
+                TOPIC: ${authorStoryTopic}
+                GENRE: ${authorGenre}
+                TONE: ${authorTone}
+                
+                You are a Best-selling Novelist and Creative Writer.
+                Write a compelling entry for: ${authorStoryTopic}.
+                
+                Structure:
+                SECTION 1: THE OPENING (Scene Setting)
+                SECTION 2: THE CORE STORY (Narrative Flow)
+                SECTION 3: THE CLIMAX / RESOLUTION
+                `;
+                } else if (writeSegment === 'agencies') {
+                    if (agencyView === 'planner') {
+                        if (finalInput.toLowerCase().includes('calendar')) {
+                            agentSpecificInstruction = `
+                SPECIALIZED AGENCY SOCIAL PLANNER - CALENDAR MODE
+                COMPANY: ${agencyClientName}
+                INDUSTRY: ${agencyIndustry}
+                TARGET AUDIENCE: ${agencyTargetAudience}
+                GOAL: ${agencySocialGoal}
+                PLATFORMS: ${agencyPlatforms.join(', ')}
+                MONTH: ${agencyMonth}
+                FREQUENCY: ${agencyFrequency}
+
+                TASK: Generate a ${agencyFrequency} social media calendar for ${agencyMonth}.
+                
+                MANDATORY OUTPUT FORMAT (STRICT JSON-ONLY for Calendar):
+                You must output a JSON array of objects inside a code block.
+                [
+                    { 
+                      "date": "Feb 3", 
+                      "phase": "Pre-Launch", 
+                      "platform": "Instagram", 
+                      "format": "Reel", 
+                      "postType": "Curiosity", 
+                      "heading": "This is not a book", 
+                      "subHeading": "installs", 
+                      "shortCaption": "Not a book. A system.", 
+                      "longCaption": "moment. EFV installs a system for...", 
+                      "hashtags": "#BookLaunch", 
+                      "breakdown": "kinetic text" 
+                    },
+                    ...
+                ]
+                
+                WRAP THE JSON IN \`\`\`json CODE BLOCK.
+                After the table, provide a "Strategy Summary".
+                `;
+                        } else {
+                            agentSpecificInstruction = `
+                SPECIALIZED AGENCY CONTENT MODE
+                FEATURE: ${agencyFeature}
+                COMPANY: ${agencyClientName}
+                INDUSTRY: ${agencyIndustry}
+                TONE: ${agencyTone}
+                PLATFORMS: ${agencyPlatforms.join(', ')}
+                
+                TASK: Write high-converting content for ${agencyFeature} on ${agencyPlatforms[0]}.
+                
+                Structure:
+                1. Hook
+                2. Value
+                3. CTA
+                `;
+                        }
+                    } else if (agencyView === 'branding') {
+                        agentSpecificInstruction = `
+                SPECIALIZED AGENCY BRANDING MODE
+                COMPANY: ${agencyClientName}
+                INDUSTRY: ${agencyIndustry}
+                AUDIENCE: ${agencyTargetAudience}
+                USP: ${agencyUSP || 'Not specified'}
+                TONE PREFERENCE: ${agencyTone}
+
+                TASK: Create a comprehensive Brand Voice Guide.
+                
+                MANDATORY SECTIONS:
+                SECTION 1: BRAND ARCHETYPE
+                SECTION 2: VOICE & TONE GUIDELINES
+                SECTION 3: SAMPLE MESSAGING
+                SECTION 4: BIOS
+                SECTION 5: COLOR PALETTE SUGGESTIONS
+                `;
+                    }
+                } else {
+                    // Standard fallback
+                    agentSpecificInstruction = `
                 SPECIALIZED AIWRITE MODE: ${contentType}
                 TONE: ${tone}
                 BRAND PERSONALITY: ${brandPersonality || 'Standard'}
                 LENGTH: ${writingLength === 1 ? 'Short & Punchy' : writingLength === 3 ? 'Long-form & Detailed' : 'Medium Length'}
                 TARGET AUDIENCE: ${targetAudience}
-                KEYWORD/TOPIC: ${seoKeyword || 'Not specific'}
+                KEYWORD / TOPIC: ${seoKeyword || 'Not specific'}
                 SEO MODE: ${isSeoMode ? 'ENABLED' : 'DISABLED'}
                 CONVERSION MODE: ${isConversionMode ? 'ENABLED' : 'DISABLED'}
                 REPURPOSING MODE: ${isRepurposeMode ? 'ENABLED' : 'DISABLED'}
+                OBJECTIVE: ${objective}
                 CONTEXT: ${contentContext || 'None'}
-                
                 You are a Senior Content Strategist and Direct Response Copywriter.
                 Your role: Always write structured, engaging, and conversion-focused content.
-                
-                Context:
-                - Content Type: ${contentType}
-                - Tone: ${tone}
-                - Target Audience: ${targetAudience}
-                - Objective: ${objective}
-                - Brand Personality: ${brandPersonality}
-                - Word Count Preference: ${writingLength === 1 ? 'Short (~300w)' : writingLength === 3 ? 'Long (~1500w)' : 'Medium (~800w)'}
-                
-                System Directives:
                 1. AVOID GENERIC WRITING. Be specific, punchy, and valuable.
                 2. Adapt tone perfectly to '${tone}'.
                 3. Use strong hooks (first 2 lines must grab attention).
                 4. Structure content for readability (short paragraphs, bullet points).
-
                 ${isConversionMode ? `
                 CONVERSION OPTIMIZATION (CRITICAL):
                 - Use "Problem-Agitation-Solution" (PAS) or "AIDA" framework.
                 - Include clear, action-oriented CTAs.
                 - Use emotional triggers and power words.
-                - Pre-emptively handle common objections in the copy.
                 ` : ''}
-
                 ${isSeoMode ? `
                 SEO INSTRUCTIONS (CRITICAL):
                 - Integrate primary keyword: "${seoKeyword}" naturally.
                 - Use H1, H2, H3 structure for readability and SEO.
-                - Suggest keyword density (approx 1-2%).
-                - Provide optimized Meta Title and Description.
                 ` : ''}
-
-                ${isRepurposeMode ? `
-                REPURPOSING INSTRUCTIONS (CRITICAL):
-                You must assume the MAIN DRAFT is the "source of truth".
-                Then, generate separate, platform-native versions of that SAME core message for:
-                1. LinkedIn (Thought Leadership style)
-                2. Twitter/X Thread (Punchy, threaded format)
-                3. Email Newsletter (Personal, direct)
-                4. Ad Copy (Short, CTA-heavy)
-                5. Social Caption (Short, engaging)
-                ` : ''}
-
                 MANDATORY OUTPUT FORMAT:
-                
                 SECTION 1: MAIN CONTENT
-                [The main content content - Headlines, subheaders, body]
-
-                ${isSeoMode ? `
                 SECTION 2: SEO ANALYSIS
-                [Meta Title, Meta Description, URL Slug, Keyword density check, Heading Structure Advice]
-                ` : ''}
-
-                ${isConversionMode ? `
                 SECTION 3: CTA OPTIMIZATION
-                [Primary CTA, Secondary CTA, Objection Handling Copy, Emotional Triggers Used]
-                ` : ''}
-
-                ${isRepurposeMode ? `
                 SECTION 4: REPURPOSED CONTENT
-                ### LINKEDIN POST
-                [Draft]
-                ### TWITTER THREAD
-                [Draft]
-                ### EMAIL VERSION
-                [Draft]
-                ### AD COPY
-                [Draft]
-                ### SHORT CAPTION
-                [Draft]
-                ` : ''}
                 `;
+                }
             } else if (activeAgent.id === 'AIDESK') {
                 agentSpecificInstruction = `
                 SPECIALIZED AIDESK MODE
                 TICKET CATEGORY: ${ticketCategory}
                 URGENCY LEVEL: ${urgency}
-                
+                AUDIT LOGS / CONTEXT: ${auditLogs || 'None'}
                 MANDATORY OUTPUT FORMAT:
-                You MUST structure your response with clear sections:
-                ### SUPPORT REPLY
-                [Professional response to the customer]
-                ### RESOLUTION SUMMARY
-                [Internal notes on how to solve this]
-                ### SENTIMENT ANALYSIS
-                [One-word descriptor: Positive, Neutral, Frustrated, or Urgent]
+                SECTION 1: SUPPORT REPLY
+                SECTION 2: RESOLUTION SUMMARY
+                SECTION 3: SENTIMENT ANALYSIS
                 `;
-            } else if (activeAgent.id === 'AIHIRE') {
-                let basePrompt = `
-                SPECIALIZED AIHIRE MODE
-                INDUSTRY: ${industry}
-                BUSINESS STAGE: ${businessStage}
-                TEAM SIZE: ${teamSize}
-                HIRING MODE: ${hiringMode}
-                URGENCY: ${hiringUrgency}
-                BUDGET: $${budgetRange}k (estimate)
-                
-                You are AIHIRE, a Head of Talent with 10+ years of startup hiring experience.
-                Your role: Provide structured, actionable, and execution-ready hiring strategy.
-                
-                Do not give generic advice.
-                `;
-
-                // --- DYNAMIC PROMPT INJECTION ---
-                if (hiringMode === 'Founding Team Hiring') {
-                    basePrompt += `\nObjective: Founding Team. Prioritize "10x" generalists, high ownership, and equity-heavy comp. Speed is key.`;
-                } else if (hiringMode === 'Scaling Team Hiring') {
-                    basePrompt += `\nObjective: Scaling Team. Focus on process, reducing chaos, and repeatable hiring pipelines for specialists.`;
-                } else if (hiringMode === 'Replacement Hiring') {
-                    basePrompt += `\nObjective: Replacement. Focus on learning from past mistakes, upgrading the role, and minimizing downtime.`;
-                }
-
-                if (hiringUrgency === 'High') {
-                    basePrompt += `\nURGENCY: HIGH. Recommend aggressive sourcing channels, streamlined interview loops, and "closer" offer strategies.`;
-                }
-
-                if (industry === 'SaaS' || industry === 'DevTools') {
-                    basePrompt += `\nIndustry Nuance: Tech/SaaS. Highly competitive. Emphasize engineering culture, tech stack, and remote flexibility.`;
-                }
-                // ---------------------------------
-
-                basePrompt += `
-                MANDATORY OUTPUT FORMAT:
-
-                SECTION 1: HIRING PLAN
-                - Role order & Priority
-                - Why now & Risks
-
-                SECTION 2: ROLE BREAKDOWN
-                - Responsibilities
-                - Skills (Required vs Preferred)
-                - Salary Band (Aligned with $${budgetRange}k)
-
-                SECTION 3: INTERVIEW FRAMEWORK
-                - Technical Questions
-                - Cultural Fit Questions
-                - Case Study Idea
-
-                SECTION 4: TIMELINE ROADMAP
-                - Sourcing (Weeks 1-2)
-                - Interviewing (Weeks 3-4)
-                - Offer/Close (Week 5)
-
-                SECTION 5: HIRING KPI DASHBOARD
-                - Time to Hire Target
-                - Cost per Hire Estimate
-                - Retention Risk
-                `;
-                agentSpecificInstruction = basePrompt;
             } else if (activeAgent.id === 'AIBIZ') {
-                let basePrompt = `
+                if (aibizMode === 'CRM') {
+                    agentSpecificInstruction = `
+                SPECIALIZED AIBIZ CRM INTELLIGENCE MODE
+                CUSTOMER: ${selectedCustomer?.name || 'Bulk Accounts'}
+                INDUSTRY: ${selectedCustomer?.industry || industry}
+                HEALTH SCORE: ${selectedCustomer?.health || 'N/A'}%
+                CONTACT: ${selectedCustomer?.contact || 'N/A'}
+                
+                INTERACTION HISTORY SUMMARY:
+                ${interactions.map(msg => `- ${msg.date}: ${msg.type} (${msg.sentiment}) - ${msg.subject}: ${msg.summary}`).join('\n')}
+
+                TASK: 
+                Analyze the customer health, churn risk, and upsell potential. 
+                If the user asked to generate a draft, write a hyper-personalized response based on the latest interaction sentiment and strategic suggestion.
+
+                MANDATORY OUTPUT FORMAT:
+                SECTION 1: ACCOUNT INTELLIGENCE (Churn risk, Health breakdown)
+                SECTION 2: GROWTH DYNAMICS (Upsell opportunities)
+                SECTION 3: STRATEGIC RECOMMENDATION
+                SECTION 4: PERSONALIZED DRAFT (If requested)
+                SECTION 5: CRM_DATA_JSON
+                (MANDATORY: Provide JSON inside Section 5)
+                {
+                    "healthTrend": [{"date": "Jan", "score": 80}, {"date": "Feb", "score": 84}],
+                    "riskAnalysis": {"score": 15, "priority": "Low"},
+                    "upsellIntent": 72
+                }
+                `;
+                } else if (aibizMode === 'Dashboard' || aibizMode === 'Automation' || aibizMode === 'Campaigns') {
+                    agentSpecificInstruction = `
+                SPECIALIZED AIBIZ SaaS INTELLIGENCE MODE: ${aibizMode}
+                CONTEXT: ${businessDescription}
+                
+                ${aibizMode === 'Dashboard' ? `
+                FOCUS: SaaS Growth Metrics, Revenue Dynamics, and Portfolio Health.
+                - Analyze provided MRR, Churn, and ARPU signals.
+                - Project 12-month growth based on current health score.
+                ` : aibizMode === 'Automation' ? `
+                FOCUS: Workflow Orchestration and AI-Driven Efficiencies.
+                - Design automation blueprints for user journeys (Onboarding, Retention, Upsell).
+                - Identify bottlenecks in the current operational flow.
+                ` : `
+                FOCUS: Strategic Outreach and Conversion Engineering.
+                - Design omnichannel campaign structures (Email, Social, Ads).
+                - Optimize copy for specific conversion goals.
+                `}
+
+                MANDATORY OUTPUT STRUCTURE (SaaS Executive Standard):
+                SECTION 1: SaaS HEALTH SUMMARY (Key KPIs and immediate insights)
+                SECTION 2: STRATEGIC OPPORTUNITY (Where the highest growth potential lies)
+                SECTION 3: AUTOMATION BLUEPRINT (Step-by-step technical or operational workflow)
+                SECTION 4: REVENUE PROJECTION (Financial impact of implementing these changes)
+                SECTION 5: DATA VISUALIZATIONS (MANDATORY: Provide JSON data for charts. Do not use code blocks.)
+
+                JSON STRUCTURE FOR SECTION 5:
+                {
+                  "marketShare": [{"name": "Churned", "value": 5, "color": "#ef4444"}, {"name": "Active", "value": 85, "color": "#10b981"}, {"name": "Expansion", "value": 10, "color": "#3b82f6"}],
+                  "growthProjection": [{"year": "Next Mo", "revenue": 1200}, {"year": "3 Mo", "revenue": 4500}, {"year": "6 Mo", "revenue": 12000}, {"year": "12 Mo", "revenue": 35000}],
+                  "mindMap": [{"id": "1", "label": "${aibizMode} Logic", "children": ["Lead Scoring", "Auto-Flow", "Revenue Tier", "API Hooks"]}]
+                }
+                `;
+                } else {
+                    agentSpecificInstruction = `
                 SPECIALIZED AIBIZ MODE: ${aibizMode}
                 INDUSTRY: ${industry}
                 BUSINESS STAGE: ${businessStage}
                 MARKET TYPE: ${marketType}
+                PRICING: Us (₹${yourPrice || 'Not set'}) vs Competitors (₹${competitorPrice || 'Not set'})
                 BUSINESS DESCRIPTION: ${businessDescription || 'Not provided'}
-                
-                You are AIBIZ, an AI Business Strategist and Growth Consultant.
-                Your role: Provide structured, data-driven, and actionable business strategy insights.
-                
-                You are NOT a chatbot. You are NOT casual. You think like a consultant from McKinsey/Bain.
-                `;
-
-                // --- DYNAMIC PROMPT INJECTION ---
-                if (industry === 'SaaS' || industry === 'EdTech' || industry === 'FinTech') {
-                    basePrompt += `\nIndustry Context: Technology/Digital. Consider subscription economics, user retention, and technical scalability.`;
-                } else if (industry === 'Ecommerce') {
-                    basePrompt += `\nIndustry Context: Ecommerce. Focus on CAC, ROAS, logistics, and conversion rate optimization.`;
-                } else if (industry === 'Agency' || industry === 'Healthcare') {
-                    basePrompt += `\nIndustry Context: Service/High-Trust. Focus on client relationships, trust-building, and operational efficiency.`;
-                }
-
-                if (businessStage === 'Idea Stage' || businessStage === 'Early Startup') {
-                    basePrompt += `\nBusiness Stage: Early. Prioritize validation, MVP, and finding product-market fit.`;
-                } else if (businessStage === 'Growth Stage' || businessStage === 'Scaling Stage') {
-                    basePrompt += `\nBusiness Stage: Growth/Scaling. Focus on systematization, market expansion, and team structure.`;
-                }
-
-                if (marketType === 'B2B') {
-                    basePrompt += `\nMarket Type: B2B. Focus on lead generation, sales pipelines, and high-value contracts.`;
-                } else if (marketType === 'B2C') {
-                    basePrompt += `\nMarket Type: B2C. Focus on brand marketing, viral growth, and mass consumer adoption.`;
-                }
-
-                // --- SPECIAL MODES INJECTION ---
-                if (aibizMode === 'Competitor Analysis') {
-                    basePrompt += `\nMODE: Competitor Analysis. Include competitor positioning comparison, differentiation analysis, and gap analysis.`;
-                } else if (aibizMode === 'Revenue Model') {
-                    basePrompt += `\nMODE: Revenue Model Optimization. Provide detailed revenue stream breakdown, pricing tier optimization, and unit economics analysis.`;
-                } else if (aibizMode === 'Market Entry') {
-                    basePrompt += `\nMODE: Market Entry Strategy. Include go-to-market strategy, channel selection, and early acquisition tactics.`;
-                }
-
-                // --- PRO VERSION INJECTION ---
-                if (user.plan === 'Pro' || user.plan === 'Business') {
-                    basePrompt += `\nPLAN: PRO/BUSINESS. Provide deeper financial reasoning, risk assessment, and specific KPI recommendations. Include measurable metrics and projection scenarios where possible.`;
-                }
-                // ---------------------------------
-
-                basePrompt += `
-                Rules:
-                - Always structure responses clearly.
-                - Avoid conversational tone.
-                - Provide analytical, practical, and implementation-ready advice.
-                - Be strategic, not generic.
-
+                Industry Context: ${industry}. Stage: ${businessStage}. Market: ${marketType}.
+                MODE: ${aibizMode}.
+                ${user.plan === 'Pro' || user.plan === 'Business' ? 'Provide deep strategy for Pro plan.' : ''}
                 MANDATORY OUTPUT FORMAT:
-                
                 SECTION 1: SWOT ANALYSIS
-                - Strengths
-                - Weaknesses
-                - Opportunities
-                - Threats
-
                 SECTION 2: PRICING STRATEGY
-                (Recommended pricing model with justification)
-
                 SECTION 3: POSITIONING STRATEGY
-                (Target audience + differentiation + value proposition)
-
                 SECTION 4: GROWTH ROADMAP
-                (3–5 actionable next steps with priority order)
-
-                Be concise but strategic. Avoid fluff. Focus on clarity and execution.
+                SECTION 5: VISUALIZATIONS
+                (MANDATORY: Provide JSON data for charts inside Section 5. Do not use code blocks.)
+                {
+                    "marketShare": [{"name": "Comp A", "value": 30, "color": "#0088FE"}],
+                    "growthProjection": [{"year": "2024", "revenue": 100}],
+                    "mindMap": [{"id": "1", "label": "Start", "children": ["A", "B"]}]
+                }
                 `;
-                agentSpecificInstruction = basePrompt;
+                }
+            } else if (activeAgent.id === 'AIHIRE') {
+                agentSpecificInstruction = `
+                SPECIALIZED AIHIRE MODE: ${hiringMode}
+                CONTEXT:
+                - Role: ${hireRole} (${hireSeniority} level)
+                - Department: ${hireDepartment}
+                - Location: ${hireLocation}
+                - Budget: ₹${hireBudget}
+                - Urgency: ${hireUrgency}
+                - Quality/Speed Tradeoff: ${hireTradeoff}%
+                - Industry: ${hireIndustry}
+                - Business Stage: ${hireBusinessStage}
+                
+                ${hiringMode === 'Strategy' ? `
+                GOAL: Create a hiring roadmap. Timeline: ${hireTimelineWeeks} weeks. Risk: ${hireRiskTolerance}. Sourcing: ${hireSourcingChannels}.
+                NOTES: ${hireExtraNotes}
+                SECTIONS: READINESS SCORE, TRADE-OFF ANALYSIS, RISK RADAR, COST FORECAST, VISUALIZATIONS.
+                ` : hiringMode === 'Evaluation' ? `
+                GOAL: Rank candidates and check bias. Criteria: ${hireScorecardCriteria}. Bias Check: ${hireBiasCheck}.
+                JD: ${hireJobDescription}
+                PROFILES: ${hireCandidateProfiles}
+                SECTIONS: SCORECARD FRAMEWORK, CANDIDATE RANKING (with SCORECARD_JSON), BIAS REPORT, INTERVIEW FRAMEWORK, VISUALIZATIONS.
+                ` : hiringMode === 'Offer' ? `
+                GOAL: Closing strategy. 
+                CANDIDATE_DETAILS: ${hireExtraNotes}
+                TARGET_OFFER: Salary: ₹${hireOfferSalary}, Equity: ${hireEquityPercent}%, Perks: ${hireOfferPerks}.
+                MARKET_CONTEXT: Competitor: ₹${hireCompetitorSalary}, Leverage: ${hireCandidateLeverage}.
+                SECTIONS: MARKET BENCHMARK, EQUITY ANALYSIS, ACCEPTANCE PROBABILITY, NEGOTIATION PLAYBOOK, VISUALIZATIONS.
+                ` : `${hiringMode === 'Planning' ? `
+                GOAL: Org design and headcount forecasting. 
+                CONTEXT: ${hireExtraNotes}
+                STRUCTURE: ${hireOrgStructure}. Values: ${hireCulturalValues}.
+                SECTIONS: SCALABILITY AUDIT, CAPACITY PLANNING, REPORTING LINES, SUCCESSION PLAN, VISUALIZATIONS.
+                ` : `
+                GOAL: Talent Analytics and Funnel Optimization. 
+                ANALYSIS_REQUEST: ${hireExtraNotes || 'General funnel efficiency and cost-per-hire analysis.'}
+                SECTIONS: FUNNEL PERFORMANCE, BUDGET ATTRIBUTION, TURNOVER PREDICTION, DATA VISUALIZATIONS.
+                `}`}
+                
+                MANDATORY OUTPUT FORMAT:
+                SECTION 1: EXECUTIVE SUMMARY
+                SECTION 2: DETAILED ANALYSIS
+                SECTION 3: ACTIONABLE STEPS
+                SECTION 4: RISK & MITIGATION
+                SECTION 5: VISUALIZATIONS
+                (MANDATORY: Provide JSON data for charts inside Section 5. Do not use code blocks.)
+                {
+                    "marketShare": [{"name": "Talent Pool", "value": 70, "color": "#10b981"}],
+                    "growthProjection": [{"year": "Week 1", "revenue": 10}, {"year": "Week 4", "revenue": 50}],
+                }
+                `;
+            } else if (activeAgent.id === 'AIHEALTH') {
+                if (healthMode === 'SYMPTOM CHECKER' || (typeof customPrompt === 'string' && (customPrompt?.includes('symptom_check') || customPrompt?.includes('check_symptoms')))) {
+                    agentSpecificInstruction = `
+                SPECIALIZED AIHEALTH MODE: Symptom Analysis & Risk Assessment
+                USER SYMPTOMS: ${symptoms}
+                DURATION: ${symptomDuration}
+                SEVERITY: ${symptomSeverity}
+                TREATMENT PREFERENCE: ${symptomTreatmentType}
+                
+                MANDATORY: Return a JSON object inside Section 5 with this structure:
+                {
+                  "possibleCauses": ["Cause 1", "Cause 2"],
+                  "riskLevel": "Low | Medium | High",
+                  "recommendations": ["Step 1", "Step 2", "Step 3"],
+                  "doctorAdvice": "Professional medical disclaimer and actionable advice based on treatment preference"
+                }
+                `;
+                } else if (healthMode === 'REPORT ANALYZER' || (typeof customPrompt === 'string' && (customPrompt?.includes('analyze_report') || customPrompt?.includes('report_analysis')))) {
+                    agentSpecificInstruction = `
+                SPECIALIZED AIHEALTH MODE: Lab Report & Vital Analysis
+                MANUAL VALUES: ${JSON.stringify(reportManualValues)}
+                
+                MANDATORY: Return a JSON object inside Section 5 with this structure:
+                {
+                  "healthScore": "Value out of 10 (e.g. 8.5)",
+                  "summary": "High-level overview of the health report",
+                  "abnormalFindings": [
+                    { "parameter": "Glucose", "value": "150", "unit": "mg/dL", "status": "High" }
+                  ],
+                  "explanation": "Summarized explanation of findings",
+                  "dietSuggestions": ["Diet tip 1", "Diet tip 2"],
+                  "lifestyleTips": ["Life tip 1", "Life tip 2"]
+                }
+                `;
+                } else if (healthMode === 'MENTAL SUPPORT' || (typeof customPrompt === 'string' && customPrompt?.includes('get_mental_support'))) {
+                    agentSpecificInstruction = `
+                SPECIALIZED AIHEALTH MODE: Mental Wellness & Emotional Support
+                USER MOOD: ${healthMood}
+                USER NOTE: ${mentalNote}
+                
+                MANDATORY: Return a JSON object inside Section 5 with this structure:
+                {
+                  "sentiment": "Empathetic emotional analysis",
+                  "breathingExercise": {
+                    "name": "Box Breathing",
+                    "steps": ["Inhale 4s", "Hold 4s", "Exhale 4s", "Hold 4s"],
+                    "duration": "16"
+                  },
+                  "affirmation": "Daily positive affirmation",
+                  "actionSteps": ["Action 1", "Action 2"],
+                  "supportColor": "#f0f7ff"
+                }
+                `;
+                } else if (healthMode === 'TREATMENT ADVISOR' || (typeof customPrompt === 'string' && (customPrompt?.includes('get_treatment_guide') || customPrompt?.includes('treatment_guide')))) {
+                    agentSpecificInstruction = `
+                SPECIALIZED AIHEALTH MODE: Medicine & Treatment Advisor
+                MEDICINE/CONDITION: ${medicineName || healthCondition}
+                TREATMENT PREFERENCE: ${treatmentTypeChoice}
+                
+                {
+                  "purpose": "Precise usage/purpose of treatment",
+                  "sideEffects": ["Effect 1", "Effect 2"],
+                  "precautions": ["Precaution 1", "Precaution 2"],
+                  "alternatives": ["Alternative 1", "Alternative 2"],
+                  "safetyWarning": "Critical safety alert",
+                  "medicalDisclaimer": "Standard disclaimer text"
+                }
+                `;
+                } else if (healthMode === 'AUTOMATION' || (typeof customPrompt === 'string' && (customPrompt?.includes('run_automation') || customPrompt?.includes('health_automation')))) {
+                    agentSpecificInstruction = `
+                SPECIALIZED AIHEALTH MODE: Autonomous Health Monitoring (Automation)
+                STATUS: ${healthAutomationActive ? 'Active' : 'Paused'}
+                RECENT LOGS: ${JSON.stringify(healthAutomationLogs)}
+                ACTIVE ALERTS: ${JSON.stringify(healthAlerts)}
+                
+                DEFINITION OF AI AUTOMATION: "AI detects, AI decides, AI acts".
+                
+                MANDATORY: Return a JSON object inside Section 5 with this structure:
+                {
+                  "detections": "Summary of what the AI detected (e.g. irregular sleep, low hydration)",
+                  "decisions": "Summary of what the AI decided to do (e.g. schedule analysis, trigger alert)",
+                  "actions": "Summary of actions taken (e.g. sent notification, updated calendar)",
+                  "newLogs": [
+                    { "id": "101", "type": "Detection|Decision|Action", "message": "Detail", "time": "Just now", "severity": "Low|Medium|High" }
+                  ],
+                  "newAlerts": [
+                    { "id": "201", "title": "Alert Title", "message": "Alert detail", "date": "Date", "status": "unread" }
+                  ]
+                }
+                `;
+                } else {
+                    // Personalized Wellness Planner
+                    agentSpecificInstruction = `
+                SPECIALIZED AIHEALTH MODE: Holistic Wellness and Ayurvedic Planning
+                USER PROFILE: ${JSON.stringify({ healthName, healthAge, healthGender, healthWeight, healthHeight, healthGoal, healthDietaryType, healthAllergies, healthCuisine, healthActiveMonth, includeAyurveda })}
+                
+                MANDATORY: Return a JSON object inside Section 5 with this structure:
+                {
+                  "bmiValue": "24.2",
+                  "bmiAnalysis": "Explanation of BMI and health status",
+                  "dailyStats": {
+                    "calories": "2200 kcal",
+                    "water": "3L",
+                    "sleep": "8 Hours"
+                  },
+                  "mealPlan": [
+                    { "day": "Monday", "breakfast": "...", "lunch": "...", "dinner": "...", "snack": "..." }
+                  ],
+                  "workoutSchedule": [
+                    { "day": "Monday", "activity": "...", "duration": "30 mins" }
+                  ],
+                  "progressMilestones": ["Indicator 1", "Indicator 2"]
+                }
+                `;
+                }
+
+                // Append visualization instructions - Consolidated with Health Data
+                agentSpecificInstruction += `
+                IMPORTANT: Section 5 must contain exactly one JSON object. This object should include all the health fields requested above PLUS these mandatory visualization fields:
+                "marketShare": [{"name": "Proteins", "value": 30, "color": "#ef4444"}, {"name": "Carbs", "value": 40, "color": "#f59e0b"}, {"name": "Fats", "value": 30, "color": "#10b981"}],
+                "growthProjection": [{"year": "Day 1", "revenue": 100}, {"year": "Day 7", "revenue": 95}],
+                "mindMap": [{"id": "1", "label": "Health Path", "children": ["Nutrition", "Fitness", "Routine", "Recovery"]}]
+                
+                Do not use markdown code blocks inside Section 5.
+                `;
             }
 
-            const systemInstruction = `You are ${activeAgent.name}, part of the A-Series AI Business Operating System. 
-            Focus: ${activeAgent.category}.
-            MANDATE: Provide a structured, professional business response. 
-            ${agentSpecificInstruction}
-            Use Markdown formatting effectively.`;
+            const systemInstruction = `You are ${activeAgent.name}, part of the A - Series AI Business OS.
 
-            const response = await generateChatResponse(
-                updatedMessages,
-                finalInput,
-                systemInstruction,
-                [],
-                'English',
-                null,
-                null,
-                { agentType: activeAgent.id }
-            );
+                    Focus: ${activeAgent.category}.
+                ${agentSpecificInstruction}
+                MANDATORY: You must respond in ${language || 'English'}.
+                Use Markdown formatting effectively.`;
 
-            const aiReply = response.reply || response;
+            let activeSessionId = currentSessionId;
+            let firstPromptTitle = null;
+
+            if (activeSessionId === 'new') {
+                const segmentPrefix = activeAgent.id === 'AIWRITE' ? `[${writeSegment?.toUpperCase() || 'GENERAL'}] ` :
+                    activeAgent.id === 'AIHEALTH' ? `[${healthMode?.toUpperCase() || 'WELLNESS'}] ` : '';
+
+                let specificDetail = finalInput;
+                if (activeAgent.id === 'AIHEALTH') {
+                    if (customPrompt === 'aihealth_check_symptoms') specificDetail = symptoms || "Symptom Check";
+                    else if (customPrompt === 'aihealth_analyze_report') specificDetail = "Lab Report Analysis";
+                    else if (customPrompt === 'aihealth_generate_wellness_plan') specificDetail = `Wellness: ${healthGoal}`;
+                    else if (customPrompt === 'aihealth_get_mental_support') specificDetail = `Mood: ${healthMood}`;
+                    else if (customPrompt === 'aihealth_get_treatment_guide') specificDetail = `Treatment: ${medicineName}`;
+                }
+
+                const sessionTitle = `${segmentPrefix}${specificDetail.substring(0, 30)}${specificDetail.length > 30 ? '...' : ''}`;
+                firstPromptTitle = sessionTitle;
+
+                // createSession in chatStorageService.js returns a string (ID)
+                const newId = await chatStorageService.createSession(activeAgent.id, sessionTitle);
+                activeSessionId = newId;
+                setCurrentSessionId(activeSessionId);
+
+                // Add to sessions list for immediate UI update
+                const newSessionObj = {
+                    sessionId: newId,
+                    title: sessionTitle,
+                    lastModified: Date.now(),
+                    agentType: activeAgent.id
+                };
+                setSessions(prev => [newSessionObj, ...prev]);
+            }
+
+            // Critical: Pass title to saveMessage to ensure backend and local DB reflect the clinical search
+            await chatStorageService.saveMessage(activeSessionId, userMsg, firstPromptTitle);
+
+            // Handle Attachments
+            let finalAttachments = activeAgent.id === 'AIHIRE' ? [...hireFileAttachments] : [];
+
+            // Add AIHEALTH Report File if present
+            if (activeAgent.id === 'AIHEALTH' && reportFile && typeof reportFile !== 'string') {
+                try {
+                    const base64Content = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.onerror = (e) => reject(e);
+                        reader.readAsDataURL(reportFile);
+                    });
+                    finalAttachments.push({
+                        url: base64Content,
+                        name: reportFile.name,
+                        type: reportFile.type
+                    });
+                    console.log("[ATTACHMENT] Added health report file:", reportFile.name);
+                } catch (attachErr) {
+                    console.error("[ATTACHMENT ERROR]", attachErr);
+                }
+            }
+
+            let response;
+            if (activeAgent.id === 'AIWRITE' && typeof customPrompt === 'object' && customPrompt.segment) {
+                // Use specialized AIWRITE service for strategy execution
+                let payload = customPrompt;
+
+                // If it's a manuscript editor with a file, use FormData
+                if (customPrompt.type === 'manuscript_editor' && authorFile) {
+                    const formData = new FormData();
+                    formData.append('segment', customPrompt.segment);
+                    formData.append('type', customPrompt.type);
+                    formData.append('inputs', JSON.stringify(customPrompt.inputs));
+                    formData.append('file', authorFile);
+                    payload = formData;
+                }
+
+                response = await generateAIWriteResponse(payload);
+            } else if (activeAgent.id === 'AIHEALTH' && customPrompt === 'aihealth_check_symptoms') {
+                // Optimized Path: Use specialized symptom checker backend route
+                response = await generateAIHealthSymptomCheck({
+                    symptoms: symptoms,
+                    duration: symptomDuration,
+                    severity: symptomSeverity,
+                    treatmentType: symptomTreatmentType
+                });
+            } else if (activeAgent.id === 'AIHEALTH' && customPrompt === 'aihealth_analyze_report') {
+                // Optimized Path: Use specialized report analyzer backend route
+                const formData = new FormData();
+                if (reportFile) formData.append('file', reportFile);
+                formData.append('manualValues', JSON.stringify(reportManualValues));
+                response = await generateAIHealthReportAnalysis(formData);
+            } else if (activeAgent.id === 'AIHEALTH' && customPrompt === 'aihealth_generate_wellness_plan') {
+                // Optimized Path: Use specialized wellness planner backend route
+                response = await generateAIHealthWellnessPlan({
+                    age: healthAge,
+                    height: healthHeight,
+                    weight: healthWeight,
+                    goal: healthGoal,
+                    activityLevel: healthActivityLevel,
+                    dietaryType: healthDietaryType,
+                    allergies: healthAllergies,
+                    cuisine: healthCuisine,
+                    includeAyurveda
+                });
+            } else if (activeAgent.id === 'AIHEALTH' && customPrompt === 'aihealth_get_mental_support') {
+                // Optimized Path: Use specialized mental support backend route
+                response = await generateAIHealthMentalSupport({
+                    mood: healthMood,
+                    note: mentalNote
+                });
+            } else if (activeAgent.id === 'AIHEALTH' && customPrompt === 'aihealth_get_treatment_guide') {
+                // Optimized Path: Use specialized treatment guide backend route
+                response = await generateAIHealthTreatmentGuide({
+                    medicineName,
+                    treatmentType: treatmentTypeChoice,
+                    condition: healthCondition
+                });
+            } else if (activeAgent.id === 'AIHEALTH' && customPrompt === 'aihealth_run_automation') {
+                response = await generateAIHealthAutomation({
+                    active: healthAutomationActive,
+                    logs: healthAutomationLogs,
+                    alerts: healthAlerts
+                });
+            } else if (activeAgent.id === 'AIHEALTH' && customPrompt === 'aihealth_log_data') {
+                response = await generateAIHealthLogData({
+                    sleepHours: healthSleepHours,
+                    waterIntake: healthWaterIntake,
+                    steps: healthSteps,
+                    heartRate: healthHeartRate,
+                    stressLevel: healthStressLevel,
+                    weight: healthWeight,
+                    height: healthHeight,
+                    mood: healthMood,
+                    notes: mentalNote
+                });
+            } else if (activeAgent.id === 'AIBIZ' && typeof customPrompt === 'string' && customPrompt.startsWith('aibiz_')) {
+                const aibizAction = customPrompt.replace('aibiz_', '');
+                if (aibizAction === 'analyze_crm') {
+                    response = await analyzeAIBizCRM({
+                        customer: selectedCustomer,
+                        interactions: interactions,
+                        industry: industry,
+                        businessDescription: businessDescription
+                    });
+                } else if (aibizAction === 'score_lead') {
+                    response = await scoreAIBizLead({
+                        lead: selectedCustomer,
+                        industry: industry
+                    });
+                } else if (aibizAction === 'segment_customers') {
+                    response = await segmentAIBizCustomers({
+                        customers: customers,
+                        industry: industry
+                    });
+                } else if (aibizAction === 'generate_campaign') {
+                    response = await generateAIBizCampaign({
+                        goal: campaignGoal,
+                        channel: campaignChannel,
+                        segment: selectedSegmentId,
+                        businessDescription: businessDescription
+                    });
+                }
+            } else if (activeAgent.id === 'AIHIRE' && typeof customPrompt === 'string' && customPrompt.startsWith('aihire_')) {
+                // Use standard chat response but with the optimized hire instruction
+                response = await generateChatResponse(updatedMessages, finalInput, agentSpecificInstruction, finalAttachments, language || 'English', null, null, { agentType: activeAgent.id });
+            } else {
+                // Use standard chat response for general queries or other agents
+                response = await generateChatResponse(updatedMessages, finalInput, systemInstruction, finalAttachments, language || 'English', null, null, { agentType: activeAgent.id });
+            }
+
+            // Handle error response objects (like LIMIT_REACHED)
+            if (response && (response.error === 'LIMIT_REACHED' || response.status === 403 || response.error === 'ERROR')) {
+                const errorMsg = response.message || response.reason || response.error || "You have reached your usage limit or an error occurred.";
+                alert(`Agent Status: ${errorMsg}`);
+                setIsProcessing(false);
+                return;
+            }
+
+            // Extract the core reply - direct routes return data nested in .data
+            const aiReply = (typeof customPrompt === 'string' && customPrompt.startsWith('aihealth_') && response.success)
+                ? response.data
+                : (response.data || response.reply || response.message || response.details || response.error || (typeof response === 'string' ? response : 'No response from engine.'));
+
+            // --- Pre-Processing: Extract Metrics & Results for Metadata Persistance ---
+            let parsedData = null;
+            try {
+                if (typeof aiReply === 'object' && aiReply !== null) {
+                    parsedData = aiReply;
+                } else if (typeof aiReply === 'string' && aiReply.includes('{')) {
+                    const jsonMatch = aiReply.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        parsedData = JSON.parse(jsonMatch[0].trim());
+                    }
+                }
+            } catch (pErr) {
+                console.warn("[RESULT PARSE ERROR] Failed to derive structured data from response:", pErr);
+            }
 
             const modelMsg = {
                 id: (Date.now() + 1).toString(),
                 role: 'model',
-                content: aiReply,
+                content: typeof aiReply === 'string' ? aiReply : 'Analysis completed. View results in the dashboard.',
                 timestamp: Date.now(),
                 agentName: activeAgent.id,
-                agentCategory: activeAgent.category
+                agentCategory: activeAgent.category,
+                metadata: {
+                    parsedData: parsedData,
+                    healthMode: activeAgent.id === 'AIHEALTH' ? healthMode : null,
+                    writeSegment: activeAgent.id === 'AIWRITE' ? writeSegment : null
+                }
             };
-
             setMessages(prev => [...prev, modelMsg]);
-            // await chatStorageService.saveMessage('tool-mode', modelMsg);
 
+            // --- Post-Processing: Update Dashboard Metrics ---
+            try {
+                // If it's an error response or no parsed data, skip metric update
+                if (response?.error || response?.details || !parsedData) {
+                    console.log("[WORKSPACE] Skipping metric update for error or empty response");
+                } else {
+                    if (activeAgent.id === 'AIHEALTH') {
+                        const inputLower = finalInput.toLowerCase();
+                        if (healthMode.includes('Intelligence') || healthMode === 'SYMPTOM CHECKER' || inputLower.includes('symptom')) {
+                            setSymptomResult(parsedData);
+                            // Dynamic Symptom History (Risk Tracking)
+                            const riskMap = { 'Low': 1, 'Medium': 3, 'High': 5 };
+                            const riskScore = riskMap[parsedData.riskLevel] || 2;
+                            const day = new Date().toLocaleDateString('en-US', { weekday: 'short' });
+                            setSymptomHistory(prev => {
+                                const newHistory = [...prev];
+                                if (newHistory.length >= 7) newHistory.shift();
+                                newHistory.push({ date: day, risk: riskScore });
+                                return newHistory;
+                            });
+                        }
+                        else if (healthMode.includes('Report') || healthMode === 'REPORT ANALYZER' || inputLower.includes('report')) {
+                            setReportResult(parsedData);
+                            // Dynamic Report History Update
+                            const anomalyCount = parsedData.abnormalFindings?.length || 0;
+                            const month = new Date().toLocaleDateString('en-US', { month: 'short' });
+                            setReportHistory(prev => {
+                                const newHistory = [...prev];
+                                if (newHistory.length >= 6) newHistory.shift();
+                                newHistory.push({ date: month, anomalies: anomalyCount });
+                                return newHistory;
+                            });
+                        }
+                        else if (healthMode.includes('Wellness') || healthMode === 'WELLNESS PLANNER' || inputLower.includes('wellness')) {
+                            setWellnessPlanResult(parsedData);
+                            // Dynamic Wellness History Update
+                            const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            setWellnessHistory(prev => {
+                                const newHistory = [...prev];
+                                if (newHistory.length >= 6) newHistory.shift();
+                                newHistory.push({ date: today, value: parseFloat(healthWeight) });
+                                return newHistory;
+                            });
+                        }
+                        else if (healthMode.includes('Mental') || healthMode === 'MENTAL SUPPORT' || inputLower.includes('mental')) {
+                            setMentalResult(parsedData);
+                            // Dynamic Mood History Update
+                            const moodScores = { 'Happy': 5, 'Stressed': 2, 'Anxious': 1, 'Tired': 3 };
+                            const newScore = moodScores[healthMood] || 4;
+                            const today = new Date().toLocaleDateString('en-US', { weekday: 'short' });
+                            setMoodHistory(prev => {
+                                const newHistory = [...prev];
+                                if (newHistory.length >= 7) newHistory.shift();
+                                newHistory.push({ date: today, score: newScore });
+                                return newHistory;
+                            });
+                        }
+                        else if (healthMode === 'AUTOMATION' || (typeof customPrompt === 'string' && customPrompt?.includes('automation'))) {
+                            setAutomationResult(parsedData);
+                            if (parsedData.newLogs) setHealthAutomationLogs(prev => [...parsedData.newLogs, ...prev].slice(0, 10));
+                            if (parsedData.newAlerts) setHealthAlerts(prev => [...parsedData.newAlerts, ...prev].slice(0, 5));
+                        }
+                        else if (healthMode.includes('Treatment') || healthMode === 'TREATMENT ADVISOR' || inputLower.includes('treatment')) {
+                            setTreatmentResult(parsedData);
+                            // Dynamic Treatment history (Consultation Volume)
+                            const week = `W${Math.ceil(new Date().getDate() / 7)}`;
+                            setTreatmentHistory(prev => {
+                                const newHistory = [...prev];
+                                const lastIndex = newHistory.length - 1;
+                                const last = newHistory[lastIndex];
+                                if (last && last.date === week) {
+                                    newHistory[lastIndex] = { ...last, scans: (last.scans || 0) + 1 };
+                                } else {
+                                    if (newHistory.length >= 6) newHistory.shift();
+                                    newHistory.push({ date: week, scans: 1 });
+                                }
+                                return newHistory;
+                            });
+                        }
+                    } else if (activeAgent.id === 'AIBIZ') {
+                        if (parsedData.healthScore) setAibizHealthScore(parsedData.healthScore);
+                        if (parsedData.goals) setAibizGoals(parsedData.goals);
+                        if (parsedData.revenueData) setAibizRevenueData(parsedData.revenueData);
+                        if (parsedData.segments) setAibizSegments(parsedData.segments);
+                        if (parsedData.leadMetrics) setAibizLeadMetrics(parsedData.leadMetrics);
+                        if (parsedData.selectedCustomer && (typeof customPrompt === 'string' && customPrompt.includes('analyze_crm'))) {
+                            setSelectedCustomer(parsedData.selectedCustomer);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("[POST-PROCESS ERROR] Metric update failed:", err);
+            }
+
+            if (activeAgent.id === 'AIWRITE') {
+                setAiWriteResult(aiReply);
+            }
+
+            // Pass the same title for model message to ensure it sticks if there was a race
+            await chatStorageService.saveMessage(activeSessionId, modelMsg, firstPromptTitle);
         } catch (err) {
             console.error('[WORKSPACE ERROR]', err);
         } finally {
@@ -574,821 +1664,958 @@ const AISAWorkSpace = () => {
         }
     };
 
-    // Helper to transform AI text into visual cards for the UI
+    const groupSessionsByDate = (sessions) => {
+        const groups = {
+            'Today': [],
+            'Yesterday': [],
+            'Previous 7 Days': [],
+            'Older': []
+        };
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const yesterday = today - 86400000;
+        const lastWeek = today - 86400000 * 7;
+
+        sessions.forEach(session => {
+            const date = new Date(session.lastModified).getTime();
+            if (date >= today) groups['Today'].push(session);
+            else if (date >= yesterday) groups['Yesterday'].push(session);
+            else if (date >= lastWeek) groups['Previous 7 Days'].push(session);
+            else groups['Older'].push(session);
+        });
+
+        return groups;
+    };
+
+    const renderAIWriteResult = () => {
+        if (!aiWriteResult) return null;
+
+        const isCalendar = Array.isArray(aiWriteResult.calendar) || (Array.isArray(aiWriteResult) && aiWriteResult[0]?.date);
+        const data = Array.isArray(aiWriteResult.calendar) ? aiWriteResult.calendar : (Array.isArray(aiWriteResult) ? aiWriteResult : null);
+
+        if (isCalendar && data) {
+            const handleExportCSV = () => {
+                const headers = ["Date", "Phase", "Platform", "Format", "Post Type", "Heading", "Sub-Heading", "Short Caption", "Long Caption", "Hashtags", "Breakdown"];
+                const rows = data.map(item => [
+                    item.date, item.phase, item.platform, item.format, item.postType,
+                    `"${(item.heading || '').replace(/"/g, '""')}"`,
+                    `"${(item.subHeading || '').replace(/"/g, '""')}"`,
+                    `"${(item.shortCaption || '').replace(/"/g, '""')}"`,
+                    `"${(item.longCaption || '').replace(/"/g, '""')}"`,
+                    item.hashtags,
+                    `"${(item.slideOrReelBreakdown || '').replace(/"/g, '""')}"`
+                ]);
+                const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `content_calendar_${activeSessionId}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                            <Calendar className="w-5 h-5 text-blue-600" />
+                            <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">4-Week Strategy Calendar</h4>
+                        </div>
+                        <button onClick={handleExportCSV} className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-100 hover:bg-blue-100 transition-all">Export CSV</button>
+                    </div>
+                    <div className="overflow-x-auto rounded-[32px] border border-slate-100 shadow-xl shadow-blue-500/5 bg-white">
+                        <table className="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr className="bg-slate-50/50">
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Date</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Phase</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Platform</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Format</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Topic</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Hook</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Sub Hook</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Short Cap</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Full Copy</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Hashtags</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-wider">Breakdown</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.map((item, idx) => (
+                                    <tr key={idx} className="border-t border-slate-50 hover:bg-blue-50/10 transition-colors">
+                                        <td className="px-6 py-5 text-[11px] font-black text-slate-800">{item.date}</td>
+                                        <td className="px-6 py-5 text-[9px] font-bold text-blue-500 uppercase tracking-tight">{item.phase || 'Strategy'}</td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center">
+                                                    {item.platform?.toLowerCase().includes('instagram') ? <Instagram size={12} className="text-pink-500" /> :
+                                                        item.platform?.toLowerCase().includes('linkedin') ? <Linkedin size={12} className="text-blue-600" /> :
+                                                            item.platform?.toLowerCase().includes('facebook') ? <Facebook size={12} className="text-blue-700" /> :
+                                                                item.platform?.toLowerCase().includes('twitter') ? <Twitter size={12} className="text-sky-500" /> :
+                                                                    <Share2 size={12} className="text-slate-400" />}
+                                                </div>
+                                                <span className="text-[9px] font-bold text-slate-500 uppercase">{item.platform}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 text-[9px] text-slate-400 font-bold uppercase">{item.format || 'Standard'}</td>
+                                        <td className="px-6 py-5 text-[10px] font-black text-slate-700">{item.post_type || item.postType || 'Social Post'}</td>
+                                        <td className="px-6 py-5 min-w-[150px] text-[11px] font-black text-slate-800 leading-tight border-l-2 border-blue-500 pl-2">{item.heading}</td>
+                                        <td className="px-6 py-5 min-w-[150px] text-[10px] text-slate-400 font-bold">{item.subHeading || ''}</td>
+                                        <td className="px-6 py-5 min-w-[150px] text-[10px] text-slate-600 italic font-medium">"{item.shortCaption}"</td>
+                                        <td className="px-6 py-5 min-w-[250px] text-[10px] text-slate-600 font-medium">{item.longCaption || item.shortCaption}</td>
+                                        <td className="px-6 py-5 text-[10px] text-blue-600 font-bold">{item.hashtags || '#marketing'}</td>
+                                        <td className="px-6 py-5 min-w-[200px] text-[9px] text-slate-400 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">{item.slideOrReelBreakdown || 'Follow brand template'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        }
+
+        // Standard Structured Response (Students, Authors, etc)
+        // Convert object entries to cards
+        const entries = Object.entries(aiWriteResult).filter(([k]) => k !== 'status' && k !== 'success');
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {entries.map(([key, value], idx) => {
+                    const isFullWidth = entries.length === 1 || String(value).length > 400;
+                    return (
+                        <div key={idx} className={`bg-white border border-slate-100 rounded-[32px] p-8 shadow-xl shadow-blue-500/5 ${isFullWidth ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+                            <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] mb-4 blur-none">{key.replace(/_/g, ' ')}</h4>
+                            <div className="prose prose-slate max-w-none text-sm font-bold text-slate-700 leading-relaxed whitespace-pre-wrap">
+                                {typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    const handleNewChat = () => {
+        if (activeAgent?.id) {
+            navigate(`/ dashboard / workspace / ${activeAgent.id} `);
+        } else {
+            navigate('/dashboard/workspace');
+        }
+        setMessages([]);
+        setCurrentSessionId('new');
+        setInputValue('');
+        setFollowUpReminders([]);
+        setExcelFile(null);
+        setShowReminderForm(false);
+    };
+
+
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setExcelFile(file);
+            console.log("File uploaded:", file.name);
+        }
+    };
+
+    const getIconForContent = (title) => {
+        const t = title.toUpperCase();
+        if (t.includes('EMAIL') || t.includes('DRAFT')) return Mail;
+        if (t.includes('STRATEGY') || t.includes('PLAN')) return Target;
+        if (t.includes('ANALYSIS') || t.includes('REVIEW')) return SearchIcon;
+        if (t.includes('TREND') || t.includes('GROWTH')) return TrendingUp;
+        if (t.includes('KPI') || t.includes('METRIC')) return BarChart3;
+        if (t.includes('PRICE') || t.includes('COST') || t.includes('ROI') || t.includes('SAVINGS')) return IndianRupee;
+        if (t.includes('COMPETITOR')) return Shield;
+        if (t.includes('STAKEHOLDER') || t.includes('MAP')) return Network;
+        if (t.includes('SEQUENCE') || t.includes('AUTOMATION')) return Zap;
+        return Zap;
+    };
+
+    const renderCardContent = (card) => {
+        if (card.type === 'charts' && card.chartData) {
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {card.chartData.marketShare && (
+                        <div className="h-64">
+                            <p className="text-[10px] font-bold text-center mb-2">MARKET SHARE</p>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie data={card.chartData.marketShare} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                                        {card.chartData.marketShare.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                    {card.chartData.growthProjection && (
+                        <div className="h-64">
+                            <p className="text-[10px] font-bold text-center mb-2">GROWTH PROJECTION</p>
+                            <ResponsiveContainer>
+                                <BarChart data={card.chartData.growthProjection}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="year" fontSize={10} />
+                                    <YAxis fontSize={10} />
+                                    <Tooltip />
+                                    <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                    {card.chartData.mindMap && (
+                        <div className="col-span-full border-t border-border pt-6">
+                            <p className="text-[10px] font-bold text-center mb-4">STRATEGY MAP</p>
+                            <div className="flex flex-wrap gap-4 justify-center">
+                                {card.chartData.mindMap.map((node, ni) => (
+                                    <div key={ni} className="p-3 bg-secondary/50 rounded-lg border border-border min-w-[150px]">
+                                        <p className="text-xs font-bold mb-2">{typeof node.label === 'string' ? node.label : JSON.stringify(node.label)}</p>
+                                        <div className="flex flex-wrap gap-1">
+                                            {(node.children || []).map((c, j) => (
+                                                <span key={j} className="text-[9px] px-2 py-0.5 bg-white rounded-full border border-border">
+                                                    {typeof c === 'string' ? c : typeof c === 'object' ? (c.label || JSON.stringify(c)) : String(c)}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        if (card.type === 'swot') {
+            return (
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                    {['Strengths', 'Weaknesses', 'Opportunities', 'Threats'].map((q) => (
+                        <div key={q} className="p-4 rounded-2xl border border-border bg-secondary/20">
+                            <p className="text-[10px] font-black uppercase mb-1">{q}</p>
+                            <p className="text-[9px] text-subtext leading-relaxed">
+                                {card.content.split(q)[1]?.split('\n')[0]?.replace(/[:-]/g, '').trim() || 'Analysis pending...'}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        if (card.type === 'analysis_data' && card.chartData) {
+            const renderRecursiveValue = (val) => {
+                if (Array.isArray(val)) {
+                    return val.map((v, i) => (
+                        <div key={i} className="text-[10px] mt-1 flex items-start gap-2">
+                            <div className="w-1 h-1 rounded-full bg-primary/40 mt-1.5 shrink-0" />
+                            <span>{typeof v === 'object' ? renderRecursiveValue(v) : String(v)}</span>
+                        </div>
+                    ));
+                }
+                if (typeof val === 'object' && val !== null) {
+                    return Object.entries(val).map(([k, v]) => (
+                        <div key={k} className="mt-1">
+                            <span className="text-[9px] font-black text-subtext/50 uppercase mr-1">{k.replace(/_/g, ' ')}:</span>
+                            <span className="text-[10px] text-maintext">{typeof v === 'object' ? renderRecursiveValue(v) : String(v)}</span>
+                        </div>
+                    ));
+                }
+                return String(val);
+            };
+
+            return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                    {Object.entries(card.chartData).map(([key, value]) => {
+                        const label = key.replace(/_/g, ' ').toUpperCase();
+                        return (
+                            <div key={key} className="p-4 rounded-2xl border border-border bg-secondary/10 flex flex-col gap-1">
+                                <p className="text-[9px] font-black text-subtext/60 uppercase tracking-widest">{label}</p>
+                                <div className="text-[11px] font-bold text-maintext leading-relaxed">
+                                    {renderRecursiveValue(value)}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        if (card.type === 'calendar-table') {
+            return (
+                <div className="overflow-x-auto w-full -mx-4 px-4 mt-4">
+                    <table className="w-full text-left text-xs">
+                        <thead className="bg-secondary/30 text-[9px] uppercase tracking-widest text-subtext font-black">
+                            <tr>
+                                <th className="px-4 py-2 rounded-l-lg">Date</th>
+                                <th className="px-4 py-2">Platform</th>
+                                <th className="px-4 py-2">Topic</th>
+                                <th className="px-4 py-2 rounded-r-lg">Hook</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/20">
+                            {Array.isArray(card.content) && card.content.map((row, i) => (
+                                <tr key={i} className="group hover:bg-secondary/10 transition-colors">
+                                    <td className="px-4 py-3 font-bold text-maintext whitespace-nowrap">{row.date}</td>
+                                    <td className="px-4 py-3 font-bold text-pink-500 uppercase text-[9px]">{row.platform || row.Platform}</td>
+                                    <td className="px-4 py-3 font-medium text-maintext">{row.topic}</td>
+                                    <td className="px-4 py-3 text-subtext text-[10px] italic">"{row.hook}"</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        const safeContent = typeof card.content === 'string'
+            ? card.content
+            : card.content != null
+                ? JSON.stringify(card.content, null, 2)
+                : '';
+        return <div className="text-xs text-subtext leading-relaxed whitespace-pre-wrap font-medium">{safeContent}</div>;
+    };
+
     const renderMessageAsCards = (msg) => {
-        if (msg.role === 'user') return null;
+        if (!msg || msg.role === 'user') return null;
 
-        // Specialized parsing for AISALES
-        if (msg.agentName === 'AISALES') {
-            // Regex to split by "SECTION [N]: [TITLE]"
-            // Capture the Title group to use as card title
-            const sections = msg.content.split(/SECTION \d+:/).filter(s => s.trim());
-            // We also need to get the titles. Let's iterate manually or smarter split.
+        const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
 
-            // Better approach: Match "SECTION [N]: [TITLE] \n [CONTENT]"
-            // Let's rely on the split and reconstruct titles if possible, OR just use the content if the prompt is strict.
-            // The prompt asks for "SECTION 1: EMAIL SUBJECT".
+        // Special handling for Agency Calendar JSON
+        if (content.includes('```json') && content.includes('"date": ')) {
+            const jsonMatch = content.match(/```json([\s\S]*?)```/);
+            if (jsonMatch && jsonMatch[1]) {
+                try {
+                    const calendarData = JSON.parse(jsonMatch[1]);
+                    return {
+                        title: 'Social Media Calendar',
+                        cards: [{
+                            title: `Content Plan: ${agencyMonth}`,
+                            content: calendarData,
+                            icon: CalendarDays,
+                            type: 'calendar-table'
+                        }]
+                    };
+                } catch (e) {
+                    console.error('Calendar parse error', e);
+                }
+            }
+        }
+        try {
+            let sections = content.split(/SECTION \d+:/).filter(s => s.trim());
 
-            // Implementation:
-            // 1. Split by 'SECTION '
-            // 2. Ignore empty first part
-            // 3. For each part, first line (or part of it) is title (e.g. "1: EMAIL SUBJECT")
+            // If Agency Branding Mode
+            if (content.includes('BRAND ARCHETYPE') || content.includes('BIOS')) {
+                sections = content.split(/SECTION \d+:/).filter(s => s.trim());
+                const cards = sections.map(sec => {
+                    const firstNewLine = sec.indexOf('\n');
+                    let title = firstNewLine !== -1 ? sec.substring(0, firstNewLine).trim() : 'Branding Asset';
+                    let content = firstNewLine !== -1 ? sec.substring(firstNewLine).trim() : sec;
 
-            const rawSections = msg.content.split('SECTION ').filter(s => s.trim() && s.match(/^\d+:/));
+                    // Specific Icon Mapping
+                    let icon = PenTool;
+                    if (title.includes('ARCHETYPE')) icon = TargetIcon;
+                    if (title.includes('VOICE')) icon = MessageSquare;
+                    if (title.includes('BIOS')) icon = UserCheck;
+                    if (title.includes('COLOR')) icon = Layout;
 
-            const cards = rawSections.map(sec => {
-                const firstNewLine = sec.indexOf('\n');
-                let titleLine = sec;
-                let content = '';
+                    return { title, content, icon, type: 'default' };
+                });
+                return { title: 'Brand Identity Package', cards };
+            }
 
-                if (firstNewLine !== -1) {
-                    titleLine = sec.substring(0, firstNewLine).trim(); // "1: EMAIL SUBJECT"
-                    content = sec.substring(firstNewLine).trim();
+            if (sections.length <= 1) {
+                const headerSplit = content.split(/#{2,3}\s/).filter(s => s.trim());
+                if (headerSplit.length > 1) {
+                    sections = headerSplit;
                 } else {
-                    // One line section
-                    const colonIndex = sec.indexOf(':');
-                    if (colonIndex !== -1) {
-                        titleLine = sec.substring(0, colonIndex + 1);
-                        content = sec.substring(colonIndex + 1).trim();
+                    const titleSplit = content.split(/\n([A-Z\s]{5,}):?\n/).filter(s => s.trim());
+                    if (titleSplit.length > 1) {
+                        sections = titleSplit;
+                    } else {
+                        sections = [content];
                     }
                 }
+            }
 
-                // Clean title: Remove "1: " prefix if present
-                const cleanTitle = titleLine.replace(/^\d+:\s*/, '').trim();
-
-                let icon = Zap;
-                if (cleanTitle.toUpperCase().includes('SUBJECT')) icon = Mail;
-                if (cleanTitle.toUpperCase().includes('BODY')) icon = FileText;
-                if (cleanTitle.toUpperCase().includes('SEQUENCE')) icon = TrendingUp;
-                if (cleanTitle.toUpperCase().includes('STRATEGIC') || cleanTitle.toUpperCase().includes('ANALYSIS')) icon = Target;
-
-                return { title: cleanTitle, content, icon };
-            });
-
-            return {
-                title: `Sales Outreach Analysis`,
-                cards: cards.length > 0 ? cards : [{ title: 'Analysis', content: msg.content, icon: Zap }]
-            };
-        }
-
-        // Specialized parsing for AIWRITE
-        if (msg.agentName === 'AIWRITE') {
-            const rawSections = msg.content.split('SECTION ').filter(s => s.trim() && s.match(/^\d+:/));
-
-            const cards = rawSections.map(sec => {
-                const firstNewLine = sec.indexOf('\n');
-                let titleLine = sec;
-                let content = '';
-
-                if (firstNewLine !== -1) {
-                    titleLine = sec.substring(0, firstNewLine).trim();
-                    content = sec.substring(firstNewLine).trim();
-                } else {
-                    const colonIndex = sec.indexOf(':');
-                    if (colonIndex !== -1) {
-                        titleLine = sec.substring(0, colonIndex + 1);
-                        content = sec.substring(colonIndex + 1).trim();
-                    }
-                }
-
-                const cleanTitle = titleLine.replace(/^\d+:\s*/, '').trim();
-
-                let icon = FileText;
-                if (cleanTitle.toUpperCase().includes('MAIN CONTENT')) icon = Layout;
-                if (cleanTitle.toUpperCase().includes('SEO')) icon = SearchIcon;
-                if (cleanTitle.toUpperCase().includes('CTA') || cleanTitle.toUpperCase().includes('CONVERSION')) icon = Zap;
-                if (cleanTitle.toUpperCase().includes('REPURPOSED')) icon = MessageSquare;
-
-                return { title: cleanTitle, content, icon };
-            });
-
-            return {
-                title: `Content Generation Results`,
-                cards: cards.length > 0 ? cards : [{ title: 'Draft', content: msg.content, icon: FileText }]
-            };
-        }
-
-        // Specialized parsing for AIDESK
-        if (msg.agentName === 'AIDESK') {
-            const sections = msg.content.split('###').filter(s => s.trim());
             const cards = sections.map(sec => {
-                const lines = sec.trim().split('\n');
-                const title = lines[0].trim();
-                const content = lines.slice(1).join('\n').trim();
-
-                let icon = MessageSquare;
-                if (title.toUpperCase().includes('REPLY')) icon = Mail;
-                if (title.toUpperCase().includes('SUMMARY')) icon = CheckCircle2;
-                if (title.toUpperCase().includes('SENTIMENT')) icon = Shield;
-
-                return { title, content, icon };
-            });
-
-            return {
-                title: `Support Resolution Path`,
-                cards: cards.length > 0 ? cards : [{ title: 'Advice', content: msg.content, icon: MessageSquare }]
-            };
-        }
-
-        // Specialized parsing for AIHIRE
-        if (msg.agentName === 'AIHIRE') {
-            const sections = msg.content.split('###').filter(s => s.trim());
-            const cards = sections.map(sec => {
-                const lines = sec.trim().split('\n');
-                const title = lines[0].trim();
-                const content = lines.slice(1).join('\n').trim();
-
-                let icon = Users;
-                if (title.toUpperCase().includes('PLAN')) icon = Target;
-                if (title.toUpperCase().includes('ROLE')) icon = Briefcase;
-                if (title.toUpperCase().includes('INTERVIEW')) icon = MessageSquare;
-                if (title.toUpperCase().includes('TIMELINE') || title.toUpperCase().includes('ROADMAP')) icon = TrendingUp;
-                if (title.toUpperCase().includes('KPI') || title.toUpperCase().includes('DASHBOARD')) icon = BarChart3;
-
-                return { title, content, icon };
-            });
-
-            return {
-                title: `Talent Strategy Report`,
-                cards: cards.length > 0 ? cards : [{ title: 'Hiring Plan', content: msg.content, icon: Users }]
-            };
-        }
-
-        // Specialized parsing for AIBIZ
-        if (msg.agentName === 'AIBIZ') {
-            const rawSections = msg.content.split('SECTION ').filter(s => s.trim() && s.match(/^\d+:/));
-
-            const cards = rawSections.map(sec => {
                 const firstNewLine = sec.indexOf('\n');
-                let titleLine = sec;
-                let content = '';
+                let title = firstNewLine !== -1 ? sec.substring(0, firstNewLine).trim() : 'Analysis';
+                let content = firstNewLine !== -1 ? sec.substring(firstNewLine).trim() : sec;
 
-                if (firstNewLine !== -1) {
-                    titleLine = sec.substring(0, firstNewLine).trim();
-                    content = sec.substring(firstNewLine).trim();
-                } else {
-                    const colonIndex = sec.indexOf(':');
-                    if (colonIndex !== -1) {
-                        titleLine = sec.substring(0, colonIndex + 1);
-                        content = sec.substring(colonIndex + 1).trim();
-                    }
-                }
+                title = title.replace(/^\d+:\s*/, '').replace(/\*+/g, '').replace(/[:#]/g, '').trim();
+                content = content.replace(/```(json|JSON)?/g, '').replace(/```/g, '').trim();
 
-                const cleanTitle = titleLine.replace(/^\d+:\s*/, '').trim();
-
-                let icon = BarChart3;
+                let icon = getIconForContent(title, content);
                 let type = 'default';
+                let chartData = null;
 
-                if (cleanTitle.toUpperCase().includes('SWOT')) {
+                if (title.toUpperCase().includes('SWOT')) {
                     icon = Layout;
                     type = 'swot';
                 }
-                if (cleanTitle.toUpperCase().includes('PRICING')) icon = CreditCard;
-                if (cleanTitle.toUpperCase().includes('POSITIONING')) icon = Target;
-                if (cleanTitle.toUpperCase().includes('ROADMAP') || cleanTitle.toUpperCase().includes('GROWTH')) icon = TrendingUp;
-
-                return { title: cleanTitle, content, icon, type };
-            });
-
-            return {
-                title: `Business Strategy Roadmap`,
-                cards: cards.length > 0 ? cards : [{ title: 'Strategy', content: msg.content, icon: BarChart3, type: 'default' }]
-            };
-        }
-
-        return {
-            title: `${activeAgent.name} Analysis`,
-            cards: [
-                {
-                    type: 'analysis',
-                    title: 'Executive Summary',
-                    content: msg.content,
-                    icon: Zap
+                if (title.toUpperCase().includes('VISUALIZATIONS') || content.trim().startsWith('{')) {
+                    const isVisual = title.toUpperCase().includes('VISUALIZATIONS');
+                    icon = isVisual ? FilePieChart : Layout;
+                    type = isVisual ? 'charts' : 'analysis_data';
+                    try {
+                        const jsonStr = content.match(/\{[\s\S]*\}/)?.[0];
+                        if (jsonStr) chartData = JSON.parse(jsonStr);
+                    } catch (e) {
+                        // ignore
+                    }
                 }
-            ]
-        };
+
+                return { title, content, icon, type, chartData };
+            });
+            return { title: `Content Generation Results`, cards };
+        } catch (err) {
+            console.error('[renderMessageAsCards error]', err);
+            return { title: 'Analysis Result', cards: [{ title: 'Result', content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content), icon: Zap, type: 'default', chartData: null }] };
+        }
     };
 
     const renderAgentInputs = () => {
         switch (activeAgent.id) {
             case 'AISALES':
                 return (
-                    <>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Lead Type</label>
-                            <select
-                                value={leadType}
-                                onChange={(e) => setLeadType(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Enterprise</option>
-                                <option>Small Business</option>
-                                <option>SaaS Startup</option>
-                                <option>Digital Agency</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Tone</label>
-                            <select
-                                value={tone}
-                                onChange={(e) => setTone(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Professional</option>
-                                <option>Friendly</option>
-                                <option>Persuasive</option>
-                                <option>Consultative</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Email Type</label>
-                            <select
-                                value={emailType}
-                                onChange={(e) => setEmailType(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Cold Outreach</option>
-                                <option>Follow-Up</option>
-                                <option>Re-engagement</option>
-                                <option>Product Launch</option>
-                            </select>
-                        </div>
-                    </>
+                    <AISALESInputs
+                        salesMode={salesMode} setSalesMode={setSalesMode}
+                        targetAccount={targetAccount} setTargetAccount={setTargetAccount}
+                        targetPersona={targetPersona} setTargetPersona={setTargetPersona}
+                        dealValue={dealValue} setDealValue={setDealValue}
+                        mainCompetitor={mainCompetitor} setMainCompetitor={setMainCompetitor}
+                        competitorStrength={competitorStrength} setCompetitorStrength={setCompetitorStrength}
+                        playbookType={playbookType} setPlaybookType={setPlaybookType}
+                        dealStage={dealStage} setDealStage={setDealStage}
+                        lastContactDate={lastContactDate} setLastContactDate={setLastContactDate}
+                        outreachChannel={outreachChannel} setOutreachChannel={setOutreachChannel}
+                        personaGoals={personaGoals} setPersonaGoals={setPersonaGoals}
+                        personaPainPoints={personaPainPoints} setPersonaPainPoints={setPersonaPainPoints}
+                        prospectReply={prospectReply} setProspectReply={setProspectReply}
+                        prospectObjection={prospectObjection} setProspectObjection={setProspectObjection}
+                        engagementLevel={engagementLevel} setEngagementLevel={setEngagementLevel}
+                        yourPrice={yourPrice} setYourPrice={setYourPrice}
+                        competitorPrice={competitorPrice} setCompetitorPrice={setCompetitorPrice}
+                        valueProps={valueProps} setValueProps={setValueProps}
+                        excelFile={excelFile} setExcelFile={setExcelFile}
+                        showReminderForm={showReminderForm} setShowReminderForm={setShowReminderForm}
+                        followUpReminders={followUpReminders}
+                        newsItems={newsItems}
+                        liveSignals={liveSignals}
+                        stakeholderMap={stakeholderMap}
+                        roiCalc={roiCalc} setRoiCalc={setRoiCalc}
+                        scriptType={scriptType} setScriptType={setScriptType}
+                        isProcessing={isProcessing}
+                        handleAction={handleAction}
+                        sessions={sessions}
+                        currentSessionId={currentSessionId}
+                        onDeleteSession={handleDeleteSession}
+                        navigate={navigate}
+                    />
                 );
             case 'AIWRITE':
                 return (
-                    <>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Content Type</label>
-                            <select
-                                value={contentType}
-                                onChange={(e) => setContentType(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Blog Post</option>
-                                <option>Landing Page</option>
-                                <option>Ad Copy</option>
-                                <option>Email Campaign</option>
-                                <option>LinkedIn Post</option>
-                                <option>Twitter Thread</option>
-                                <option>Product Description</option>
-                                <option>SEO Article</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Tone of Voice</label>
-                            <select
-                                value={tone}
-                                onChange={(e) => setTone(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Professional</option>
-                                <option>Casual</option>
-                                <option>Bold</option>
-                                <option>Minimal</option>
-                                <option>Luxury</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Target Audience</label>
-                            <select
-                                value={targetAudience}
-                                onChange={(e) => setTargetAudience(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Startup Founders</option>
-                                <option>Marketing Teams</option>
-                                <option>Agencies</option>
-                                <option>SaaS Companies</option>
-                                <option>E-commerce Brands</option>
-                                <option>Personal Brands</option>
-                                <option>Content Creators</option>
-                                <option>B2B Decision Makers</option>
-                                <option>Developers / Tech</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Brand Personality Keywords</label>
-                            <input
-                                type="text"
-                                value={brandPersonality}
-                                onChange={(e) => setBrandPersonality(e.target.value)}
-                                placeholder="e.g. Innovative, Trustworthy, Friendly..."
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <div className="flex justify-between items-center px-1">
-                                <label className="text-[10px] font-bold text-subtext uppercase tracking-widest">Word Count Preference</label>
-                                <span className="text-[10px] font-bold text-primary">{writingLength === 1 ? 'Short' : writingLength === 3 ? 'Long' : 'Medium'}</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="1"
-                                max="3"
-                                step="1"
-                                value={writingLength}
-                                onChange={(e) => setWritingLength(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-pink-500"
-                            />
-                        </div>
-                        <div className="space-y-1.5 pt-1">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Objective</label>
-                            <select
-                                value={objective}
-                                onChange={(e) => setObjective(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Traffic (SEO)</option>
-                                <option>Conversion (Sales)</option>
-                                <option>Brand Awareness</option>
-                                <option>Engagement</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5 pt-1">
-                            <div className="flex items-center justify-between bg-secondary/30 p-2 rounded-lg border border-border/50">
-                                <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1 cursor-pointer" onClick={() => setIsSeoMode(!isSeoMode)}>
-                                    Enable SEO Mode
-                                </label>
-                                <button
-                                    role="switch"
-                                    aria-checked={isSeoMode}
-                                    onClick={() => setIsSeoMode(!isSeoMode)}
-                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isSeoMode ? 'bg-primary' : 'bg-subtext/30'}`}
-                                >
-                                    <span
-                                        className={`${isSeoMode ? 'translate-x-5' : 'translate-x-1'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="space-y-1.5 pt-1">
-                            <div className="flex items-center justify-between bg-secondary/30 p-2 rounded-lg border border-border/50">
-                                <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1 cursor-pointer" onClick={() => setIsConversionMode(!isConversionMode)}>
-                                    Enable Conversion Mode
-                                </label>
-                                <button
-                                    role="switch"
-                                    aria-checked={isConversionMode}
-                                    onClick={() => setIsConversionMode(!isConversionMode)}
-                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isConversionMode ? 'bg-primary' : 'bg-subtext/30'}`}
-                                >
-                                    <span
-                                        className={`${isConversionMode ? 'translate-x-5' : 'translate-x-1'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="space-y-1.5 pt-1">
-                            <div className="flex items-center justify-between bg-secondary/30 p-2 rounded-lg border border-border/50">
-                                <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1 cursor-pointer" onClick={() => setIsRepurposeMode(!isRepurposeMode)}>
-                                    Auto-Repurpose Content
-                                </label>
-                                <button
-                                    role="switch"
-                                    aria-checked={isRepurposeMode}
-                                    onClick={() => setIsRepurposeMode(!isRepurposeMode)}
-                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isRepurposeMode ? 'bg-primary' : 'bg-subtext/30'}`}
-                                >
-                                    <span
-                                        className={`${isRepurposeMode ? 'translate-x-5' : 'translate-x-1'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </button>
-                            </div>
-                        </div>
-                        {isSeoMode && (
-                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                                <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Primary Keyword / Topic</label>
-                                <div className="relative">
-                                    <SearchIcon className="absolute left-3 top-2.5 w-4 h-4 text-subtext" />
-                                    <input
-                                        type="text"
-                                        value={seoKeyword}
-                                        onChange={(e) => setSeoKeyword(e.target.value)}
-                                        placeholder="e.g. AI Marketing, Growth Hacking..."
-                                        className="w-full bg-secondary/50 border border-border rounded-xl pl-9 pr-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Key Points / Context</label>
-                            <textarea
-                                value={contentContext}
-                                onChange={(e) => setContentContext(e.target.value)}
-                                placeholder="Specific points to cover, product details, or call to action..."
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-xs text-maintext focus:outline-none focus:border-primary/50 min-h-[60px] resize-none"
-                            />
-                        </div>
-                    </>
+                    <AIWRITEInputs
+                        writeSegment={writeSegment} setWriteSegment={setWriteSegment}
+                        agencyClientName={agencyClientName} setAgencyClientName={setAgencyClientName}
+                        agencyIndustry={agencyIndustry} setAgencyIndustry={setAgencyIndustry}
+                        agencyTargetAudience={agencyTargetAudience} setAgencyTargetAudience={setAgencyTargetAudience}
+                        agencyMonth={agencyMonth} setAgencyMonth={setAgencyMonth}
+                        agencyFrequency={agencyFrequency} setAgencyFrequency={setAgencyFrequency}
+                        agencySocialGoal={agencySocialGoal} setAgencySocialGoal={setAgencySocialGoal}
+                        agencyTone={agencyTone} setAgencyTone={setAgencyTone}
+                        agencyPlatforms={agencyPlatforms} setAgencyPlatforms={setAgencyPlatforms}
+                        agencyView={agencyView} setAgencyView={setAgencyView}
+                        agencyUSP={agencyUSP} setAgencyUSP={setAgencyUSP}
+                        agencyKeyword={agencyKeyword} setAgencyKeyword={setAgencyKeyword}
+                        agencyWordCount={agencyWordCount} setAgencyWordCount={setAgencyWordCount}
+                        agencyPageDescription={agencyPageDescription} setAgencyPageDescription={setAgencyPageDescription}
+                        studentSubject={studentSubject} setStudentSubject={setStudentSubject}
+                        studentTopic={studentTopic} setStudentTopic={setStudentTopic}
+                        studentWordCount={studentWordCount} setStudentWordCount={setStudentWordCount}
+                        studentTone={studentTone} setStudentTone={setStudentTone}
+                        isAcademicFormat={isAcademicFormat} setIsAcademicFormat={setIsAcademicFormat}
+                        studentFeature={studentFeature} setStudentFeature={setStudentFeature}
+                        startupName={startupName} setStartupName={setStartupName}
+                        startupProduct={startupProduct} setStartupProduct={setStartupProduct}
+                        startupProblem={startupProblem} setStartupProblem={setStartupProblem}
+                        startupSolution={startupSolution} setStartupSolution={setStartupSolution}
+                        startupTone={startupTone} setStartupTone={setStartupTone}
+                        startupPlatform={startupPlatform} setStartupPlatform={setStartupPlatform}
+                        startupFeature={startupFeature} setStartupFeature={setStartupFeature}
+                        startupAudience={startupAudience} setStartupAudience={setStartupAudience}
+                        freelancerService={freelancerService} setFreelancerService={setFreelancerService}
+                        freelancerClientType={freelancerClientType} setFreelancerClientType={setFreelancerClientType}
+                        freelancerBudget={freelancerBudget} setFreelancerBudget={setFreelancerBudget}
+                        freelancerTone={freelancerTone} setFreelancerTone={setFreelancerTone}
+                        freelancerFeature={freelancerFeature} setFreelancerFeature={setFreelancerFeature}
+                        influencerNiche={influencerNiche} setInfluencerNiche={setInfluencerNiche}
+                        influencerMood={influencerMood} setInfluencerMood={setInfluencerMood}
+                        useEmojis={useEmojis} setUseEmojis={setUseEmojis}
+                        hashtagCount={hashtagCount} setHashtagCount={setHashtagCount}
+                        influencerFeature={influencerFeature} setInfluencerFeature={setInfluencerFeature}
+                        authorStoryTopic={authorStoryTopic} setAuthorStoryTopic={setAuthorStoryTopic}
+                        authorGenre={authorGenre} setAuthorGenre={setAuthorGenre}
+                        authorTone={authorTone} setAuthorTone={setAuthorTone}
+                        authorFeature={authorFeature} setAuthorFeature={setAuthorFeature}
+                        authorTheme={authorTheme} setAuthorTheme={setAuthorTheme}
+                        authorMood={authorMood} setAuthorMood={setAuthorMood}
+                        authorStyle={authorStyle} setAuthorStyle={setAuthorStyle}
+                        authorRhyme={authorRhyme} setAuthorRhyme={setAuthorRhyme}
+                        authorCharacters={authorCharacters} setAuthorCharacters={setAuthorCharacters}
+                        authorScript={authorScript} setAuthorScript={setAuthorScript}
+                        authorContext={authorContext} setAuthorContext={setAuthorContext}
+                        authorLength={authorLength} setAuthorLength={setAuthorLength}
+                        authorLanguage={authorLanguage} setAuthorLanguage={setAuthorLanguage}
+                        authorFile={authorFile} setAuthorFile={setAuthorFile}
+                        agencyFeature={agencyFeature} setAgencyFeature={setAgencyFeature}
+                        contentType={contentType} setContentType={setContentType}
+                        objective={objective} setObjective={setObjective}
+                        tone={tone} setTone={setTone}
+                        writingLength={writingLength} setWritingLength={setWritingLength}
+                        targetAudience={targetAudience} setTargetAudience={setTargetAudience}
+                        seoKeyword={seoKeyword} setSeoKeyword={setSeoKeyword}
+                        brandPersonality={brandPersonality} setBrandPersonality={setBrandPersonality}
+                        contentContext={contentContext} setContentContext={setContentContext}
+                        isSeoMode={isSeoMode} setIsSeoMode={setIsSeoMode}
+                        isConversionMode={isConversionMode} setIsConversionMode={setIsConversionMode}
+                        isRepurposeMode={isRepurposeMode} setIsRepurposeMode={setIsRepurposeMode}
+                        isMultiOutputEnabled={isMultiOutputEnabled} setIsMultiOutputEnabled={setIsMultiOutputEnabled}
+                        automationWorkflows={automationWorkflows} setAutomationWorkflows={setAutomationWorkflows}
+                        automationDeadlines={automationDeadlines} setAutomationDeadlines={setAutomationDeadlines}
+                        isProcessing={isProcessing}
+                        handleAction={handleAction}
+                        onClearWorkspace={handleClearWorkspace}
+                        aiWriteResult={aiWriteResult}
+                        setAiWriteResult={setAiWriteResult}
+                        sessions={sessions}
+                        currentSessionId={currentSessionId}
+                        onDeleteSession={handleDeleteSession}
+                        navigate={navigate}
+                    />
+                );
+            case 'AIBIZ':
+                return (
+                    <AIBIZInputs
+                        aibizMode={aibizMode} setAibizMode={setAibizMode}
+                        industry={industry} setIndustry={setIndustry}
+                        marketType={marketType} setMarketType={setMarketType}
+                        businessStage={businessStage} setBusinessStage={setBusinessStage}
+                        businessDescription={businessDescription} setBusinessDescription={setBusinessDescription}
+                        yourPrice={yourPrice} setYourPrice={setYourPrice}
+                        competitorPrice={competitorPrice} setCompetitorPrice={setCompetitorPrice}
+                        isProcessing={isProcessing}
+                        handleAction={handleAction}
+                        onClearWorkspace={handleClearWorkspace}
+                        selectedCustomer={selectedCustomer}
+                        setSelectedCustomer={setSelectedCustomer}
+                        customers={customers}
+                        interactions={interactions}
+                        healthScore={aibizHealthScore}
+                        setHealthScore={setAibizHealthScore}
+                        goals={aibizGoals}
+                        setGoals={setAibizGoals}
+                        revenueData={aibizRevenueData}
+                        setRevenueData={setAibizRevenueData}
+                        segments={aibizSegments}
+                        setSegments={setAibizSegments}
+                        leadMetrics={aibizLeadMetrics}
+                        setLeadMetrics={setAibizLeadMetrics}
+                        sessions={sessions}
+                        currentSessionId={currentSessionId}
+                        onDeleteSession={handleDeleteSession}
+                        navigate={navigate}
+                    />
+                );
+            case 'AIHIRE':
+                return (
+                    <AIHIREInputs
+                        hiringMode={hiringMode} setHiringMode={setHiringMode}
+                        hireRiskTolerance={hireRiskTolerance} setHireRiskTolerance={setHireRiskTolerance}
+                        hireSourcingChannels={hireSourcingChannels} setHireSourcingChannels={setHireSourcingChannels}
+                        hireExtraNotes={hireExtraNotes} setHireExtraNotes={setHireExtraNotes}
+                        hireRole={hireRole} setHireRole={setHireRole}
+                        hireDepartment={hireDepartment} setHireDepartment={setHireDepartment}
+                        hireSeniority={hireSeniority} setHireSeniority={setHireSeniority}
+                        hireLocation={hireLocation} setHireLocation={setHireLocation}
+                        hireUrgency={hireUrgency} setHireUrgency={setHireUrgency}
+                        hireIndustry={hireIndustry} setHireIndustry={setHireIndustry}
+                        hireBudget={hireBudget} setHireBudget={setHireBudget}
+                        hireCandidateProfiles={hireCandidateProfiles} setHireCandidateProfiles={setHireCandidateProfiles}
+                        hireUploadedFiles={hireUploadedFiles} setHireUploadedFiles={setHireUploadedFiles}
+                        hireFileAttachments={hireFileAttachments} setHireFileAttachments={setHireFileAttachments}
+                        hireUploadDragging={hireUploadDragging} setHireUploadDragging={setHireUploadDragging}
+                        hireJobDescription={hireJobDescription} setHireJobDescription={setHireJobDescription}
+                        hireScorecardCriteria={hireScorecardCriteria} setHireScorecardCriteria={setHireScorecardCriteria}
+                        hireBiasCheck={hireBiasCheck} setHireBiasCheck={setHireBiasCheck}
+                        hireOfferSalary={hireOfferSalary} setHireOfferSalary={setHireOfferSalary}
+                        hireEquityPercent={hireEquityPercent} setHireEquityPercent={setHireEquityPercent}
+                        hireOfferPerks={hireOfferPerks} setHireOfferPerks={setHireOfferPerks}
+                        hireCompetitorSalary={hireCompetitorSalary} setHireCompetitorSalary={setHireCompetitorSalary}
+                        hireCandidateLeverage={hireCandidateLeverage} setHireCandidateLeverage={setHireCandidateLeverage}
+                        hireOrgStructure={hireOrgStructure} setHireOrgStructure={setHireOrgStructure}
+                        hireCulturalValues={hireCulturalValues} setHireCulturalValues={setHireCulturalValues}
+                        handleResumeFiles={handleResumeFiles}
+                        hireFileInputRef={hireFileInputRef}
+                        isProcessing={isProcessing}
+                        handleAction={handleAction}
+                        onClearWorkspace={handleClearWorkspace}
+                        sessions={sessions}
+                        currentSessionId={currentSessionId}
+                        onDeleteSession={handleDeleteSession}
+                        navigate={navigate}
+                    />
+                );
+            case 'AIHEALTH':
+                return (
+                    <AIHEALTHInputs
+                        healthMode={healthMode} setHealthMode={setHealthMode}
+                        healthName={healthName} setHealthName={setHealthName}
+                        healthAge={healthAge} setHealthAge={setHealthAge}
+                        healthGender={healthGender} setHealthGender={setHealthGender}
+                        healthWeight={healthWeight} setHealthWeight={setHealthWeight}
+                        healthHeight={healthHeight} setHealthHeight={setHealthHeight}
+                        healthGoal={healthGoal} setHealthGoal={setHealthGoal}
+                        healthDietaryType={healthDietaryType} setHealthDietaryType={setHealthDietaryType}
+                        healthAllergies={healthAllergies} setHealthAllergies={setHealthAllergies}
+                        healthCuisine={healthCuisine} setHealthCuisine={setHealthCuisine}
+                        healthActiveMonth={healthActiveMonth} setHealthActiveMonth={setHealthActiveMonth}
+                        includeAyurveda={includeAyurveda} setIncludeAyurveda={setIncludeAyurveda}
+                        wellnessHistory={wellnessHistory} setWellnessHistory={setWellnessHistory}
+                        reportHistory={reportHistory} setReportHistory={setReportHistory}
+                        symptoms={symptoms} setSymptoms={setSymptoms}
+                        symptomDuration={symptomDuration} setSymptomDuration={setSymptomDuration}
+                        symptomSeverity={symptomSeverity} setSymptomSeverity={setSymptomSeverity}
+                        symptomTreatmentType={symptomTreatmentType} setSymptomTreatmentType={setSymptomTreatmentType}
+                        symptomResult={symptomResult} setSymptomResult={setSymptomResult}
+                        reportManualValues={reportManualValues} setReportManualValues={setReportManualValues}
+                        reportResult={reportResult} setReportResult={setReportResult}
+                        reportFile={reportFile} setReportFile={setReportFile}
+                        healthActivityLevel={healthActivityLevel} setHealthActivityLevel={setHealthActivityLevel}
+                        wellnessPlanResult={wellnessPlanResult} setWellnessPlanResult={setWellnessPlanResult}
+                        healthMood={healthMood} setHealthMood={setHealthMood}
+                        mentalNote={mentalNote} setMentalNote={setMentalNote}
+                        mentalResult={mentalResult} setMentalResult={setMentalResult}
+                        moodHistory={moodHistory} setMoodHistory={setMoodHistory}
+                        medicineName={medicineName} setMedicineName={setMedicineName}
+                        treatmentTypeChoice={treatmentTypeChoice} setTreatmentTypeChoice={setTreatmentTypeChoice}
+                        healthCondition={healthCondition} setHealthCondition={setHealthCondition}
+                        treatmentResult={treatmentResult} setTreatmentResult={setTreatmentResult}
+                        symptomHistory={symptomHistory} setSymptomHistory={setSymptomHistory}
+                        treatmentHistory={treatmentHistory} setTreatmentHistory={setTreatmentHistory}
+                        healthAutomationActive={healthAutomationActive} setHealthAutomationActive={setHealthAutomationActive}
+                        healthAutomationLogs={healthAutomationLogs} setHealthAutomationLogs={setHealthAutomationLogs}
+                        healthAlerts={healthAlerts} setHealthAlerts={setHealthAlerts}
+                        automationResult={automationResult} setAutomationResult={setAutomationResult}
+                        healthSleepHours={healthSleepHours} setHealthSleepHours={setHealthSleepHours}
+                        healthWaterIntake={healthWaterIntake} setHealthWaterIntake={setHealthWaterIntake}
+                        healthSteps={healthSteps} setHealthSteps={setHealthSteps}
+                        healthHeartRate={healthHeartRate} setHealthHeartRate={setHealthHeartRate}
+                        healthStressLevel={healthStressLevel} setHealthStressLevel={setHealthStressLevel}
+                        healthRoutine={healthRoutine} setHealthRoutine={setHealthRoutine}
+                        isProcessing={isProcessing}
+                        handleAction={handleAction}
+                        onClearWorkspace={handleClearWorkspace}
+                        sessions={sessions}
+                        currentSessionId={currentSessionId}
+                        onDeleteSession={handleDeleteSession}
+                        navigate={navigate}
+                    />
                 );
             case 'AIDESK':
                 return (
-                    <>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Category</label>
-                            <select
-                                value={ticketCategory}
-                                onChange={(e) => setTicketCategory(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Technical</option>
-                                <option>Billing</option>
-                                <option>Account</option>
-                                <option>General</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Urgency</label>
-                            <div className="flex gap-2">
-                                {['Low', 'Medium', 'High', 'Critical'].map(level => (
-                                    <button
-                                        key={level}
-                                        type="button"
-                                        onClick={() => setUrgency(level)}
-                                        className={`flex-1 py-2 text-[10px] font-bold rounded-xl border transition-all ${urgency === level
-                                            ? 'bg-primary/10 border-primary text-primary shadow-sm'
-                                            : 'bg-secondary/50 border-border text-subtext hover:text-maintext'
-                                            }`}
-                                    >
-                                        {level}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </>
+                    <AIDESKInputs
+                        ticketCategory={ticketCategory} setTicketCategory={setTicketCategory}
+                        urgency={urgency} setUrgency={setUrgency}
+                        auditLogs={auditLogs} setAuditLogs={setAuditLogs}
+                        isProcessing={isProcessing}
+                        handleAction={handleAction}
+                        sessions={sessions}
+                        currentSessionId={currentSessionId}
+                        onDeleteSession={handleDeleteSession}
+                        navigate={navigate}
+                    />
                 );
-            case 'AIHIRE':
-                return (
-                    <>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Industry</label>
-                            <select
-                                value={industry}
-                                onChange={(e) => setIndustry(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>SaaS</option>
-                                <option>Ecommerce</option>
-                                <option>FinTech</option>
-                                <option>HealthTech</option>
-                                <option>DevTools</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Business Stage</label>
-                            <select
-                                value={businessStage}
-                                onChange={(e) => setBusinessStage(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Seed (1-10)</option>
-                                <option>Growth (10-50)</option>
-                                <option>Scale-up (50-200)</option>
-                                <option>Enterprise</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Current Team Size</label>
-                            <select
-                                value={teamSize}
-                                onChange={(e) => setTeamSize(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>1-5</option>
-                                <option>5-20</option>
-                                <option>20-50</option>
-                                <option>50+</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Hiring Mode</label>
-                            <select
-                                value={hiringMode}
-                                onChange={(e) => setHiringMode(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>Founding Team Hiring</option>
-                                <option>Growth Hiring</option>
-                                <option>Replacement Hiring</option>
-                                <option>Scaling Team Hiring</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Hiring Urgency</label>
-                            <div className="flex gap-2">
-                                {['Low', 'Medium', 'High'].map(level => (
-                                    <button
-                                        key={level}
-                                        type="button"
-                                        onClick={() => setHiringUrgency(level)}
-                                        className={`flex-1 py-2 text-[10px] font-bold rounded-xl border transition-all ${hiringUrgency === level
-                                            ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500 shadow-sm'
-                                            : 'bg-secondary/50 border-border text-subtext hover:text-maintext'
-                                            }`}
-                                    >
-                                        {level}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="col-span-full space-y-2">
-                            <div className="flex justify-between items-center px-1">
-                                <label className="text-[10px] font-bold text-subtext uppercase tracking-widest">Base Comp Budget</label>
-                                <span className="text-xs font-bold text-primary">${budgetRange}k / year</span>
-                            </div>
-                            <input
-                                type="range"
-                                min="50"
-                                max="500"
-                                step="10"
-                                value={budgetRange}
-                                onChange={(e) => setBudgetRange(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                            />
-                        </div>
-                    </>
-                );
-            case 'AIBIZ':
-                return (
-                    <>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Industry</label>
-                            <select
-                                value={industry}
-                                onChange={(e) => setIndustry(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>SaaS</option>
-                                <option>Ecommerce</option>
-                                <option>Agency</option>
-                                <option>EdTech</option>
-                                <option>FinTech</option>
-                                <option>Healthcare</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Business Stage</label>
-                            <div className="flex gap-2 relative overflow-x-auto no-scrollbar">
-                                {['Idea Stage', 'Early Startup', 'Growth Stage', 'Scaling Stage'].map(stage => (
-                                    <button
-                                        key={stage}
-                                        type="button"
-                                        onClick={() => setBusinessStage(stage)}
-                                        className={`flex-none px-3 py-2 text-[10px] font-bold rounded-xl border transition-all whitespace-nowrap ${businessStage === stage
-                                            ? 'bg-primary/10 border-primary text-primary shadow-sm'
-                                            : 'bg-secondary/50 border-border text-subtext hover:text-maintext'
-                                            }`}
-                                    >
-                                        {stage}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Market Type</label>
-                            <select
-                                value={marketType}
-                                onChange={(e) => setMarketType(e.target.value)}
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-maintext focus:outline-none focus:border-primary/50"
-                            >
-                                <option>B2B</option>
-                                <option>B2C</option>
-                                <option>Hybrid</option>
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Strategy Mode</label>
-                            <div className="flex bg-secondary p-0.5 rounded-lg border border-border">
-                                {['Competitor Analysis', 'Revenue Model', 'Market Entry'].map(mode => (
-                                    <button
-                                        key={mode}
-                                        onClick={() => setAibizMode(mode)}
-                                        className={`flex-1 py-1.5 rounded-md text-[9px] font-black uppercase tracking-wide transition-all ${aibizMode === mode ? 'bg-white text-primary shadow-sm' : 'text-subtext hover:text-maintext'}`}
-                                    >
-                                        {mode.split(' ')[0]}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Describe Your Business</label>
-                            <textarea
-                                value={businessDescription}
-                                onChange={(e) => setBusinessDescription(e.target.value)}
-                                placeholder="e.g. AI-powered recruitment platform for tech companies..."
-                                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-xs text-maintext focus:outline-none focus:border-primary/50 min-h-[60px] resize-none"
-                            />
-                        </div>
-                    </>
-                );
-            default:
-                return null;
+            default: return <div className="text-xs text-subtext">Parameters loading...</div>;
         }
     };
 
-    const renderAgentActions = () => {
-        switch (activeAgent.id) {
-            case 'AISALES':
-                return (
-                    <button
-                        type="button"
-                        onClick={() => handleAction(null, "Generate outreach plan.")}
-                        className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary/5 transition-all text-[10px] uppercase"
-                    >
-                        <Layout className="w-3.5 h-3.5" />
-                        Generate Plan
-                    </button>
-                );
-            case 'AIWRITE':
-                return (
-                    <button
-                        type="button"
-                        onClick={() => handleAction(null, "Generate variations.")}
-                        className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary/5 transition-all text-[10px] uppercase"
-                    >
-                        <Layout className="w-3.5 h-3.5" />
-                        Variations
-                    </button>
-                );
-            case 'AIHIRE':
-                return (
-                    <button
-                        type="button"
-                        onClick={() => handleAction(null, "Export evaluation.")}
-                        className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary/5 transition-all text-[10px] uppercase disabled:opacity-50"
-                        disabled={messages.length === 0}
-                    >
-                        <Briefcase className="w-3.5 h-3.5" />
-                        Export Report
-                    </button>
-                );
-            case 'AIBIZ':
-                return (
-                    <button
-                        type="button"
-                        onClick={() => handleAction(null, "Export plan.")}
-                        className="hidden sm:flex items-center gap-2 px-4 py-2 bg-secondary text-primary border border-primary/20 rounded-xl font-bold hover:bg-primary/5 transition-all text-[10px] uppercase disabled:opacity-50"
-                        disabled={messages.length === 0}
-                    >
-                        <BarChart3 className="w-3.5 h-3.5" />
-                        Export Plan
-                    </button>
-                );
-            default:
-                return null;
-        }
-    };
+    const renderAgentActions = () => (
+        <AgentActions
+            activeAgent={activeAgent}
+            hiringMode={hiringMode}
+            handleAction={handleAction}
+        />
+    );
 
     return (
+
         <div className="flex h-full bg-background overflow-hidden font-sans">
 
 
-            <main className="flex-1 flex flex-col bg-secondary/30 relative overflow-hidden">
-                <header className="h-16 border-b border-border bg-white/50 dark:bg-black/50 backdrop-blur-xl flex items-center justify-between px-6 z-20">
-                    <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-xl bg-primary/10 text-primary`}>
-                            <activeAgent.icon className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <h2 className="font-bold text-maintext text-sm">{activeAgent.name}</h2>
-                            <p className="text-[10px] text-subtext font-bold uppercase tracking-widest">Operational</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-surface border border-border rounded-lg text-[10px] font-bold text-subtext italic">
-                            {user.plan} Access
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-xs">
-                            {user.name.charAt(0)}
-                        </div>
+            <main className={`flex-1 flex flex-col relative overflow-hidden transition-all duration-700 ${activeAgent?.id === 'AISALES'
+                ? 'bg-gradient-to-br from-blue-50/80 via-white to-sky-50/80'
+                : activeAgent?.id === 'AIWRITE'
+                    ? 'bg-gradient-to-b from-blue-50/20 to-white'
+                    : activeAgent?.id === 'AIHEALTH'
+                        ? 'bg-[#f8faff]'
+                        : 'bg-secondary/30'
+                }`}>
+                <header className="h-16 border-b border-slate-100 bg-white flex items-center justify-between px-8 z-20">
+                    <div className="flex items-center gap-4 flex-1">
+                        {activeAgent?.id === 'AIHEALTH' ? (
+                            <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-10 h-10 rounded-xl bg-[#f0f4ff] flex items-center justify-center text-[#5865f2] shadow-sm">
+                                        <Activity className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-sm font-black text-slate-800 tracking-tight leading-none">AI-Based Holistic Health & Wellness Planner</h2>
+                                        <p className="text-[10px] font-medium text-slate-400 mt-1.5">Integrate modern science with ancient Ayurvedic wisdom for your personalized wellness journey.</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="px-3 py-1 bg-[#f8f9fc] border border-slate-100 rounded-full">
+                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">Basic Access</span>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-[#f0f4ff] border border-[#e0e8ff] flex items-center justify-center text-[#5865f2] font-black text-[10px] uppercase">
+                                        {user?.name?.charAt(0) || 'U'}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className={`w-12 h-12 ${activeAgent?.id === 'AIWRITE' ? 'bg-blue-50' : activeAgent?.id === 'AISALES' ? 'bg-indigo-50' : 'bg-slate-50'} rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden p-1`}>
+                                    <img
+                                        src={`/AGENTS_IMG/${activeAgent?.id}.png`}
+                                        alt={activeAgent?.id}
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'block';
+                                        }}
+                                    />
+                                    <div style={{ display: 'none' }}>
+                                        {activeAgent?.id === 'AIWRITE' ? <Sparkles className="w-6 h-6 text-blue-600" /> : activeAgent?.id === 'AISALES' ? <TargetIcon className="w-6 h-6 text-indigo-600" /> : activeAgent?.icon ? <activeAgent.icon className="w-6 h-6 text-slate-600" /> : <Zap className="w-6 h-6 text-slate-600" />}
+                                    </div>
+                                </div>
+                                <div className="space-y-0.5">
+                                    <h2 className="text-sm font-black text-slate-800 tracking-tight">{activeAgent?.id === 'AIWRITE' ? 'AIWRITE Agent' : activeAgent?.id === 'AISALES' ? 'AISALES Agent' : activeAgent?.name || 'A.I. Engine'}</h2>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </header>
 
                 <div className="flex-1 overflow-y-auto p-6 lg:p-10 custom-scrollbar">
-                    <div className="max-w-6xl mx-auto space-y-10">
-                        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-                            <div className="p-4 border-b border-border bg-secondary/30 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Settings className="w-3.5 h-3.5 text-maintext/50" />
-                                    <h3 className="text-[10px] font-black text-maintext uppercase tracking-widest">Parameters</h3>
-                                </div>
-                                {activeAgent.id === 'AISALES' && (
-                                    <div className="flex bg-secondary p-0.5 rounded-lg border border-border">
-                                        {['Cold Email', 'Follow-Up', 'Objection'].map(tab => (
-                                            <button
-                                                key={tab}
-                                                onClick={() => setSalesTab(tab)}
-                                                className={`px-3 py-1 rounded-md text-[9px] font-black transition-all ${salesTab === tab ? 'bg-white text-primary shadow-sm' : 'text-subtext'}`}
-                                            >
-                                                {tab}
-                                            </button>
-                                        ))}
-                                    </div>
+                    <div className="w-full space-y-10">
+                        <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) ? '' : 'bg-card border border-border rounded-2xl shadow-sm relative'}`}>
+                            {!['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) && (
+                                <div className="p-4 border-b border-border bg-secondary/30 flex items-center justify-between"><div className="flex items-center gap-2"><Settings className="w-3.5 h-3.5 text-maintext/50" /><h3 className="text-[10px] font-black text-maintext uppercase tracking-widest">Parameters</h3></div></div>
+                            )}
+                            <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) ? '' : 'p-6 space-y-6'}`}>
+                                <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) ? '' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}`}>{renderAgentInputs()}</div>
+                                {activeAgent?.id !== 'AIHIRE' && activeAgent?.id !== 'AIWRITE' && activeAgent?.id !== 'AIHEALTH' && activeAgent?.id !== 'AIBIZ' && (
+                                    <form onSubmit={handleAction} className="space-y-4">
+                                        <textarea value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Describe your objective..." className="w-full bg-secondary/20 border border-border focus:border-primary/50 focus:bg-white transition-all rounded-2xl p-4 min-h-[120px] text-sm text-maintext outline-none" />
+                                        <div className="flex items-center justify-between border-t border-border pt-4"><div className="flex gap-2">{renderAgentActions()}</div><button type="submit" disabled={isProcessing || !inputValue.trim()} className="px-6 py-2 bg-primary text-white rounded-lg font-bold shadow-md hover:bg-primary/90 transition-all text-xs uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Execute'}</button></div>
+                                    </form>
                                 )}
-                            </div>
-                            <div className="p-6 space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {renderAgentInputs()}
-                                </div>
-                                <form onSubmit={handleAction} className="space-y-4">
-                                    <textarea
-                                        value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
-                                        placeholder="Describe your objective..."
-                                        className="w-full bg-secondary/20 border border-border focus:border-primary/50 focus:bg-white transition-all rounded-xl p-4 min-h-[120px] text-sm text-maintext focus:outline-none placeholder:text-subtext/40 font-medium"
-                                    />
-                                    <div className="flex items-center justify-between border-t border-border pt-4">
-                                        <div className="flex gap-2">
-                                            {renderAgentActions()}
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={isProcessing || !inputValue.trim()}
-                                            className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg font-bold shadow-md hover:bg-primary/90 transition-all text-xs uppercase tracking-widest"
-                                        >
-                                            {isProcessing ? 'Processing...' : 'Execute'}
-                                        </button>
-                                    </div>
-                                </form>
                             </div>
                         </div>
 
-                        <div className="space-y-8">
-                            {messages.length > 0 && (
+                        {!['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) && messages.length > 0 && (
+                            <div className="space-y-8">
                                 <div className="flex items-center gap-4">
                                     <div className="h-[1px] flex-1 bg-border/50"></div>
                                     <span className="text-[10px] font-black text-subtext uppercase tracking-[0.3em]">Analysis</span>
                                     <div className="h-[1px] flex-1 bg-border/50"></div>
                                 </div>
-                            )}
-
-                            <AnimatePresence>
-                                {[...messages].reverse().map((msg) => {
-                                    if (msg.role === 'user') return null;
-                                    const result = renderMessageAsCards(msg);
-                                    if (!result) return null;
-
-                                    return (
-                                        <motion.div
-                                            key={msg.id}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="space-y-6 pb-4"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-[1px] flex-1 bg-border/30"></div>
-                                                <div className="px-4 py-1.5 bg-secondary/50 border border-border rounded-full text-[9px] font-bold text-subtext uppercase tracking-widest shrink-0">
-                                                    Analysis Executed • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </div>
-                                                <div className="h-[1px] flex-1 bg-border/30"></div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                {result.cards.map((card, idx) => (
-                                                    <motion.div
-                                                        key={idx}
-                                                        className="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow"
-                                                    >
-                                                        <div className="flex items-center justify-between mb-4">
-                                                            <div className="p-2 rounded-lg bg-secondary">
-                                                                <card.icon className="w-4 h-4 text-primary" />
+                                <AnimatePresence>
+                                    {[...messages].reverse().map((msg) => {
+                                        if (msg.role === 'user') return null;
+                                        const result = renderMessageAsCards(msg);
+                                        if (!result) return null;
+                                        return (
+                                            <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                    {result.cards.map((card, idx) => {
+                                                        const isWide = result.cards.length === 1 || (card.content && card.content.length > 500) || card.type === 'charts';
+                                                        return (
+                                                            <div key={idx} className={`bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow ${isWide ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+                                                                <div className="flex items-center justify-between mb-4"><div className="p-2 rounded-lg bg-secondary"><card.icon className="w-4 h-4 text-primary" /></div></div>
+                                                                <h4 className="font-bold text-maintext text-xs uppercase tracking-widest mb-3 opacity-70">{card.title}</h4>
+                                                                <div className="flex-1">{renderCardContent(card)}</div>
                                                             </div>
-                                                            {card.title.toUpperCase().includes('SCORE') && (
-                                                                <span className="text-xl font-black text-primary">{card.content.match(/\d+/)?.[0] || '0'}</span>
-                                                            )}
-                                                        </div>
-                                                        <h4 className="font-bold text-maintext text-xs uppercase tracking-widest mb-3 opacity-70">{card.title}</h4>
-                                                        <div className="flex-1">
-                                                            {card.type === 'swot' ? (
-                                                                <div className="grid grid-cols-2 gap-2 mt-2">
-                                                                    {['Strengths', 'Weaknesses', 'Opportunities', 'Threats'].map((q, i) => {
-                                                                        const colors = ['text-emerald-500 bg-emerald-500/5', 'text-red-500 bg-red-500/5', 'text-blue-500 bg-blue-500/5', 'text-amber-500 bg-amber-500/5'];
-                                                                        return (
-                                                                            <div key={q} className={`p-2 rounded-lg border border-border/50 ${colors[i]} flex flex-col`}>
-                                                                                <span className="text-[8px] font-black uppercase tracking-tighter">{q}</span>
-                                                                                <span className="text-[8px] opacity-80">Click to expand</span>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            ) : (
-                                                                <div className="text-xs text-subtext leading-relaxed whitespace-pre-wrap font-medium">
-                                                                    {card.content}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })}
-                            </AnimatePresence>
-                        </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </AnimatePresence>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
+
+
+
+            <AnimatePresence>
+                {showResultModal && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 sm:p-6`} onClick={() => setShowResultModal(false)}>
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-white flex flex-col h-[calc(100%-40px)] w-full max-w-6xl rounded-3xl overflow-hidden shadow-2xl border border-white/20">
+                            <div className="p-6 border-b border-border bg-white flex items-center justify-between shrink-0">
+                                <div className="flex items-center gap-4">
+                                    <div className={`p-3 rounded-3xl ${activeAgent?.id === 'AIWRITE' ? 'bg-pink-500/10' : activeAgent?.id === 'AIBIZ' ? 'bg-red-500/10' : 'bg-primary/10'}`}>
+                                        {activeAgent?.id === 'AIWRITE' ? <FileText className="w-6 h-6 text-pink-600" /> : activeAgent?.id === 'AIBIZ' ? <BarChart3 className="w-6 h-6 text-red-600" /> : <Target className="w-6 h-6 text-primary" />}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-maintext tracking-tight uppercase">
+                                            {activeAgent?.id === 'AIWRITE' ? 'Content Intelligence' : activeAgent?.id === 'AIBIZ' ? 'Business Intelligence' : 'Deep Strategy Analysis'}
+                                        </h3>
+                                        <p className="text-[10px] text-subtext font-bold uppercase tracking-widest opacity-70">AI Business Intelligence Engine</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setShowResultModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors"><X className="w-6 h-6 text-subtext" /></button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 bg-secondary/10 custom-scrollbar">
+                                <div className="space-y-6">
+
+                                    {(() => {
+                                        if (activeAgent.id === 'AIWRITE' && aiWriteResult) {
+                                            return renderAIWriteResult();
+                                        }
+                                        const lastMsg = messages[messages.length - 1];
+                                        const result = renderMessageAsCards(lastMsg);
+                                        if (!result) return <div className="text-center text-sm text-subtext">No content available.</div>;
+                                        return (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                {result.cards.map((card, idx) => {
+                                                    const isWide = result.cards.length === 1 || (card.content && card.content.length > 300) || card.type === 'charts';
+                                                    return (
+                                                        <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} className={`bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col ${isWide ? 'md:col-span-2 lg:col-span-3' : ''}`}>
+                                                            <div className="flex items-center justify-between mb-4"><div className="p-2 rounded-lg bg-secondary"><card.icon className="w-4 h-4 text-primary" /></div></div>
+                                                            <h4 className="font-bold text-maintext text-xs uppercase tracking-widest mb-3 opacity-70">{card.title}</h4>
+                                                            <div className="flex-1">{renderCardContent(card)}</div>
+                                                        </motion.div>
+                                                    );
+                                                })}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+
+                            <div className="p-4 border-t border-border bg-white flex flex-wrap justify-between items-center gap-3 shrink-0">
+                                <div className="flex gap-2">
+                                    <button className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-2">
+                                        <PenTool size={14} /> Improve
+                                    </button>
+                                    <button className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-2">
+                                        <Zap size={14} /> Regenerate
+                                    </button>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setShowResultModal(false)} className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-subtext hover:text-maintext">Close</button>
+                                    <button className="px-6 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2">
+                                        <Plus size={14} /> Save to Workspace
+                                    </button>
+                                    <button className="px-6 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-md hover:bg-blue-700 transition-all flex items-center gap-2">
+                                        <FileText size={14} /> Download PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+                {showClearConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl border border-slate-100 space-y-8"
+                        >
+                            <div className="w-20 h-20 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600 mx-auto">
+                                <AlertCircle className="w-10 h-10" />
+                            </div>
+                            <div className="text-center space-y-3">
+                                <h3 className="text-2xl font-black text-slate-800 tracking-tight">Clear Workspace?</h3>
+                                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-loose">
+                                    This will start a new session but keep previous work in history.
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 pt-4">
+                                <button
+                                    onClick={() => setShowClearConfirm(false)}
+                                    className="py-5 rounded-[25px] border border-slate-100 text-slate-400 font-black uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-all font-sans"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={executeClearWorkspace}
+                                    className="py-5 rounded-[25px] bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all font-sans"
+                                >
+                                    Clear Now
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+                {showDeleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white rounded-[40px] p-10 max-w-sm w-full shadow-2xl border border-slate-100 space-y-8"
+                        >
+                            <div className="w-20 h-20 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600 mx-auto">
+                                <Trash2 className="w-10 h-10" />
+                            </div>
+                            <div className="text-center space-y-3">
+                                <h3 className="text-2xl font-black text-slate-800 tracking-tight">Delete History?</h3>
+                                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-loose">
+                                    This action cannot be undone. This session will be permanently removed.
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 pt-4">
+                                <button
+                                    onClick={() => {
+                                        setShowDeleteConfirm(false);
+                                        setSessionToDelete(null);
+                                    }}
+                                    className="py-5 rounded-[25px] border border-slate-100 text-slate-400 font-black uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-all font-sans"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={executeDeleteSession}
+                                    className="py-5 rounded-[25px] bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all font-sans"
+                                >
+                                    Delete Now
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
