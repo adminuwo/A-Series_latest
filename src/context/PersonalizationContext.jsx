@@ -78,7 +78,7 @@ export const PersonalizationProvider = ({ children }) => {
     const fetchNotifications = async () => {
         if (!user?.token) return;
         try {
-            const res = await axios.get(apis.user + '/notifications', {
+            const res = await axios.get(apis.notifications, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             setNotifications(res.data);
@@ -91,7 +91,7 @@ export const PersonalizationProvider = ({ children }) => {
         setNotifications(prev => prev.filter(n => n.id !== notifId));
         try {
             if (user?.token) {
-                await axios.delete(`${apis.user}/notifications/${notifId}`, {
+                await axios.delete(`${apis.notifications}/${notifId}`, {
                     headers: { 'Authorization': `Bearer ${user.token}` }
                 });
             }
@@ -105,7 +105,7 @@ export const PersonalizationProvider = ({ children }) => {
         setNotifications([]);
         try {
             if (user?.token) {
-                await axios.delete(`${apis.user}/notifications`, {
+                await axios.delete(`${apis.notifications}`, {
                     headers: { 'Authorization': `Bearer ${user.token}` }
                 });
             }

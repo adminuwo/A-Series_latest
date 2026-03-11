@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Download, Check, Star, FileText, Play, X, Calendar, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles, BookOpen, PenTool, BarChart3, Users } from 'lucide-react';
+import { Search, Download, Check, Star, FileText, Play, X, Calendar, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles, BookOpen, PenTool, BarChart3, Users, Stethoscope } from 'lucide-react';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { getUserData, toggleState } from '../userStore/userData';
@@ -45,7 +45,9 @@ const Marketplace = () => {
 
       try {
         const [userAgentsRes, agentsRes] = await Promise.allSettled([
-          axios.post(apis.getUserAgents, { userId }),
+          axios.post(apis.getUserAgents, { userId }, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          }),
           axios.get(apis.agents)
         ]);
 
@@ -135,6 +137,12 @@ const Marketplace = () => {
       case 'tool-openai-image-edit-standard': return Edit;
       case 'tool-openai-image-edit-lite': return Edit;
       case 'tool-vertex-music-gen': return Music;
+      case 'tool-image-understanding-claude': return Brain;
+      case 'tool-pathology-medgemma': return Stethoscope;
+      case 'tool-derm-foundation': return Activity;
+      case 'tool-geospatial-sensing': return MapPin;
+      case 'tool-cxr-foundation': return ShieldCheck;
+      case 'tool-pixel-segmentor-sam': return Target;
       case 'tool-vertex-stt': return Mic;
       // Workspace Agents
       case 'tool-aibiz': return BarChart3;
@@ -201,22 +209,41 @@ const Marketplace = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-surface border border-border rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden relative"
+              className="bg-surface border border-border rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden relative max-h-[85vh] flex flex-col"
             >
               <button
                 onClick={() => setSelectedTool(null)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-secondary text-subtext hover:text-maintext hover:bg-border transition-all z-10"
+                className="absolute top-4 right-4 p-2 rounded-full bg-secondary text-subtext hover:text-maintext hover:bg-border transition-all z-50 backdrop-blur-sm"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="relative">
+              <div className="relative overflow-y-auto flex-1 scrollbar-none">
                 {/* Header Section */}
-                <div className={`h-32 ${selectedTool.bgGradient} relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute -bottom-10 left-8">
-                    <div className={`w-24 h-24 rounded-2xl ${selectedTool.bgGradient} border-4 border-surface shadow-xl flex items-center justify-center`}>
-                      {selectedTool.icon ? <selectedTool.icon className="w-12 h-12 text-white" /> : <ImageIcon className="w-12 h-12 text-white" />}
+                <div className="h-40 relative overflow-hidden bg-surface">
+                  {selectedTool.avatar ? (
+                    <div className="absolute inset-0">
+                      <img
+                        src={selectedTool.avatar}
+                        className="w-full h-full object-cover blur-md opacity-40 scale-110"
+                        alt=""
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
+                    </div>
+                  ) : (
+                    <div className={`absolute inset-0 ${selectedTool.bgGradient || 'bg-gradient-to-br from-primary to-indigo-600'} opacity-80`} />
+                  )}
+                  <div className="absolute inset-0 bg-black/10" />
+
+                  <div className="absolute -bottom-8 left-8">
+                    <div className={`w-24 h-24 rounded-3xl border-4 border-surface shadow-2xl flex items-center justify-center overflow-hidden ${!selectedTool.avatar ? (selectedTool.bgGradient || 'bg-primary') : 'bg-card'}`}>
+                      {selectedTool.avatar ? (
+                        <img src={selectedTool.avatar} alt={selectedTool.agentName} className="w-full h-full object-cover" />
+                      ) : selectedTool.icon ? (
+                        <selectedTool.icon className="w-12 h-12 text-white" />
+                      ) : (
+                        <ImageIcon className="w-12 h-12 text-white" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -261,7 +288,7 @@ const Marketplace = () => {
                     </button>
                   </div>
 
-                  <p className="text-subtext leading-relaxed mb-6">
+                  <p className="text-subtext leading-relaxed mb-6 whitespace-pre-wrap text-sm">
                     {selectedTool.fullDesc || selectedTool.description}
                   </p>
 

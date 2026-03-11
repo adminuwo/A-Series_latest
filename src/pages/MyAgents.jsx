@@ -33,7 +33,9 @@ const MyAgents = () => {
         setLoading(true);
         const userId = user?.id || user?._id;
         try {
-            const res = await axios.post(apis.getUserAgents, { userId });
+            const res = await axios.post(apis.getUserAgents, { userId }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
             console.log('[MY AGENTS] Loaded:', res.data.agents);
             setAgents(res.data.agents || []);
         } catch (err) {

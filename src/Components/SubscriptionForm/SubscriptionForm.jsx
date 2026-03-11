@@ -77,7 +77,9 @@ const SubscriptionForm = ({ id }) => {
     if (amount === 0) {
       setIsProcessing(true);
       try {
-        await axios.post(`${apis.buyAgent}/${id}`, { userId });
+        await axios.post(`${apis.buyAgent}/${id}`, { userId }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
         toast.success(`${agent?.agentName || 'Agent'} subscribed successfully!`);
         setSubscripTgl({ ...subscripTgl, subscripPgTgl: false, notify: true });
         navigate('/dashboard/chat', { state: { activated: true, toolName: agent?.agentName } });

@@ -374,7 +374,10 @@ const Chat = () => {
       if (!userId) return;
 
       try {
-        const response = await axios.post(apis.getUserAgents, { userId });
+        const token = localStorage.getItem('token');
+        const response = await axios.post(apis.getUserAgents, { userId }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         if (response.data && response.data.agents) {
           console.log("[Chat] Fetched User Agents:", response.data.agents);
           setUserAgents(response.data.agents);
@@ -3840,7 +3843,6 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       key={msg.videoUrl}
                                       src={msg.videoUrl}
                                       style={{ opacity: 0 }}
-                                      crossOrigin="anonymous"
                                       className="w-full h-full object-contain transition-opacity duration-700"
                                       alt="AISA Visual Content"
                                       loading="eager"
