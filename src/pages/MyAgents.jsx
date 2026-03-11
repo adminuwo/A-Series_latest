@@ -33,7 +33,9 @@ const MyAgents = () => {
         setLoading(true);
         const userId = user?.id || user?._id;
         try {
-            const res = await axios.post(apis.getUserAgents, { userId });
+            const res = await axios.post(apis.getUserAgents, { userId }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
             console.log('[MY AGENTS] Loaded:', res.data.agents);
             setAgents(res.data.agents || []);
         } catch (err) {
@@ -156,9 +158,9 @@ const MyAgents = () => {
                                         onClick={() => {
                                             const name = (agent.agentName || agent.name || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
                                             // Agents that use the new AISAWorkSpace interface
-                                            const workspaceAgents = ['AIWRITE', 'AIBIZ', 'AIDESK'];
+                                            const workspaceAgents = ['AISALES', 'AIWRITE', 'AIBIZ', 'AIHIRE', 'AIDESK', 'AIHEALTH'];
 
-                                            // Standalone agents
+                                            // Standalone agents (legacy or special routing)
                                             const standaloneAgents = {
                                                 'AIHIRE': '/agents/aihire',
                                                 'AISALES': '/agents/aisales'

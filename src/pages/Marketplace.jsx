@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Download, Check, Star, FileText, Play, X, Calendar, Users, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles } from 'lucide-react';
+import { Search, Download, Check, Star, FileText, Play, X, Calendar, Users, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles, BookOpen, PenTool, BarChart3, Stethoscope } from 'lucide-react';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { getUserData, toggleState } from '../userStore/userData';
@@ -45,7 +45,9 @@ const Marketplace = () => {
 
       try {
         const [userAgentsRes, agentsRes] = await Promise.allSettled([
-          axios.post(apis.getUserAgents, { userId }),
+          axios.post(apis.getUserAgents, { userId }, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          }),
           axios.get(apis.agents)
         ]);
 
@@ -115,21 +117,6 @@ const Marketplace = () => {
       case 'tool-blip2': return MessageSquare;
       case 'tool-nvidia-nemotron-nano-12b': return Cpu;
       case 'tool-path-foundation': return Activity;
-      case 'tool-derm-foundation': return Heart;
-      case 'tool-time-series-forecasting': return TrendingUp;
-      case 'tool-llm-auditor': return ShieldCheck;
-      case 'tool-personalized-shopping': return ShoppingBag;
-      case 'tool-brand-search-optimization': return Globe;
-      case 'tool-fomc-research': return DollarSign;
-      case 'tool-image-scoring': return Target;
-      case 'tool-data-science': return Database;
-      case 'tool-rag-engine': return Brain;
-      case 'tool-financial-advisor': return Briefcase;
-      case 'tool-marketing-agency': return Megaphone;
-      case 'tool-customer-service': return Headset;
-      case 'tool-academic-research': return GraduationCap;
-      case 'tool-bug-assistant': return Bug;
-      case 'tool-travel-concierge': return MapPin;
       case 'tool-ai-personal-assistant': return Calendar;
       case 'tool-openai-content': return Edit;
       case 'tool-openai-chat': return MessageSquare;
@@ -139,6 +126,33 @@ const Marketplace = () => {
       case 'tool-openai-code': return Code;
       case 'tool-openai-document': return FileText;
       case 'tool-openai-vision': return Eye;
+      case 'tool-openai-video': return Video;
+      case 'tool-openai-search-preview': return Globe;
+      case 'tool-openai-search-pro': return Globe;
+      case 'tool-openai-search-lite': return Globe;
+      case 'tool-openai-search-realtime': return Globe;
+      case 'tool-openai-video-standard': return Video;
+      case 'tool-openai-video-max': return Video;
+      case 'tool-openai-image-standard': return ImageIcon;
+      case 'tool-openai-image-lite': return ImageIcon;
+      case 'tool-openai-image-edit': return Edit;
+      case 'tool-openai-image-edit-standard': return Edit;
+      case 'tool-openai-image-edit-lite': return Edit;
+      case 'tool-vertex-music-gen': return Music;
+      case 'tool-image-understanding-claude': return Brain;
+      case 'tool-pathology-medgemma': return Stethoscope;
+      case 'tool-derm-foundation': return Activity;
+      case 'tool-geospatial-sensing': return MapPin;
+      case 'tool-cxr-foundation': return ShieldCheck;
+      case 'tool-pixel-segmentor-sam': return Target;
+      case 'tool-vertex-stt': return Mic;
+      // Workspace Agents
+      case 'tool-aibiz': return BarChart3;
+      case 'tool-aihire': return Users;
+      case 'tool-aihealth': return Heart;
+      case 'tool-aiwrite': return FileText;
+      case 'tool-aisales': return Target;
+      case 'tool-aidesk': return MessageSquare;
       default: return ImageIcon;
     }
   };
@@ -197,22 +211,41 @@ const Marketplace = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-surface border border-border rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden relative"
+              className="bg-surface border border-border rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden relative max-h-[85vh] flex flex-col"
             >
               <button
                 onClick={() => setSelectedTool(null)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-secondary text-subtext hover:text-maintext hover:bg-border transition-all z-10"
+                className="absolute top-4 right-4 p-2 rounded-full bg-secondary text-subtext hover:text-maintext hover:bg-border transition-all z-50 backdrop-blur-sm"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="relative">
+              <div className="relative overflow-y-auto flex-1 scrollbar-none">
                 {/* Header Section */}
-                <div className={`h-32 ${selectedTool.bgGradient} relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute -bottom-10 left-8">
-                    <div className={`w-24 h-24 rounded-2xl ${selectedTool.bgGradient} border-4 border-surface shadow-xl flex items-center justify-center`}>
-                      {selectedTool.icon ? <selectedTool.icon className="w-12 h-12 text-white" /> : <ImageIcon className="w-12 h-12 text-white" />}
+                <div className="h-40 relative overflow-hidden bg-surface">
+                  {selectedTool.avatar ? (
+                    <div className="absolute inset-0">
+                      <img
+                        src={selectedTool.avatar}
+                        className="w-full h-full object-cover blur-md opacity-40 scale-110"
+                        alt=""
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
+                    </div>
+                  ) : (
+                    <div className={`absolute inset-0 ${selectedTool.bgGradient || 'bg-gradient-to-br from-primary to-indigo-600'} opacity-80`} />
+                  )}
+                  <div className="absolute inset-0 bg-black/10" />
+
+                  <div className="absolute -bottom-8 left-8">
+                    <div className={`w-24 h-24 rounded-3xl border-4 border-surface shadow-2xl flex items-center justify-center overflow-hidden ${!selectedTool.avatar ? (selectedTool.bgGradient || 'bg-primary') : 'bg-card'}`}>
+                      {selectedTool.avatar ? (
+                        <img src={selectedTool.avatar} alt={selectedTool.agentName} className="w-full h-full object-cover" />
+                      ) : selectedTool.icon ? (
+                        <selectedTool.icon className="w-12 h-12 text-white" />
+                      ) : (
+                        <ImageIcon className="w-12 h-12 text-white" />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -241,8 +274,12 @@ const Marketplace = () => {
                       onClick={() => {
                         const name = (selectedTool.agentName || "").toUpperCase().replace(/\s+/g, '');
                         setSelectedTool(null);
+                        const workspaceAgents = ['AIBIZ', 'AIHIRE', 'AIHEALTH', 'AIWRITE', 'AISALES', 'AIDESK'];
+
                         if (name === 'AIPERSONALASSISTANT') {
                           navigate('/dashboard/ai-personal-assistant');
+                        } else if (workspaceAgents.includes(name)) {
+                          navigate(`/dashboard/workspace/${name}`);
                         } else {
                           navigate('/dashboard/chat', { state: { agentType: name, agent: selectedTool } });
                         }
@@ -253,7 +290,7 @@ const Marketplace = () => {
                     </button>
                   </div>
 
-                  <p className="text-subtext leading-relaxed mb-6">
+                  <p className="text-subtext leading-relaxed mb-6 whitespace-pre-wrap text-sm">
                     {selectedTool.fullDesc || selectedTool.description}
                   </p>
 
