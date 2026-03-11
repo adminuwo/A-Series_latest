@@ -3,7 +3,7 @@ import { apiService } from '../../services/apiService';
 import TaskModal from './TaskModal';
 import { Plus, CheckCircle, Clock, Calendar as CalendarIcon, AlertTriangle, Trash2, Mic, Settings, Sparkles, Volume2, Bot } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { generateChatResponse } from '../../services/geminiService';
+import { generateChatResponse } from '../../services/aivaService';
 
 const Dashboard = () => {
     const [tasks, setTasks] = useState([]);

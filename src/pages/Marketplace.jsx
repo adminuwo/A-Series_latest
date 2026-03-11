@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from 'react';
-<<<<<<< HEAD
-import { Search, Download, Check, Star, FileText, Play, X, Calendar, Users } from 'lucide-react';
-=======
-import { Search, Download, Check, Star, FileText, Play, X, Calendar, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles } from 'lucide-react';
->>>>>>> 3c0e05378996b18123c4f4c9f9f30d9e86fb2415
+import React, { useState, useEffect } from 'react';
+import { Search, Download, Check, Star, FileText, Play, X, Calendar, Users, Image as ImageIcon, Headphones, Code, Video, Edit, Zap, Music, EyeOff, Eye, Bot, MessageSquare, Cpu, Activity, Heart, TrendingUp, ShieldCheck, ShoppingBag, Globe, DollarSign, Target, Database, Brain, Briefcase, Megaphone, Headset, GraduationCap, Bug, MapPin, Mic, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { getUserData, toggleState } from '../userStore/userData';
@@ -353,149 +349,160 @@ const Marketplace = () => {
       </div >
 
       {/* Agents Grid */}
-<<<<<<< HEAD
       < div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" >
         {/* Personal Assistant App Card */}
-        <div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden">
-          <div className="flex justify-between items-start mb-4 relative z-10">
-            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
-              <Calendar className="w-10 h-10 text-white" />
+        {(filter === 'all' || filter === 'Business OS') && (
+          <div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shadow-lg">
+                <Calendar className="w-10 h-10 text-white" />
+              </div>
+              <div className="bg-surface border border-border px-2 py-1 rounded-lg flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                <span className="text-xs font-bold text-maintext">5.0</span>
+              </div>
             </div>
-            <div className="bg-surface border border-border px-2 py-1 rounded-lg flex items-center gap-1">
-              <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-              <span className="text-xs font-bold text-maintext">5.0</span>
+
+            <div className="mb-1 relative z-10">
+              <h3 className="text-lg font-bold text-maintext">{t('marketplacePage.aiPersonalAssistant')}</h3>
             </div>
+
+            <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3 relative z-10">{t('marketplacePage.productivity')}</span>
+
+            <p className="text-sm text-subtext mb-6 flex-1 relative z-10">
+              {t('marketplacePage.personalAssistantDesc')}
+            </p>
+
+            <button
+              onClick={() => navigate('/dashboard/ai-personal-assistant')}
+              className="w-full py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 relative z-10"
+            >
+              {t('marketplacePage.openApp')}
+            </button>
           </div>
-=======
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" >
->>>>>>> 3c0e05378996b18123c4f4c9f9f30d9e86fb2415
+        )}
 
-        {loading ? <h1>{t('myAgentsPage.loading')}</h1> : filteredAgents.map(agent => {
-          // Helper to determine if this is a "System Tool" with special styling
-          const isSystemTool = agent.slug?.startsWith('tool-');
-          const ToolIcon = isSystemTool ? getToolIcon(agent.slug) : null;
-
-<<<<<<< HEAD
-          <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3 relative z-10">{t('marketplacePage.productivity')}</span>
-
-          <p className="text-sm text-subtext mb-6 flex-1 relative z-10">
-            {t('marketplacePage.personalAssistantDesc')}
-          </p>
-
-          <button
-            onClick={() => navigate('/dashboard/ai-personal-assistant')}
-            className="w-full py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 relative z-10"
-          >
-            {t('marketplacePage.openApp')}
-          </button>
-        </div>
-
-        {loading ? <h1>{t('myAgentsPage.loading')}</h1> : filteredAgents.map(agent => (
-          <div
-            key={agent._id}
-            className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div className="relative">
-                <img
-                  src={agent.avatar}
-                  alt={agent.agentName}
-                  className="w-20 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform"
-                />
+        {/* AI Hire Card */}
+        {(filter === 'all' || filter === 'Business OS') && (
+          <div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <Briefcase className="w-10 h-10 text-white" />
               </div>
               <div className="bg-surface border border-border px-2 py-1 rounded-lg flex items-center gap-1">
                 <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                 <span className="text-xs font-bold text-maintext">4.9</span>
               </div>
             </div>
-
-            <div className="mb-1">
-              <h3 className="text-lg font-bold text-maintext text-2xl font-bold">{agent.agentName} <sup className='text-sm'>TM</sup></h3>
+            <div className="mb-1 relative z-10">
+              <h3 className="text-lg font-bold text-maintext">AI Hire <sup className='text-sm'>TM</sup></h3>
             </div>
+            <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3 relative z-10">Business OS</span>
+            <p className="text-sm text-subtext mb-6 flex-1 relative z-10">
+              Streamline your recruitment process with AI-powered candidate sourcing and screening.
+            </p>
+            <button
+              onClick={() => navigate('/agents/aihire')}
+              className="w-full py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 relative z-10"
+            >
+              {t('marketplacePage.openApp')}
+            </button>
+          </div>
+        )}
 
-            <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3">
-              {(() => {
-                const catKeyMap = {
-                  "Business OS": 'business_os',
-                  "Data & Intelligence": 'data_intelligence',
-                  "Sales & Marketing": 'sales_marketing',
-                  "HR & Finance": 'hr_finance',
-                  "Design & Creative": 'design_creative',
-                  "Medical & Health AI": 'medical_health'
-                };
-                return t(`marketplacePage.categories.${catKeyMap[agent.category] || 'all'}`) || agent.category;
-              })()}
-            </span>
-
-            <p className="text-sm text-subtext mb-6 flex-1">{agent.description}</p>
-
-            {/* Install / Launch Buttons */}
-            <div className="flex gap-2">
-              {userAgent.some((ag) => ag && agent._id == ag._id) ? (
-                <div className="flex-1 flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const name = (agent.agentName || agent.name || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
-                      // Workspace agents
-                      const workspaceAgents = ['AIWRITE', 'AIBIZ', 'AIDESK'];
-                      if (workspaceAgents.includes(name)) {
-                        navigate(`${AppRoute.WORKSPACE}/${name}`);
-                      } else if (name === 'AIHIRE') {
-                        navigate('/agents/aihire');
-                      } else if (name === 'AISALES') {
-                        navigate('/agents/aisales');
-                      } else {
-                        const targetUrl = agent.url || AppRoute.agentSoon;
-                        window.location.href = targetUrl;
-                      }
-                    }}
-                    className="flex-1 py-2.5 rounded-xl font-semibold bg-emerald-600 text-white hover:opacity-90 shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
-                  >
-                    <Play className="w-4 h-4" /> {t('marketplacePage.launch') || 'Launch'}
-                  </button>
-                  <button
-                    className="px-3 py-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20 opacity-70 cursor-default"
-                    title={t('marketplacePage.subscribed')}
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon') ? (
-                <button
-                  disabled
-                  className="flex-1 py-2.5 rounded-xl font-semibold bg-border text-subtext cursor-not-allowed opacity-50 flex items-center justify-center gap-2"
-                >
-                  {t('marketplacePage.unavailable')}
-                </button>
-              ) : (
-                <button
-                  onClick={() => toggleBuy(agent._id)}
-                  className="flex-1 py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all"
-                >
-                  <Download className="w-4 h-4" /> {t('marketplacePage.subscribe')}
-                </button>
-              )}
-              {userAgent.some((ag) => ag && agent._id == ag._id) && (
-                <button
-                  onClick={() => {
-                    navigate(AppRoute.INVOICES);
-                  }}
-                  className="p-2.5 rounded-xl bg-surface border border-border text-subtext hover:text-primary transition-all"
-                  title={t('marketplacePage.viewInvoice')}
-                >
-                  <FileText className="w-5 h-5" />
-                </button>
-              )}
+        {/* AI Biz Card */}
+        {(filter === 'all' || filter === 'Business OS') && (
+          <div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                <Database className="w-10 h-10 text-white" />
+              </div>
+              <div className="bg-surface border border-border px-2 py-1 rounded-lg flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                <span className="text-xs font-bold text-maintext">4.8</span>
+              </div>
             </div>
-          </div >
-        ))}
-=======
+            <div className="mb-1 relative z-10">
+              <h3 className="text-lg font-bold text-maintext">AI Biz <sup className='text-sm'>TM</sup></h3>
+            </div>
+            <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3 relative z-10">Business OS</span>
+            <p className="text-sm text-subtext mb-6 flex-1 relative z-10">
+              Automate business workflows and generate professional documents with ease.
+            </p>
+            <button
+              onClick={() => navigate('/agents/aibiz')}
+              className="w-full py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 relative z-10"
+            >
+              {t('marketplacePage.openApp')}
+            </button>
+          </div>
+        )}
+
+        {/* AI Base Card */}
+        {(filter === 'all' || filter === 'Business OS') && (
+          <div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
+                <Cpu className="w-10 h-10 text-white" />
+              </div>
+              <div className="bg-surface border border-border px-2 py-1 rounded-lg flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                <span className="text-xs font-bold text-maintext">4.9</span>
+              </div>
+            </div>
+            <div className="mb-1 relative z-10">
+              <h3 className="text-lg font-bold text-maintext">AI Base <sup className='text-sm'>TM</sup></h3>
+            </div>
+            <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3 relative z-10">Business OS</span>
+            <p className="text-sm text-subtext mb-6 flex-1 relative z-10">
+              The foundation for your enterprise AI solutions, providing robust data management.
+            </p>
+            <button
+              onClick={() => navigate('/agents/aibase')}
+              className="w-full py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 relative z-10"
+            >
+              {t('marketplacePage.openApp')}
+            </button>
+          </div>
+        )}
+
+        {/* AI Sales Card */}
+        {(filter === 'all' || filter === 'Business OS') && (
+          <div className="group bg-card border border-border hover:border-primary/50 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden">
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-fuchsia-500 to-rose-600 flex items-center justify-center shadow-lg">
+                <TrendingUp className="w-10 h-10 text-white" />
+              </div>
+              <div className="bg-surface border border-border px-2 py-1 rounded-lg flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                <span className="text-xs font-bold text-maintext">5.0</span>
+              </div>
+            </div>
+            <div className="mb-1 relative z-10">
+              <h3 className="text-lg font-bold text-maintext">AI Sales <sup className='text-sm'>TM</sup></h3>
+            </div>
+            <span className="text-xs text-primary uppercase tracking-wider font-semibold mb-3 relative z-10">Business OS</span>
+            <p className="text-sm text-subtext mb-6 flex-1 relative z-10">
+              Boost your revenue with AI-driven sales intelligence and outreach strategies.
+            </p>
+            <button
+              onClick={() => navigate('/agents/aisales')}
+              className="w-full py-2.5 rounded-xl font-semibold bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 relative z-10"
+            >
+              {t('marketplacePage.openApp')}
+            </button>
+          </div>
+        )}
+
+        {loading ? <h1>{t('myAgentsPage.loading')}</h1> : filteredAgents.map(agent => {
+          const isSystemTool = agent.slug?.startsWith('tool-');
+          const ToolIcon = isSystemTool ? getToolIcon(agent.slug) : null;
+
           if (isSystemTool) {
             return (
               <div
                 key={agent._id}
-                onClick={() => setSelectedTool({ ...agent, icon: ToolIcon })} // Pass icon to modal
+                onClick={() => setSelectedTool({ ...agent, icon: ToolIcon })}
                 className="group bg-card border border-border hover:border-primary/50 p-5 hover:shadow-xl transition-all duration-300 flex flex-col h-full shadow-sm relative overflow-hidden rounded-2xl cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-4 relative z-10">
@@ -513,7 +520,6 @@ const Marketplace = () => {
                     <span className="text-xs font-bold text-maintext">5.0</span>
                   </div>
                 </div>
->>>>>>> 3c0e05378996b18123c4f4c9f9f30d9e86fb2415
 
                 <div className="mb-1 relative z-10">
                   <h3 className="text-lg font-bold text-maintext">{agent.agentName}</h3>
@@ -556,7 +562,6 @@ const Marketplace = () => {
             );
           }
 
-          // Standard Agent Card
           return (
             <div
               key={agent._id}

@@ -165,10 +165,8 @@ const MyAgents = () => {
                                             };
 
                                             // Agents that use the generic Chat interface
-<<<<<<< HEAD
-                                            const chatAgents = ['AIVA'];
-=======
                                             const chatAgents = [
+                                                'AIVA',
                                                 'AISA',
                                                 'GENERATEIMAGE',
                                                 'GENERATEVIDEO',
@@ -186,7 +184,6 @@ const MyAgents = () => {
                                             const internalRouteAgents = {
                                                 'AIPERSONALASSISTANT': '/dashboard/ai-personal-assistant',
                                             };
->>>>>>> 3c0e05378996b18123c4f4c9f9f30d9e86fb2415
 
                                             if (workspaceAgents.includes(name)) {
                                                 navigate(`${AppRoute.WORKSPACE}/${name}`);

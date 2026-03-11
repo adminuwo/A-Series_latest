@@ -58,10 +58,7 @@ export const generateChatResponse = async (history, currentMessage, systemInstru
             withCredentials: true
         });
 
-<<<<<<< HEAD:src/services/aivaService.js
         // Return full response data (includes reply and potentially conversion data)
-=======
->>>>>>> 3c0e05378996b18123c4f4c9f9f30d9e86fb2415:src/services/geminiService.js
         return result.data;
 
     } catch (error) {
