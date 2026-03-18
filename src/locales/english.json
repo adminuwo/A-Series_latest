@@ -495,7 +495,11 @@
             "sales_marketing": "Sales & Marketing",
             "hr_finance": "HR & Finance",
             "design_creative": "Design & Creative",
-            "medical_health": "Medical & Health AI"
+            "medical_health": "Medical & Health AI",
+            "search_research": "Search & Research",
+            "productivity_office": "Productivity & Office",
+            "developer_tools": "Developer Tools",
+            "audio_voice": "Audio & Voice"
         },
         "openInNewWindow": "Open in new window"
     },
