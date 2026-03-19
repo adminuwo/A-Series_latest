@@ -106,8 +106,8 @@ const AISALESInputs = ({
     return (
         <div className="col-span-full space-y-10">
             {/* Centered Tab Bar */}
-            <div className="flex justify-center border-b border-border/20 pb-4">
-                <div className="flex gap-10">
+            <div className="flex justify-start md:justify-center border-b border-border/20 pb-4 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div className="flex gap-6 md:gap-10 shrink-0">
                     {[
                         { id: 'Write Email', label: 'Email', icon: Mail },
                         { id: 'Analyze Reply', label: 'Reply', icon: MessageSquare },
@@ -120,14 +120,14 @@ const AISALESInputs = ({
                         <button
                             key={modeOption.id}
                             onClick={() => setSalesMode(modeOption.id)}
-                            className={`relative py-3 px-2 flex items-center gap-2 text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${salesMode === modeOption.id
+                            className={`relative py-3 px-1 flex items-center gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${salesMode === modeOption.id
                                 ? 'text-primary'
                                 : 'text-slate-400 hover:text-slate-600'
                                 }`}
                         >
                             <modeOption.icon className={`w-3.5 h-3.5 ${salesMode === modeOption.id ? 'text-primary' : 'text-slate-300'}`} />
                             {modeOption.label}
-                            {salesMode === modeOption.id && (
+                            {salesMode === salesMode && salesMode === modeOption.id && (
                                 <motion.div
                                     layoutId="activeTab"
                                     className="absolute -bottom-[17px] left-0 right-0 h-1 bg-primary rounded-t-full"
@@ -139,9 +139,9 @@ const AISALESInputs = ({
             </div>
 
             {salesMode === 'Write Email' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                     {/* Card 1: Deal Profile */}
-                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 space-y-8 shadow-xl shadow-blue-500/5">
+                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[32px] lg:rounded-[40px] p-6 lg:p-8 space-y-6 lg:space-y-8 shadow-xl shadow-blue-500/5">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-blue-50 text-blue-500 rounded-[30px]">
                                 <Target className="w-6 h-6" />
@@ -185,9 +185,9 @@ const AISALESInputs = ({
                             </div>
                         </div>
                     </div>
-
+ 
                     {/* Card 2: Strategic Intel */}
-                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 space-y-8 shadow-xl shadow-blue-500/5">
+                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[32px] lg:rounded-[40px] p-6 lg:p-8 space-y-6 lg:space-y-8 shadow-xl shadow-blue-500/5">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-indigo-50 text-indigo-500 rounded-[30px]">
                                 <ShieldCheck className="w-6 h-6" />
@@ -229,9 +229,9 @@ const AISALESInputs = ({
                             </div>
                         </div>
                     </div>
-
+ 
                     {/* Card 3: Interaction Sync */}
-                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 space-y-8 shadow-xl shadow-blue-500/5">
+                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[32px] lg:rounded-[40px] p-6 lg:p-8 space-y-6 lg:space-y-8 shadow-xl shadow-blue-500/5">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-emerald-50 text-emerald-500 rounded-[30px]">
                                 <Zap className="w-6 h-6" />
@@ -274,8 +274,8 @@ const AISALESInputs = ({
                     </div>
 
                     {/* Full Width Bottom Inputs (Optional) */}
-                    <div className="col-span-full grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 space-y-4 shadow-xl shadow-blue-500/5">
+                    <div className="col-span-full grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                        <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[32px] lg:rounded-[40px] p-6 lg:p-8 space-y-4 shadow-xl shadow-blue-500/5">
                             <div className="flex items-center gap-2 mb-2">
                                 <Award className="w-5 h-5 text-amber-500" />
                                 <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500">Sales Goals</h4>
@@ -284,10 +284,10 @@ const AISALESInputs = ({
                                 value={personaGoals}
                                 onChange={(e) => setPersonaGoals(e.target.value)}
                                 placeholder="What specific outcome are you helping them achieve?"
-                                className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-[30px] p-8 text-sm text-maintext h-40 focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-inner resize-none shadow-sm"
+                                className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-2xl lg:rounded-[30px] p-6 lg:p-8 text-sm text-maintext h-40 focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-inner resize-none shadow-sm"
                             />
                         </div>
-                        <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 space-y-4 shadow-xl shadow-blue-500/5">
+                        <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[32px] lg:rounded-[40px] p-6 lg:p-8 space-y-4 shadow-xl shadow-blue-500/5">
                             <div className="flex items-center gap-2 mb-2">
                                 <AlertCircle className="w-5 h-5 text-red-500" />
                                 <h4 className="text-[10px] font-black uppercase tracking-widest text-red-500">Pain Points</h4>
@@ -304,9 +304,9 @@ const AISALESInputs = ({
             )}
 
             {salesMode === 'Analyze Reply' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                     {/* Left Side: Text Input */}
-                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 space-y-6 shadow-xl shadow-blue-500/5">
+                    <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[32px] lg:rounded-[40px] p-6 lg:p-8 space-y-6 shadow-xl shadow-blue-500/5">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-blue-50 text-blue-500 rounded-[30px]">
                                 <Mail className="w-6 h-6" />
@@ -325,8 +325,8 @@ const AISALESInputs = ({
                     </div>
 
                     {/* Right Side: Objection Intel */}
-                    <div className="space-y-8">
-                        <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[40px] p-8 space-y-6 shadow-xl shadow-blue-500/5">
+                    <div className="space-y-6 lg:space-y-8">
+                        <div className="bg-white/70 backdrop-blur-xl border border-white/40 rounded-[32px] lg:rounded-[40px] p-6 lg:p-8 space-y-6 shadow-xl shadow-blue-500/5">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-red-50 text-red-500 rounded-[30px]">
                                     <AlertCircle className="w-6 h-6" />
@@ -388,14 +388,14 @@ const AISALESInputs = ({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                                 <div className="space-y-2">
                                     <label className="text-[10px] text-subtext font-bold uppercase tracking-widest ml-1">Our Price (₹)</label>
                                     <input
                                         type="number"
                                         value={yourPrice}
                                         onChange={(e) => setYourPrice(e.target.value)}
-                                        className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-[30px] px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
+                                        className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-2xl lg:rounded-[30px] px-6 lg:px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -404,7 +404,7 @@ const AISALESInputs = ({
                                         type="number"
                                         value={competitorPrice}
                                         onChange={(e) => setCompetitorPrice(e.target.value)}
-                                        className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-[30px] px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
+                                        className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-2xl lg:rounded-[30px] px-6 lg:px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
                                     />
                                 </div>
                             </div>
@@ -766,14 +766,14 @@ const AISALESInputs = ({
                             </div>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                             <div className="space-y-2">
                                 <label className="text-[10px] text-subtext font-bold uppercase tracking-widest ml-1">Current Cost (₹)</label>
                                 <input
                                     type="number"
                                     value={roiCalc.currentCost}
                                     onChange={(e) => setRoiCalc({ ...roiCalc, currentCost: parseInt(e.target.value) })}
-                                    className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-[30px] px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
+                                    className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-2xl lg:rounded-[30px] px-6 lg:px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -782,7 +782,7 @@ const AISALESInputs = ({
                                     type="number"
                                     value={roiCalc.expectedEfficiency}
                                     onChange={(e) => setRoiCalc({ ...roiCalc, expectedEfficiency: parseInt(e.target.value) })}
-                                    className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-[30px] px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
+                                    className="w-full bg-[#f8fafc]/50 border border-border/40 rounded-2xl lg:rounded-[30px] px-6 lg:px-8 py-5 text-sm font-black text-maintext focus:outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm"
                                 />
                             </div>
                         </div>

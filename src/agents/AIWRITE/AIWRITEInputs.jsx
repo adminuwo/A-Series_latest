@@ -1597,45 +1597,45 @@ const AIWRITEInputs = ({
     );
 
     const renderFreelancerUI = () => (
-        <div className="w-full px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 {/* Card 1: Service Profiling */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[32px] lg:rounded-[40px] p-6 lg:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 lg:space-y-10">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><Briefcase className="w-7 h-7" /></div>
+                        <div className="flex items-center gap-4 lg:gap-5">
+                            <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl lg:rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><Briefcase className="w-6 h-6 lg:w-7 lg:h-7" /></div>
                             <div><h3 className="text-lg font-black text-slate-800 tracking-tight">Service Profile</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Niche & Experience</p></div>
                         </div>
                         <button
                             onClick={handleSmartConfig}
                             disabled={isAutoSuggesting}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isAutoSuggesting ? 'bg-slate-100 animate-pulse' : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-lg shadow-blue-500/10'}`}
+                            className={`w-9 h-9 lg:w-10 lg:h-10 rounded-full flex items-center justify-center transition-all ${isAutoSuggesting ? 'bg-slate-100 animate-pulse' : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white shadow-lg shadow-blue-500/10'}`}
                             title="AI Automation Setup"
                         >
                             {isAutoSuggesting && automationMode === 'config' ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                         </button>
                     </div>
-                    <div className="space-y-8">
+                    <div className="space-y-6 lg:space-y-8">
                         <div className="space-y-3">
                             <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest px-1">Service Offered</label>
-                            <input type="text" value={freelancerService} onChange={(e) => setFreelancerService(e.target.value)} placeholder="e.g. Website Development" className="w-full bg-slate-50/50 border border-slate-100 rounded-[30px] px-8 py-5 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
+                            <input type="text" value={freelancerService} onChange={(e) => setFreelancerService(e.target.value)} placeholder="e.g. Website Development" className="w-full bg-slate-50/50 border border-slate-100 rounded-[24px] lg:rounded-[30px] px-6 lg:px-8 py-4 lg:py-5 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
                         </div>
                         <div className="space-y-3">
                             <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest px-1">Project Budget (Optional)</label>
-                            <input type="text" value={freelancerBudget} onChange={(e) => setFreelancerBudget(e.target.value)} placeholder="e.g. $2000 - $5000" className="w-full bg-slate-50/50 border border-slate-100 rounded-[30px] px-8 py-5 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
+                            <input type="text" value={freelancerBudget} onChange={(e) => setFreelancerBudget(e.target.value)} placeholder="e.g. $2000 - $5000" className="w-full bg-slate-50/50 border border-slate-100 rounded-[24px] lg:rounded-[30px] px-6 lg:px-8 py-4 lg:py-5 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
                         </div>
                     </div>
                 </motion.div>
                 {/* Card 2: Client Intel */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><UserPlus className="w-7 h-7" /></div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-[32px] lg:rounded-[40px] p-6 lg:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 lg:space-y-10">
+                    <div className="flex items-center gap-4 lg:gap-5">
+                        <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl lg:rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><UserPlus className="w-6 h-6 lg:w-7 lg:h-7" /></div>
                         <div><h3 className="text-lg font-black text-slate-800 tracking-tight">Client Intel</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Audience Type</p></div>
                     </div>
-                    <div className="space-y-8">
+                    <div className="space-y-6 lg:space-y-8">
                         <div className="space-y-3">
                             <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest px-1">Client Type / Industry</label>
-                            <input type="text" value={freelancerClientType} onChange={(e) => setFreelancerClientType(e.target.value)} placeholder="e.g. E-commerce" className="w-full bg-slate-50/50 border border-slate-100 rounded-[30px] px-8 py-5 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
+                            <input type="text" value={freelancerClientType} onChange={(e) => setFreelancerClientType(e.target.value)} placeholder="e.g. E-commerce" className="w-full bg-slate-50/50 border border-slate-100 rounded-[24px] lg:rounded-[30px] px-6 lg:px-8 py-4 lg:py-5 text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" />
                         </div>
                         <div className="space-y-3">
                             <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest px-1">Communication Tone</label>
@@ -2151,10 +2151,10 @@ const AIWRITEInputs = ({
 
     return (
         <div className="w-full flex flex-col items-center">
-            <div className="flex justify-center gap-12 border-b border-slate-50 w-full mb-12 overflow-x-auto no-scrollbar pb-1">
+            <div className="flex justify-start md:justify-center gap-6 md:gap-12 border-b border-slate-50 w-full mb-8 lg:mb-12 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
                 {SEGMENTS.map((seg) => (
-                    <button key={seg.id} onClick={() => setSegment(seg.id)} className={`pb-4 text-[10px] font-black uppercase tracking-[0.25em] transition-all relative flex items-center gap-3 ${segment === seg.id ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}>
-                        {seg.icon && <seg.icon className={`w-4 h-4 ${segment === seg.id ? 'text-blue-600' : 'text-slate-300'}`} />}
+                    <button key={seg.id} onClick={() => setSegment(seg.id)} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.25em] transition-all relative flex items-center gap-2 md:gap-3 shrink-0 ${segment === seg.id ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}>
+                        {seg.icon && <seg.icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${segment === seg.id ? 'text-blue-600' : 'text-slate-300'}`} />}
                         {seg.label}
                         {segment === seg.id && <motion.div layoutId="activeTabSegment" className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 rounded-t-full" />}
                     </button>

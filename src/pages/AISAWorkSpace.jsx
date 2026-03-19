@@ -91,10 +91,10 @@ import { useLanguage } from '../context/LanguageContext';
 
 // Import New Components
 import CustomSelect from '../Components/AISAWorkSpace/CustomSelect.jsx';
-import AISALESInputs from '../agents/AISALES/AISALESInputs.jsx';
+import AISALESInputs from '../agents/AISALES/AiSales.jsx';
 import AIWRITEInputs from '../agents/AIWRITE/AIWRITEInputs.jsx';
 import AIBIZInputs from '../agents/AIBIZ/AIBIZInputs.jsx';
-import AIHIREInputs from '../agents/AIHIRE/AIHIREInputs.jsx';
+import AIHIREInputs from '../agents/AIHIRE/AiHire.jsx';
 import AIHEALTHInputs from '../agents/AIHEALTH/AIHEALTHInputs.jsx';
 import AIDESKInputs from '../agents/AIDESK/AIDESKInputs.jsx';
 import AgentActions from '../components/AISAWorkSpace/AgentActions.jsx';
@@ -126,6 +126,36 @@ const STAKEHOLDERS = [
     { role: 'VP Sales', priority: 'Medium' },
     { role: 'VP Marketing', priority: 'Medium' }
 ];
+
+const groupSessionsByDate = (sessions) => {
+    if (!sessions || !Array.isArray(sessions)) return {};
+    const groups = {
+        'Today': [],
+        'Yesterday': [],
+        'Last 7 Days': [],
+        'Older': []
+    };
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(lastWeek.getDate() - 7);
+
+    sessions.forEach(s => {
+        const date = new Date(s.timestamp || s.createdAt || Date.now());
+        if (isNaN(date.getTime())) {
+            groups['Older'].push(s);
+            return;
+        }
+        if (date >= today) groups['Today'].push(s);
+        else if (date >= yesterday) groups['Yesterday'].push(s);
+        else if (date >= lastWeek) groups['Last 7 Days'].push(s);
+        else groups['Older'].push(s);
+    });
+    return groups;
+};
+
 const AISAWorkSpace = () => {
     const navigate = useNavigate();
     const { agentId, sessionId } = useParams();
@@ -146,6 +176,8 @@ const AISAWorkSpace = () => {
     const [sessionToDelete, setSessionToDelete] = useState(null);
     const [messages, setMessages] = useState([]);
     const [currentSessionId, setCurrentSessionId] = useState(sessionId || 'new');
+    const [sessions, setSessions] = useState([]);
+    const [showResultModal, setShowResultModal] = useState(false);
     useEffect(() => {
         if (agentId) {
             const found = AGENTS.find(a => a.id === agentId.toUpperCase());
@@ -1026,7 +1058,6 @@ const AISAWorkSpace = () => {
                 - OUTPUT ONLY what is asked for in the user's selected mode (${salesMode}).
                 `;
                 agentSpecificInstruction = aisalesPrompt;
-
             } else if (activeAgent.id === 'AIWRITE') {
                 if (writeSegment === 'students') {
                     agentSpecificInstruction = `
@@ -1379,7 +1410,7 @@ const AISAWorkSpace = () => {
                 TARGET_OFFER: Salary: ₹${hireOfferSalary}, Equity: ${hireEquityPercent}%, Perks: ${hireOfferPerks}.
                 MARKET_CONTEXT: Competitor: ₹${hireCompetitorSalary}, Leverage: ${hireCandidateLeverage}.
                 SECTIONS: MARKET BENCHMARK, EQUITY ANALYSIS, ACCEPTANCE PROBABILITY, NEGOTIATION PLAYBOOK, VISUALIZATIONS.
-                ` : `${hiringMode === 'Planning' ? `
+                ` : hiringMode === 'Planning' ? `
                 GOAL: Org design and headcount forecasting. 
                 CONTEXT: ${hireExtraNotes}
                 STRUCTURE: ${hireOrgStructure}. Values: ${hireCulturalValues}.
@@ -1388,7 +1419,7 @@ const AISAWorkSpace = () => {
                 GOAL: Talent Analytics and Funnel Optimization. 
                 ANALYSIS_REQUEST: ${hireExtraNotes || 'General funnel efficiency and cost-per-hire analysis.'}
                 SECTIONS: FUNNEL PERFORMANCE, BUDGET ATTRIBUTION, TURNOVER PREDICTION, DATA VISUALIZATIONS.
-                `}`}
+                ` }
                 
                 MANDATORY OUTPUT FORMAT:
                 SECTION 1: EXECUTIVE SUMMARY
@@ -1860,29 +1891,7 @@ const AISAWorkSpace = () => {
         }
     };
 
-    const groupSessionsByDate = (sessions) => {
-        const groups = {
-            'Today': [],
-            'Yesterday': [],
-            'Previous 7 Days': [],
-            'Older': []
-        };
 
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        const yesterday = today - 86400000;
-        const lastWeek = today - 86400000 * 7;
-
-        sessions.forEach(session => {
-            const date = new Date(session.lastModified).getTime();
-            if (date >= today) groups['Today'].push(session);
-            else if (date >= yesterday) groups['Yesterday'].push(session);
-            else if (date >= lastWeek) groups['Previous 7 Days'].push(session);
-            else groups['Older'].push(session);
-        });
-
-        return groups;
-    };
 
     const renderAIWriteResult = () => {
         if (!aiWriteResult) return null;
@@ -1906,7 +1915,7 @@ const AISAWorkSpace = () => {
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `content_calendar_${activeSessionId}.csv`);
+                link.setAttribute("download", `content_calendar_${currentSessionId}.csv`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -2294,40 +2303,7 @@ const AISAWorkSpace = () => {
         switch (activeAgent.id) {
             case 'AISALES':
                 return (
-                    <AISALESInputs
-                        salesMode={salesMode} setSalesMode={setSalesMode}
-                        targetAccount={targetAccount} setTargetAccount={setTargetAccount}
-                        targetPersona={targetPersona} setTargetPersona={setTargetPersona}
-                        dealValue={dealValue} setDealValue={setDealValue}
-                        mainCompetitor={mainCompetitor} setMainCompetitor={setMainCompetitor}
-                        competitorStrength={competitorStrength} setCompetitorStrength={setCompetitorStrength}
-                        playbookType={playbookType} setPlaybookType={setPlaybookType}
-                        dealStage={dealStage} setDealStage={setDealStage}
-                        lastContactDate={lastContactDate} setLastContactDate={setLastContactDate}
-                        outreachChannel={outreachChannel} setOutreachChannel={setOutreachChannel}
-                        personaGoals={personaGoals} setPersonaGoals={setPersonaGoals}
-                        personaPainPoints={personaPainPoints} setPersonaPainPoints={setPersonaPainPoints}
-                        prospectReply={prospectReply} setProspectReply={setProspectReply}
-                        prospectObjection={prospectObjection} setProspectObjection={setProspectObjection}
-                        engagementLevel={engagementLevel} setEngagementLevel={setEngagementLevel}
-                        yourPrice={yourPrice} setYourPrice={setYourPrice}
-                        competitorPrice={competitorPrice} setCompetitorPrice={setCompetitorPrice}
-                        valueProps={valueProps} setValueProps={setValueProps}
-                        excelFile={excelFile} setExcelFile={setExcelFile}
-                        showReminderForm={showReminderForm} setShowReminderForm={setShowReminderForm}
-                        followUpReminders={followUpReminders}
-                        newsItems={newsItems}
-                        liveSignals={liveSignals}
-                        stakeholderMap={stakeholderMap}
-                        roiCalc={roiCalc} setRoiCalc={setRoiCalc}
-                        scriptType={scriptType} setScriptType={setScriptType}
-                        isProcessing={isProcessing}
-                        handleAction={handleAction}
-                        sessions={sessions}
-                        currentSessionId={currentSessionId}
-                        onDeleteSession={handleDeleteSession}
-                        navigate={navigate}
-                    />
+                    <AISALESInputs />
                 );
             case 'AIWRITE':
                 return (
@@ -2445,42 +2421,7 @@ const AISAWorkSpace = () => {
                 );
             case 'AIHIRE':
                 return (
-                    <AIHIREInputs
-                        hiringMode={hiringMode} setHiringMode={setHiringMode}
-                        hireRiskTolerance={hireRiskTolerance} setHireRiskTolerance={setHireRiskTolerance}
-                        hireSourcingChannels={hireSourcingChannels} setHireSourcingChannels={setHireSourcingChannels}
-                        hireExtraNotes={hireExtraNotes} setHireExtraNotes={setHireExtraNotes}
-                        hireRole={hireRole} setHireRole={setHireRole}
-                        hireDepartment={hireDepartment} setHireDepartment={setHireDepartment}
-                        hireSeniority={hireSeniority} setHireSeniority={setHireSeniority}
-                        hireLocation={hireLocation} setHireLocation={setHireLocation}
-                        hireUrgency={hireUrgency} setHireUrgency={setHireUrgency}
-                        hireIndustry={hireIndustry} setHireIndustry={setHireIndustry}
-                        hireBudget={hireBudget} setHireBudget={setHireBudget}
-                        hireCandidateProfiles={hireCandidateProfiles} setHireCandidateProfiles={setHireCandidateProfiles}
-                        hireUploadedFiles={hireUploadedFiles} setHireUploadedFiles={setHireUploadedFiles}
-                        hireFileAttachments={hireFileAttachments} setHireFileAttachments={setHireFileAttachments}
-                        hireUploadDragging={hireUploadDragging} setHireUploadDragging={setHireUploadDragging}
-                        hireJobDescription={hireJobDescription} setHireJobDescription={setHireJobDescription}
-                        hireScorecardCriteria={hireScorecardCriteria} setHireScorecardCriteria={setHireScorecardCriteria}
-                        hireBiasCheck={hireBiasCheck} setHireBiasCheck={setHireBiasCheck}
-                        hireOfferSalary={hireOfferSalary} setHireOfferSalary={setHireOfferSalary}
-                        hireEquityPercent={hireEquityPercent} setHireEquityPercent={setHireEquityPercent}
-                        hireOfferPerks={hireOfferPerks} setHireOfferPerks={setHireOfferPerks}
-                        hireCompetitorSalary={hireCompetitorSalary} setHireCompetitorSalary={setHireCompetitorSalary}
-                        hireCandidateLeverage={hireCandidateLeverage} setHireCandidateLeverage={setHireCandidateLeverage}
-                        hireOrgStructure={hireOrgStructure} setHireOrgStructure={setHireOrgStructure}
-                        hireCulturalValues={hireCulturalValues} setHireCulturalValues={setHireCulturalValues}
-                        handleResumeFiles={handleResumeFiles}
-                        hireFileInputRef={hireFileInputRef}
-                        isProcessing={isProcessing}
-                        handleAction={handleAction}
-                        onClearWorkspace={handleClearWorkspace}
-                        sessions={sessions}
-                        currentSessionId={currentSessionId}
-                        onDeleteSession={handleDeleteSession}
-                        navigate={navigate}
-                    />
+                    <AIHIREInputs />
                 );
             case 'AIHEALTH':
                 return (
@@ -2565,66 +2506,82 @@ const AISAWorkSpace = () => {
             handleAction={handleAction}
         />
     );
-
     return (
-
-        <div className="flex h-full bg-background overflow-hidden font-sans">
+        <div className="flex h-screen bg-background overflow-hidden font-sans relative">
             <AnimatePresence mode="wait">
                 {isSidebarOpen && (
-                    <motion.aside initial={{ width: 0 }} animate={{ width: 260 }} exit={{ width: 0 }} className="bg-secondary/40 border-r border-border flex flex-col h-full shrink-0">
-                        <div className="p-4 border-b border-border flex items-center justify-between h-16">
-                            <h3 className="text-subtext text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><History className="w-3.5 h-3.5" /> History</h3>
-                            <button onClick={() => setIsSidebarOpen(false)} className="p-1 hover:bg-white/50 rounded-lg text-subtext"><X className="w-4 h-4" /></button>
-                        </div>
-                        <div className="p-3">
-                            <button onClick={handleNewChat} className="w-full h-10 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">
-                                <Plus className="w-4 h-4" /> New Chat
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-3 space-y-6 custom-scrollbar">
-                            {(() => {
-                                const grouped = groupSessionsByDate(sessions);
-                                return Object.entries(grouped).map(([label, items]) => {
-                                    if (items.length === 0) return null;
-                                    return (
-                                        <div key={label} className="space-y-1.5">
-                                            <h4 className="px-3 text-[9px] font-black text-subtext/60 uppercase tracking-[0.2em]">{label}</h4>
-                                            <div className="space-y-0.5">
-                                                {items.map(session => (
-                                                    <div
-                                                        key={session.sessionId}
-                                                        onClick={() => navigate(`/dashboard/workspace/${session.sessionId}`)}
-                                                        className={`group flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition-all ${currentSessionId === session.sessionId
-                                                            ? 'bg-white shadow-sm border border-border/50'
-                                                            : 'hover:bg-white/40 border border-transparent'
-                                                            }`}
-                                                    >
-                                                        <div className="flex items-center gap-3 overflow-hidden">
-                                                            <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${currentSessionId === session.sessionId ? 'text-primary' : 'text-subtext/40'}`} />
-                                                            <span className={`text-[11px] font-bold truncate w-36 ${currentSessionId === session.sessionId ? 'text-maintext' : 'text-subtext'}`}>
-                                                                {session.title || 'New Chat'}
-                                                            </span>
-                                                        </div>
-                                                        <button
-                                                            onClick={(e) => handleDeleteSession(e, session.sessionId)}
-                                                            className="opacity-0 group-hover:opacity-100 p-1.5 text-subtext/40 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[45] lg:hidden"
+                        />
+                        <motion.aside
+                            initial={{ x: -260, width: 260 }}
+                            animate={{ x: 0, width: 260 }}
+                            exit={{ x: -260, width: 0 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed lg:relative inset-y-0 left-0 bg-white lg:bg-secondary/40 border-r border-border flex flex-col h-full shrink-0 z-50 shadow-2xl lg:shadow-none"
+                        >
+                            <div className="p-4 border-b border-border flex items-center justify-between h-16">
+                                <h3 className="text-subtext text-[10px] font-black uppercase tracking-widest flex items-center gap-2"><History className="w-3.5 h-3.5" /> History</h3>
+                                <button onClick={() => setIsSidebarOpen(false)} className="p-1 hover:bg-slate-100 rounded-lg text-subtext"><X className="w-4 h-4" /></button>
+                            </div>
+                            <div className="p-3">
+                                <button onClick={handleNewChat} className="w-full h-10 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95">
+                                    <Plus className="w-4 h-4" /> New Chat
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-3 space-y-6 custom-scrollbar">
+                                {(() => {
+                                    const grouped = groupSessionsByDate(sessions);
+                                    return Object.entries(grouped).map(([label, items]) => {
+                                        if (items.length === 0) return null;
+                                        return (
+                                            <div key={label} className="space-y-1.5">
+                                                <h4 className="px-3 text-[9px] font-black text-subtext/60 uppercase tracking-[0.2em]">{label}</h4>
+                                                <div className="space-y-0.5">
+                                                    {items.map(session => (
+                                                        <div
+                                                            key={session.sessionId}
+                                                            onClick={() => {
+                                                                navigate(`/dashboard/workspace/${session.sessionId}`);
+                                                                if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                                                            }}
+                                                            className={`group flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition-all ${currentSessionId === session.sessionId
+                                                                ? 'bg-slate-50 lg:bg-white shadow-sm border border-border/50'
+                                                                : 'hover:bg-slate-50 border border-transparent'
+                                                                }`}
                                                         >
-                                                            <Trash2 className="w-3 h-3" />
-                                                        </button>
-                                                    </div>
-                                                ))}
+                                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                                <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${currentSessionId === session.sessionId ? 'text-primary' : 'text-subtext/40'}`} />
+                                                                <span className={`text-[11px] font-bold truncate w-36 ${currentSessionId === session.sessionId ? 'text-maintext' : 'text-subtext'}`}>
+                                                                    {session.title || 'New Chat'}
+                                                                </span>
+                                                            </div>
+                                                            <button
+                                                                onClick={(e) => handleDeleteSession(e, session.sessionId)}
+                                                                className="opacity-0 group-hover:opacity-100 p-1.5 text-subtext/40 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                });
-                            })()}
-                        </div>
-                    </motion.aside>
+                                        );
+                                    });
+                                })()}
+                            </div>
+                        </motion.aside>
+                    </>
                 )}
             </AnimatePresence>
 
 
-            <main className={`flex-1 flex flex-col relative overflow-hidden transition-all duration-700 ${activeAgent?.id === 'AISALES'
+            <main className={`flex-1 flex flex-col relative overflow-hidden transition-all duration-700 min-w-0 ${activeAgent?.id === 'AISALES'
                 ? 'bg-gradient-to-br from-blue-50/80 via-white to-sky-50/80'
                 : activeAgent?.id === 'AIWRITE'
                     ? 'bg-gradient-to-b from-blue-50/20 to-white'
@@ -2632,8 +2589,17 @@ const AISAWorkSpace = () => {
                         ? 'bg-[#f8faff]'
                         : 'bg-secondary/30'
                 }`}>
-                <header className="h-16 border-b border-slate-100 bg-white flex items-center justify-between px-8 z-20">
-                    <div className="flex items-center gap-4 flex-1">
+                <header className="h-16 border-b border-slate-100 bg-white flex items-center justify-between px-4 lg:px-8 z-20 shrink-0">
+                    <div className="flex items-center gap-2 lg:gap-4 flex-1 min-w-0">
+                        {!isSidebarOpen && (
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="p-2 hover:bg-slate-50 rounded-xl text-slate-400 lg:mr-2"
+                                title="Open history"
+                            >
+                                <History size={20} />
+                            </button>
+                        )}
                         {activeAgent?.id === 'AIHEALTH' ? (
                             <div className="flex items-center justify-between w-full">
                                 <div className="flex items-center gap-5">
@@ -2656,7 +2622,7 @@ const AISAWorkSpace = () => {
                             </div>
                         ) : (
                             <>
-                                <div className={`w-12 h-12 ${activeAgent?.id === 'AIWRITE' ? 'bg-blue-50' : activeAgent?.id === 'AISALES' ? 'bg-indigo-50' : 'bg-slate-50'} rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden p-1`}>
+                                <div className={`w-9 h-9 lg:w-12 lg:h-12 shrink-0 ${activeAgent?.id === 'AIWRITE' ? 'bg-blue-50' : activeAgent?.id === 'AISALES' ? 'bg-indigo-50' : 'bg-slate-50'} rounded-lg lg:rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden p-1`}>
                                     <img
                                         src={`/AGENTS_IMG/${activeAgent?.id}.png`}
                                         alt={activeAgent?.id}
@@ -2670,8 +2636,10 @@ const AISAWorkSpace = () => {
                                         {activeAgent?.id === 'AIWRITE' ? <Sparkles className="w-6 h-6 text-blue-600" /> : activeAgent?.id === 'AISALES' ? <TargetIcon className="w-6 h-6 text-indigo-600" /> : activeAgent?.icon ? <activeAgent.icon className="w-6 h-6 text-slate-600" /> : <Zap className="w-6 h-6 text-slate-600" />}
                                     </div>
                                 </div>
-                                <div className="space-y-0.5">
-                                    <h2 className="text-sm font-black text-slate-800 tracking-tight">{activeAgent?.id === 'AIWRITE' ? 'AIWRITE Agent' : activeAgent?.id === 'AISALES' ? 'AISALES Agent' : activeAgent?.name || 'A.I. Engine'}</h2>
+                                <div className="space-y-0.5 min-w-0 overflow-hidden">
+                                    <h2 className="text-xs lg:text-sm font-black text-slate-800 tracking-tight truncate">
+                                        {activeAgent?.id === 'AIWRITE' ? 'AIWRITE Agent' : activeAgent?.id === 'AISALES' ? 'AISALES Agent' : activeAgent?.name || 'A.I. Engine'}
+                                    </h2>
                                 </div>
                             </>
                         )}
@@ -2679,15 +2647,15 @@ const AISAWorkSpace = () => {
                     <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-xs">{user.name.charAt(0)}</div></div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-6 lg:p-10 custom-scrollbar">
-                    <div className="w-full space-y-10">
-                        <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) ? '' : 'bg-card border border-border rounded-2xl shadow-sm relative'}`}>
-                            {!['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) && (
+                <div className="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar">
+                    <div className="max-w-7xl mx-auto space-y-6 lg:space-y-10">
+                        <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ', 'AISALES'].includes(activeAgent?.id) ? '' : 'bg-card border border-border rounded-2xl shadow-sm relative'}`}>
+                            {!['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ', 'AISALES'].includes(activeAgent?.id) && (
                                 <div className="p-4 border-b border-border bg-secondary/30 flex items-center justify-between"><div className="flex items-center gap-2"><Settings className="w-3.5 h-3.5 text-maintext/50" /><h3 className="text-[10px] font-black text-maintext uppercase tracking-widest">Parameters</h3></div></div>
                             )}
-                            <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) ? '' : 'p-6 space-y-6'}`}>
-                                <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) ? '' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}`}>{renderAgentInputs()}</div>
-                                {activeAgent?.id !== 'AIHIRE' && activeAgent?.id !== 'AIWRITE' && activeAgent?.id !== 'AIHEALTH' && activeAgent?.id !== 'AIBIZ' && (
+                            <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ', 'AISALES'].includes(activeAgent?.id) ? '' : 'p-6 space-y-6'}`}>
+                                <div className={`${['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ', 'AISALES'].includes(activeAgent?.id) ? '' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}`}>{renderAgentInputs()}</div>
+                                {!['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ', 'AISALES'].includes(activeAgent?.id) && (
                                     <form onSubmit={handleAction} className="space-y-4">
                                         <textarea value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Describe your objective..." className="w-full bg-secondary/20 border border-border focus:border-primary/50 focus:bg-white transition-all rounded-2xl p-4 min-h-[120px] text-sm text-maintext outline-none" />
                                         <div className="flex items-center justify-between border-t border-border pt-4"><div className="flex gap-2">{renderAgentActions()}</div><button type="submit" disabled={isProcessing || !inputValue.trim()} className="px-6 py-2 bg-primary text-white rounded-lg font-bold shadow-md hover:bg-primary/90 transition-all text-xs uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Execute'}</button></div>
@@ -2696,7 +2664,7 @@ const AISAWorkSpace = () => {
                             </div>
                         </div>
 
-                        {!['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ'].includes(activeAgent?.id) && messages.length > 0 && (
+                        {!['AIWRITE', 'AIHEALTH', 'AIHIRE', 'AIBIZ', 'AISALES'].includes(activeAgent?.id) && messages.length > 0 && (
                             <div className="space-y-8">
                                 <div className="flex items-center gap-4">
                                     <div className="h-[1px] flex-1 bg-border/50"></div>

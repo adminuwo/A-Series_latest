@@ -110,34 +110,43 @@ const AIDESKInputs = ({
 
                     <AnimatePresence>
                         {isLocalHistoryOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                animate={{ opacity: 1, scale: 1, y: 15 }}
-                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[350px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 p-6 z-[100]"
-                            >
-                                <div className="flex items-center justify-between mb-5">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Desk History</h4>
-                                    <button onClick={() => setIsLocalHistoryOpen(false)} className="text-slate-300 hover:text-slate-600 transition-colors">
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                                <div className="relative mb-5">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300">
-                                        <SearchIcon size={12} />
+                            <>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsLocalHistoryOpen(false)}
+                                    className="fixed inset-0 z-[190] bg-slate-900/10 backdrop-blur-sm md:hidden"
+                                />
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 15 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                    className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[90vw] md:w-[350px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 p-6 z-[200]"
+                                >
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Desk History</h4>
+                                        <button onClick={() => setIsLocalHistoryOpen(false)} className="text-slate-300 hover:text-slate-600 transition-colors">
+                                            <X size={16} />
+                                        </button>
                                     </div>
-                                    <input
-                                        type="text"
-                                        value={historySearch}
-                                        onChange={(e) => setHistorySearch(e.target.value)}
-                                        placeholder="Search history..."
-                                        className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-[10px] font-bold text-slate-600 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
-                                    />
-                                </div>
-                                <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {renderHistoryList(true)}
-                                </div>
-                            </motion.div>
+                                    <div className="relative mb-5">
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300">
+                                            <SearchIcon size={12} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={historySearch}
+                                            onChange={(e) => setHistorySearch(e.target.value)}
+                                            placeholder="Search history..."
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-[10px] font-bold text-slate-600 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all"
+                                        />
+                                    </div>
+                                    <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {renderHistoryList(true)}
+                                    </div>
+                                </motion.div>
+                            </>
                         )}
                     </AnimatePresence>
                 </div>

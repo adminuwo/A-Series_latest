@@ -4495,24 +4495,24 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         {/* Welcome Screen - Absolute Overlay */}
         {
           messages.length === 0 && (
-            <div className="absolute inset-0 z-0 flex flex-col items-center justify-center text-center px-4 pt-4 pb-32 sm:pt-20 sm:pb-40 overflow-y-auto no-scrollbar pointer-events-auto">
-              <div className="flex flex-col items-center justify-center my-auto w-full max-w-4xl">
-                <div className="mb-6 select-none shrink-0">
-                  <img
-                    src={activeAgent.avatar || "/AGENTS_IMG/AIVA.png"}
-                    alt={`${activeAgent.agentName || 'AIVA'} Icon`}
-                    className="w-16 h-16 md:w-24 md:h-24 object-contain drop-shadow-2xl pointer-events-none"
-                    draggable={false}
-                    onDragStart={(e) => e.preventDefault()}
-                  />
-                </div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-maintext tracking-tight w-full leading-relaxed drop-shadow-sm px-4 shrink-0">
+            <div className="absolute inset-0 z-0 flex flex-col items-center justify-start sm:justify-center text-center px-4 pt-10 pb-32 sm:pt-20 sm:pb-40 overflow-y-auto no-scrollbar pointer-events-auto">
+              <div className="flex flex-col items-center my-auto w-full max-w-4xl">
+
+
+
+
+
+
+
+
+
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-maintext tracking-tight w-full leading-normal sm:leading-relaxed drop-shadow-sm px-4 shrink-0">
                   {activeAgent.agentName === 'AIVA' || !activeAgent.agentName ? t('chatPage.welcomeMessage') : `Hello! I’m ${activeAgent.agentName}, how can I help you today?`}
                 </h2>
 
-                <div className="mt-12 w-full max-w-4xl px-4 animate-in slide-in-from-bottom-5 duration-700 shrink-0">
-                  <div className="bg-gradient-to-br from-blue-600/10 via-white/5 to-purple-600/10 backdrop-blur-3xl rounded-[2.5rem] border border-white/20 shadow-xl p-4 sm:p-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="mt-8 sm:mt-12 w-full max-w-4xl px-4 animate-in slide-in-from-bottom-5 duration-700 shrink-0">
+                  <div className="bg-gradient-to-br from-blue-600/10 via-white/5 to-purple-600/10 backdrop-blur-3xl rounded-3xl sm:rounded-[2.5rem] border border-white/20 shadow-xl p-3 sm:p-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                       {[
                         {
                           icon: ImageIcon,

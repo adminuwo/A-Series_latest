@@ -288,9 +288,9 @@ const AIHEALTHInputs = ({
         <div className="col-span-full space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 w-full">
 
             {/* Clinical Elite Header */}
-            <div className="bg-white border border-slate-200/60 rounded-[20px] p-4 flex flex-col xl:flex-row items-center justify-between gap-6 shadow-sm">
-                <div className="flex items-center gap-4 pl-2">
-                    <div className="relative">
+            <div className="bg-white border border-slate-200/60 rounded-[20px] lg:rounded-[24px] p-4 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-sm">
+                <div className="flex items-center gap-4 pl-0 lg:pl-2 w-full lg:w-auto">
+                    <div className="relative shrink-0">
                         <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center">
                             <Heart className="w-5 h-5 text-blue-600 fill-blue-600/10" />
                         </div>
@@ -298,49 +298,51 @@ const AIHEALTHInputs = ({
                             <Sparkles className="w-2.5 h-2.5 text-amber-500" />
                         </div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col min-w-0">
                         <div className="flex items-center gap-2.5">
-                            <h2 className="text-[16px] font-black tracking-tight leading-none bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 bg-clip-text text-transparent uppercase">AIHEALTH <span className="text-slate-300 font-light ml-1">SYSTEMS</span></h2>
-                            <div className="px-2 py-0.5 rounded-md bg-gradient-to-r from-blue-900 to-slate-900 text-[8px] font-black text-white uppercase tracking-[0.1em]">
-                                Verified Pro
+                            <h2 className="text-[14px] lg:text-[16px] font-black tracking-tight leading-none bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 bg-clip-text text-transparent uppercase truncate">AIHEALTH <span className="text-slate-300 font-light ml-1 hidden sm:inline">SYSTEMS</span></h2>
+                            <div className="shrink-0 px-2 py-0.5 rounded-md bg-gradient-to-r from-blue-900 to-slate-900 text-[8px] font-black text-white uppercase tracking-[0.1em]">
+                                Verified
                             </div>
                         </div>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.15em] mt-1.5 flex items-center gap-2">
-                            Quantum Analysis <span className="w-1 h-1 rounded-full bg-slate-200"></span> Bio-Intelligence Engine
+                        <p className="text-[8px] lg:text-[9px] font-bold text-slate-400 uppercase tracking-[0.15em] mt-1.5 flex items-center gap-2 truncate">
+                            Quantum Analysis <span className="w-1 h-1 rounded-full bg-slate-200"></span> Bio-Intel
                         </p>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap lg:flex-nowrap items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-100">
-                    {HEALTH_MODES.map((mode) => (
-                        <button
-                            key={mode.id}
-                            onClick={() => setHealthMode(mode.id)}
-                            className={`flex items-center gap-3 px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${healthMode === mode.id
-                                ? 'bg-white text-blue-600 shadow-xl shadow-blue-500/10 ring-1 ring-blue-100/50 scale-[1.02]'
-                                : 'text-slate-400 hover:text-slate-600 hover:bg-white/60'
-                                }`}
-                        >
-                            <mode.icon className={`w-4 h-4 transition-transform duration-500 ${healthMode === mode.id ? 'scale-110 text-blue-500' : 'text-slate-300'}`} />
-                            {mode.label}
-                        </button>
-                    ))}
+                <div className="flex items-center gap-1 bg-slate-50 p-1.5 rounded-2xl border border-slate-100 w-full lg:w-auto overflow-x-auto scrollbar-none no-scrollbar">
+                    <div className="flex items-center gap-1 shrink-0">
+                        {HEALTH_MODES.map((mode) => (
+                            <button
+                                key={mode.id}
+                                onClick={() => setHealthMode(mode.id)}
+                                className={`flex items-center gap-2.5 px-4 lg:px-5 py-2.5 lg:py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap ${healthMode === mode.id
+                                    ? 'bg-white text-blue-600 shadow-lg ring-1 ring-blue-100/50 scale-[1.02]'
+                                    : 'text-slate-400 hover:text-slate-600 hover:bg-white/60'
+                                    }`}
+                            >
+                                <mode.icon className={`w-3.5 h-3.5 lg:w-4 lg:h-4 transition-transform duration-500 ${healthMode === mode.id ? 'scale-110 text-blue-500' : 'text-slate-300'}`} />
+                                {mode.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
             {healthMode === 'SYMPTOM CHECKER' && (
                 <div className="space-y-8 pb-10 w-full">
-                    <div className="bg-white/40 backdrop-blur-3xl border border-white/50 rounded-[40px] p-8 lg:p-12 shadow-xl shadow-blue-500/5 space-y-10">
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/5 border border-blue-100/50">
-                                <Activity className="w-7 h-7" />
+                    <div className="bg-white/40 backdrop-blur-3xl border border-white/50 rounded-[32px] lg:rounded-[40px] p-6 lg:p-12 shadow-xl shadow-blue-500/5 space-y-8 lg:space-y-10">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                            <div className="w-12 h-12 lg:w-14 lg:h-14 shrink-0 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/5 border border-blue-100/50">
+                                <Activity className="w-6 h-6 lg:w-7 lg:h-7" />
                             </div>
                             <div>
-                                <h3 className="text-[10px] font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-1 rounded-full inline-block tracking-[0.2em] mb-2 uppercase">Intelligence AI</h3>
-                                <h3 className="text-3xl font-black tracking-tight bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 bg-clip-text text-transparent">Check Your Symptoms</h3>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-2">
+                                <h3 className="text-[9px] lg:text-[10px] font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-1 rounded-full inline-block tracking-[0.2em] mb-2 uppercase">Intelligence AI</h3>
+                                <h3 className="text-2xl lg:text-3xl font-black tracking-tight bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 bg-clip-text text-transparent leading-tight">Check Your Symptoms</h3>
+                                <p className="text-[10px] lg:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                                    Real-time symptom analysis and health intelligence
+                                    Analysis & Intelligence
                                 </p>
                             </div>
                         </div>
@@ -1435,7 +1437,7 @@ const AIHEALTHInputs = ({
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Clinical System</label>
                                             <CustomSelect
@@ -1452,7 +1454,7 @@ const AIHEALTHInputs = ({
                                                 value={healthCondition}
                                                 onChange={(e) => setHealthCondition(e.target.value)}
                                                 placeholder="e.g. Type 2 Diabetes"
-                                                className="w-full bg-white border border-slate-50 rounded-[28px] px-6 py-4 text-[12px] font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/20 transition-all shadow-sm placeholder:text-slate-200"
+                                                className="w-full bg-white border border-slate-50 rounded-[24px] lg:rounded-[28px] px-6 py-4 text-[12px] font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/20 transition-all shadow-sm placeholder:text-slate-200"
                                             />
                                         </div>
                                     </div>

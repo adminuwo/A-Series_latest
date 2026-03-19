@@ -101,8 +101,8 @@ const AIHIREInputs = ({
     };
     return (
         <div className="col-span-full space-y-10">
-            <div className="flex justify-center border-b border-border/20 pb-4">
-                <div className="flex gap-10">
+            <div className="flex justify-start md:justify-center border-b border-border/20 pb-4 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div className="flex gap-6 md:gap-10 shrink-0">
                     {[
                         { id: 'Strategy', label: 'Strategy', icon: GitGraph },
                         { id: 'Evaluation', label: 'Evaluation', icon: ShieldCheck },
@@ -113,12 +113,12 @@ const AIHIREInputs = ({
                         <button
                             key={modeOption.id}
                             onClick={() => setHiringMode(modeOption.id)}
-                            className={`relative py - 3 px - 2 flex items - center gap - 2 text - [11px] font - black uppercase tracking - widest transition - all duration - 300 ${hiringMode === modeOption.id
+                            className={`relative py-3 px-1 flex items-center gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${hiringMode === modeOption.id
                                     ? 'text-emerald-500'
                                     : 'text-slate-400 hover:text-slate-600'
                                 } `}
                         >
-                            <modeOption.icon className={`w - 3.5 h - 3.5 ${hiringMode === modeOption.id ? 'text-emerald-500' : 'text-slate-300'} `} />
+                            <modeOption.icon className={`w-3.5 h-3.5 ${hiringMode === modeOption.id ? 'text-emerald-500' : 'text-slate-300'} `} />
                             {modeOption.label}
                             {hiringMode === modeOption.id && (
                                 <motion.div
@@ -175,7 +175,7 @@ const AIHIREInputs = ({
                                     <p className="text-[10px] font-bold text-subtext uppercase tracking-widest">Detail & Scope</p>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold text-subtext uppercase tracking-widest pl-1">Target Role</label>
                                     <input type="text" value={hireRole} onChange={(e) => setHireRole(e.target.value)} placeholder="e.g. Senior Backend" className="w-full bg-secondary/50 border border-border rounded-2xl px-4 py-3 text-sm text-maintext" />
@@ -275,7 +275,7 @@ const AIHIREInputs = ({
                             onDragOver={(e) => { e.preventDefault(); setHireUploadDragging(true); }}
                             onDragLeave={() => setHireUploadDragging(false)}
                             onDrop={(e) => { e.preventDefault(); setHireUploadDragging(false); handleResumeFiles(e.dataTransfer.files); }}
-                            className={`relative border - 2 border - dashed rounded - [32px] p - 6 transition - all ${hireUploadDragging ? 'border-emerald-500 bg-emerald-50/50' : 'border-border/40 bg-[#f8fafc]/30'} `}
+                            className={`relative border-2 border-dashed rounded-[32px] p-6 transition-all ${hireUploadDragging ? 'border-emerald-500 bg-emerald-50/50' : 'border-border/40 bg-[#f8fafc]/30'} `}
                         >
                             <textarea
                                 value={hireCandidateProfiles}
@@ -336,9 +336,9 @@ const AIHIREInputs = ({
                                 </div>
                                 <button
                                     onClick={() => setHireBiasCheck(!hireBiasCheck)}
-                                    className={`w - 14 h - 7 rounded - full transition - all flex items - center px - 1 ${hireBiasCheck ? 'bg-emerald-500' : 'bg-subtext/20'} `}
+                                    className={`w-14 h-7 rounded-full transition-all flex items-center px-1 ${hireBiasCheck ? 'bg-emerald-500' : 'bg-subtext/20'} `}
                                 >
-                                    <div className={`w - 5 h - 5 bg - white rounded - full shadow - md transition - transform ${hireBiasCheck ? 'translate-x-7' : 'translate-x-0'} `} />
+                                    <div className={`w-5 h-5 bg-white rounded-full shadow-md transition-transform ${hireBiasCheck ? 'translate-x-7' : 'translate-x-0'} `} />
                                 </button>
                             </div>
                         </div>
@@ -358,7 +358,7 @@ const AIHIREInputs = ({
                                 <p className="text-[10px] font-bold text-subtext uppercase tracking-widest">Package Design</p>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-subtext uppercase tracking-widest">Base Salary (₹)</label>
                                 <input type="number" value={hireOfferSalary} onChange={(e) => setHireOfferSalary(e.target.value)} className="w-full bg-secondary/30 border border-border rounded-2xl px-5 py-4 text-sm font-black text-maintext" />
@@ -460,7 +460,7 @@ const AIHIREInputs = ({
                 <div className="relative">
                     <button
                         onClick={() => setIsLocalHistoryOpen(!isLocalHistoryOpen)}
-                        className={`flex items - center gap - 2 px - 8 py - 5 border rounded - [30px] text - [10px] font - black uppercase tracking - widest transition - all shadow - sm ${isLocalHistoryOpen ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'} `}
+                        className={`flex items-center gap-2 px-8 py-5 border rounded-[30px] text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${isLocalHistoryOpen ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'} `}
                     >
                         <History size={16} className={isLocalHistoryOpen ? 'text-white' : 'text-slate-400'} /> History
                     </button>
@@ -471,7 +471,7 @@ const AIHIREInputs = ({
                                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                                 animate={{ opacity: 1, scale: 1, y: 15 }}
                                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[400px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 p-7 z-[100]"
+                                className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[90vw] md:w-[400px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 p-7 z-[100]"
                             >
                                 <div className="flex items-center justify-between mb-5">
                                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Hiring History</h4>

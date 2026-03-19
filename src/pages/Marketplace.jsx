@@ -64,6 +64,22 @@ const HARDCODED_AGENTS = [
   }
 ];
 
+const catKeyMap = {
+  'all': 'all',
+  "Business OS": 'business_os',
+  "Data & Intelligence": 'data_intelligence',
+  "Sales & Marketing": 'sales_marketing',
+  "HR & Finance": 'hr_finance',
+  "Design & Creative": 'design_creative',
+  "Medical & Health AI": 'medical_health',
+  "Search & Research": 'search_research',
+  "Productivity & Office": 'productivity_office',
+  "Developer Tools": 'developer_tools',
+  "Audio & Voice": 'audio_voice'
+};
+
+const categories = ['all', ...Object.keys(catKeyMap).filter(k => k !== 'all')];
+
 const Marketplace = () => {
   const { t } = useLanguage();
   const [agents, setAgents] = useState([]);
@@ -84,9 +100,21 @@ const Marketplace = () => {
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     if (categoryParam) {
-      setFilter(categoryParam);
+      // Find the key in catKeyMap that matches the slug in the URL
+      const matchingKey = categories.find(cat => catKeyMap[cat] === categoryParam);
+      if (matchingKey) {
+        setFilter(matchingKey);
+      } else {
+        setFilter('all');
+      }
+    } else {
+      setFilter('all');
     }
-  }, [searchParams]);
+    const queryParam = searchParams.get('q');
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, [searchParams, categories]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -144,27 +172,22 @@ const Marketplace = () => {
   ];
 
   const filteredAgents = allAvailableAgents.filter(agent => {
-    const matchesCategory = filter === 'all' || agent.category === filter;
-    const matchesSearch = (agent.agentName || agent.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (agent.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+    // Robust category matching
+    const agentCat = (agent.category || "").trim().toLowerCase();
+    const filterCat = (filter || "all").trim().toLowerCase();
+    
+    const matchesCategory = filterCat === 'all' || agentCat === filterCat;
+    
+    // Improved search with safety checks
+    const name = (agent.agentName || agent.name || "").toLowerCase();
+    const desc = (agent.description || "").toLowerCase();
+    const q = (searchQuery || "").toLowerCase().trim();
+    
+    const matchesSearch = !q || name.includes(q) || desc.includes(q);
+    
     return matchesCategory && matchesSearch;
   });
 
-  const catKeyMap = {
-    'all': 'all',
-    "Business OS": 'business_os',
-    "Data & Intelligence": 'data_intelligence',
-    "Sales & Marketing": 'sales_marketing',
-    "HR & Finance": 'hr_finance',
-    "Design & Creative": 'design_creative',
-    "Medical & Health AI": 'medical_health',
-    "Search & Research": 'search_research',
-    "Productivity & Office": 'productivity_office',
-    "Developer Tools": 'developer_tools',
-    "Audio & Voice": 'audio_voice'
-  };
-
-  const categories = ['all', ...Object.keys(catKeyMap).filter(k => k !== 'all')];
 
   const groupedAgents = categories.reduce((acc, cat) => {
     if (cat === 'all') return acc;
@@ -176,7 +199,9 @@ const Marketplace = () => {
   }, {});
 
   const getToolIcon = (slug) => {
-    switch (slug) {
+    if (!slug) return ImageIcon;
+    const s = slug.startsWith('tool-') ? slug : `tool-${slug}`;
+    switch (s) {
       case 'tool-image-gen': return ImageIcon;
       case 'tool-image-editing-customization': return Edit;
       case 'tool-deep-search': return Search;
@@ -222,6 +247,7 @@ const Marketplace = () => {
       case 'tool-cxr-foundation': return ShieldCheck;
       case 'tool-pixel-segmentor-sam': return Target;
       case 'tool-vertex-stt': return Mic;
+
       // Workspace Agents
       case 'tool-aibiz': return BarChart3;
       case 'tool-aihire': return Users;
@@ -234,8 +260,10 @@ const Marketplace = () => {
   };
 
   const renderAgentCard = (agent) => {
-    const isSystemTool = agent.slug?.startsWith('tool-');
-    const ToolIcon = isSystemTool ? getToolIcon(agent.slug) : null;
+    // A tool is either hardcoded or has a slug that matches our tool list
+    const isSystemTool = agent.isHardcoded || (agent.slug && (agent.slug.startsWith('tool-') || true)); 
+    // Actually, for marketplace seeded agents, we want them to behave like tools (open popup)
+    const ToolIcon = getToolIcon(agent.slug);
     const isAgentActive = userAgent.some((ag) => ag && agent._id == ag._id);
 
     const handleCardClick = () => {
@@ -571,21 +599,40 @@ const Marketplace = () => {
             type="text"
             placeholder={t('marketplacePage.searchPlaceholder')}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-surface border border-border rounded-xl py-2.5 pl-10 pr-4 text-maintext focus:outline-none focus:border-primary transition-colors shadow-sm"
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              const newParams = new URLSearchParams(searchParams);
+              if (e.target.value) {
+                newParams.set('q', e.target.value);
+              } else {
+                newParams.delete('q');
+              }
+              navigate(`/dashboard/marketplace?${newParams.toString()}`, { replace: true });
+            }}
+            className="w-full bg-surface border border-border rounded-xl py-2.5 pl-10 pr-4 text-maintext focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
           />
         </div>
       </div>
 
       {/* Categories */}
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none bg-background z-20 -mx-4 px-4 sm:mx-0 sm:px-0">
         {categories.map(cat => (
           <button
             key={cat}
-            onClick={() => setFilter(cat)}
-            className={`px-4 py-2 rounded-full text-sm font-medium capitalize whitespace-nowrap transition-all border ${filter === cat
-                ? 'bg-primary text-white border-primary'
-                : 'bg-card text-subtext border-border hover:bg-surface'
+            onClick={() => {
+              setFilter(cat);
+              const newParams = new URLSearchParams(searchParams);
+              const slug = catKeyMap[cat] || 'all';
+              if (cat === 'all' || slug === 'all') {
+                newParams.delete('category');
+              } else {
+                newParams.set('category', slug);
+              }
+              navigate(`/dashboard/marketplace?${newParams.toString()}`, { replace: true });
+            }}
+            className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize whitespace-nowrap transition-all border shadow-sm ${filter === cat
+              ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105'
+              : 'bg-card text-subtext border-border hover:bg-surface hover:text-maintext'
               }`}
           >
             {t(`marketplacePage.categories.${catKeyMap[cat] || 'all'}`)}
@@ -593,15 +640,43 @@ const Marketplace = () => {
         ))}
       </div>
 
-      {/* Agents Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAgents.map(agent => renderAgentCard(agent))}
-      </div>
+      {/* Agents Grid/Segmented View */}
+      <div className="space-y-12">
+        <div className="animate-in fade-in duration-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAgents.map(agent => renderAgentCard(agent))}
+          </div>
 
-      {loading && <div className="text-center py-20 text-subtext">Loading agents...</div>}
-      {!loading && filteredAgents.length === 0 && (
-        <div className="text-center py-20 text-subtext">No agents found for this category.</div>
-      )}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-20 gap-4 animate-pulse">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              <p className="text-subtext font-medium text-sm">Discovering best agents...</p>
+            </div>
+          )}
+
+          {!loading && filteredAgents.length === 0 && (
+            <div className="text-center py-20 bg-surface/30 rounded-[2.5rem] border border-dashed border-border flex flex-col items-center gap-4 mt-8">
+              <div className="p-4 bg-surface rounded-2xl shadow-sm">
+                <ImageIcon className="w-12 h-12 text-subtext/40" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-maintext">No agents found</p>
+                <p className="text-subtext">Try refining your search or exploring other categories.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setFilter('all');
+                  setSearchQuery('');
+                  navigate('/dashboard/marketplace');
+                }}
+                className="text-primary font-bold hover:underline"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
