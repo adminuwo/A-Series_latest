@@ -176,7 +176,7 @@ const ImageViewer = ({ src, alt }) => {
 
   return (
     <div className="relative w-full h-full flex flex-col overflow-hidden bg-black/90 select-none">
-      {/* Zoom Controls */}
+      /* Zoom Controls */
       <div
         className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-black/60 backdrop-blur-md rounded-full px-6 py-3 border border-white/10 shadow-xl"
         onClick={(e) => e.stopPropagation()} // Prevent closing modal
@@ -3159,7 +3159,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
   return (
     <div className="flex w-full bg-secondary relative overflow-hidden aiva-scalable-text overscroll-none h-full focus:outline-none">
 
-      {/* Document Viewer Modal */}
+      /* Document Viewer Modal */
       <AnimatePresence>
         {viewingDoc && (
           <motion.div
@@ -3174,7 +3174,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
               exit={{ scale: 0.95, opacity: 0 }}
               className="bg-card w-full max-w-4xl h-full max-h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border"
             >
-              {/* Modal Header */}
+              /* Modal Header */
               <div className="flex items-center justify-between p-4 border-b border-border bg-secondary">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -3207,7 +3207,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                 </div>
               </div>
 
-              {/* Viewer Content */}
+              /* Viewer Content */
               <div className="flex-1 bg-gray-100 dark:bg-gray-900 relative flex items-center justify-center overflow-hidden">
                 {viewingDoc.type === 'image' || viewingDoc.name.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i) || viewingDoc.url.startsWith('data:image/') ? (
                   <ImageViewer
@@ -3274,7 +3274,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         )}
       </AnimatePresence>
 
-      {/* Image Editor */}
+      /* Image Editor */
       <AnimatePresence>
         {isEditingImage && selectedFile && (
           <ImageEditor
@@ -3300,7 +3300,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
 
 
 
-      {/* Chat History Sidebar */}
+      /* Chat History Sidebar */
       <AnimatePresence>
         {showHistory && (
           <motion.div
@@ -3313,7 +3313,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
               flex flex - col backdrop - blur - 3xl shadow - 2xl lg: shadow - none overflow - hidden lg: rounded - r - 3xl
             `}
           >
-            {/* Sidebar Header */}
+            /* Sidebar Header */
             <div className="h-14 border-b border-border flex items-center justify-between px-4 shrink-0 bg-secondary/50">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-primary/10 rounded-lg">
@@ -3341,7 +3341,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
               </div>
             </div>
 
-            {/* Sessions List */}
+            /* Sessions List */
             <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
               {sessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center px-4">
@@ -3433,7 +3433,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                     </div>
                                   </button>
 
-                                  {/* Session Actions */}
+                                  /* Session Actions */
                                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                       onClick={(e) => {
@@ -3469,7 +3469,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         )}
       </AnimatePresence >
 
-      {/* Main Area */}
+      /* Main Area */
       <div
         className="flex-1 flex flex-col relative bg-gradient-to-br from-secondary via-background to-secondary/50 w-full min-w-0"
         onDragOver={handleDragOver}
@@ -3483,7 +3483,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
           </div>
         )}
 
-        {/* Header */}
+        /* Header */
         <div className="h-12 md:h-14 border-b border-border flex items-center justify-between px-3 md:px-4 bg-secondary z-10 shrink-0 gap-2">
           <div className="flex items-center gap-1 min-w-0">
             <button
@@ -3513,7 +3513,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
             </div>
           </div>
 
-          {/* Mode Indicator & Actions */}
+          /* Mode Indicator & Actions */
           <div className="flex items-center gap-2">
             <div
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300"
@@ -3532,14 +3532,14 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
 
 
 
-        {/* <button className="flex items-center gap-2 text-subtext hover:text-maintext text-sm">
+        /* <button className="flex items-center gap-2 text-subtext hover:text-maintext text-sm">
               <Monitor className="w-4 h-4" />
               <span className="hidden sm:inline">Device</span>
-            </button> */}
+            </button> */
 
 
 
-        {/* Messages */}
+        /* Messages */
         <div
           ref={chatContainerRef}
           onScroll={handleScroll}
@@ -3554,7 +3554,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                     } `}
                   onClick={() => setActiveMessageId(activeMessageId === msg.id ? null : msg.id)}
                 >
-                  {/* Actions Menu (Always visible for discoverability) */}
+                  /* Actions Menu (Always visible for discoverability) */
 
                   <div
                     className={`w - 8 h - 8 rounded - full flex items - center justify - center shrink - 0 ${msg.role === 'user'
@@ -3587,7 +3587,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                         </div>
                       )}
 
-                      {/* Attachment Display */}
+                      /* Attachment Display */
                       {((msg.attachments && msg.attachments.length > 0) || msg.attachment) && (
                         <div className="flex flex-col gap-3 mb-3 mt-1">
                           {(msg.attachments || (msg.attachment ? [msg.attachment] : [])).map((att, idx) => (
@@ -3848,7 +3848,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                               )}
                             </ReactMarkdown>
 
-                                                        {/* Dynamic Video Rendering */}
+                                                        /* Dynamic Video Rendering */
                             {msg.videoUrl && (
                               <div className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm">
                                 <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity pointer-events-none">
@@ -3920,7 +3920,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                               </div>
                             )}
 
-                            {/* Dynamic Image Rendering */}
+                            /* Dynamic Image Rendering */
                             {msg.imageUrl && (
                               <div
                                 className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm cursor-zoom-in max-w-md"
@@ -3961,7 +3961,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                               </div>
                             )}
 
-                            {/* Dynamic Audio Rendering */}
+                            /* Dynamic Audio Rendering */
                             {msg.audioUrl && (
                               <div className="bg-primary/5 rounded-2xl p-4 border border-primary/20 mt-4 shadow-sm backdrop-blur-sm w-full max-w-sm">
                                 <div className="flex items-center gap-3 mb-3">
@@ -3995,11 +3995,11 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                         )
                       )}
 
-                      {/* File Conversion Download Button */}
+                      /* File Conversion Download Button */
                       {
                         msg.conversion && msg.conversion.file && (
                           <div className="mt-4 pt-3 border-t border-border/40 space-y-3">
-                            {/* Integrated Audio Player for Voice Conversations */}
+                            /* Integrated Audio Player for Voice Conversations */
                             {msg.conversion.mimeType.startsWith('audio/') && (
                               <div className="bg-primary/5 rounded-xl p-2 border border-primary/10 mb-2">
                                 <audio
@@ -4214,7 +4214,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                         )
                       }
 
-                      {/* AI Feedback Actions */}
+                      /* AI Feedback Actions */
                       {
                         msg.role !== 'user' && !msg.conversion && (
                           <div className="mt-4 pt-3 border-t border-border/40 w-full block">
@@ -4404,7 +4404,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                     </span>
                   </div >
 
-                  {/* Hover Actions - User Only (AI has footer) */}
+                  /* Hover Actions - User Only (AI has footer) */
                   {
                     msg.role === 'user' && (
                       <div className={`flex items-center gap-1 transition-opacity duration-200 self-start mt-2 mr-0 flex-row-reverse ${activeMessageId === msg.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -4434,7 +4434,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                             <Edit2 className="w-4 h-4" />
                           </button>
                         )}
-                        {/* Only show Undo for the most recent user message if it's the last or second to last message in the whole chat */}
+                        /* Only show Undo for the most recent user message if it's the last or second to last message in the whole chat */
                         {msg.id === messages.findLast(m => m.role === 'user')?.id && (
                           <button
                             onClick={handleUndo}
@@ -4492,7 +4492,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
           <div ref={messagesEndRef} />
         </div >
 
-        {/* Welcome Screen - Absolute Overlay */}
+        /* Welcome Screen - Absolute Overlay */
         {
           messages.length === 0 && (
             <div className="absolute inset-0 z-0 flex flex-col items-center justify-start sm:justify-center text-center px-4 pt-10 pb-32 sm:pt-20 sm:pb-40 overflow-y-auto no-scrollbar pointer-events-auto">
@@ -4572,11 +4572,11 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
           )
         }
 
-        {/* Input */}
+        /* Input */
         <div className="absolute bottom-0 left-0 right-0 p-1.5 sm:p-2 md:p-4 bg-transparent z-20">
           <div className="max-w-5xl mx-auto relative px-1 sm:px-2">
 
-            {/* File Preview Area */}
+            /* File Preview Area */
             {filePreviews.length > 0 && (
               <div className="absolute bottom-full left-0 right-0 mb-4 px-2 overflow-x-auto custom-scrollbar no-scrollbar flex gap-3 pb-2 z-20 pointer-events-auto">
                 {filePreviews.map((preview) => (
@@ -4665,7 +4665,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                 capture="environment"
               />
 
-              {/* Left Actions Group */}
+              /* Left Actions Group */
               <div className="flex items-center gap-0.5 pl-0.5 shrink-0">
                 <AnimatePresence>
                   {isAttachMenuOpen && (
@@ -4716,7 +4716,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                   <Plus className="w-5 h-5" />
                 </button>
 
-                
+                /* 
                 <div className="relative">
                   <button
                     type="button"
@@ -4745,11 +4745,12 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                   >
                     <Sparkles className="w-5 h-5" />
                   </button>
-                </div>
-                
+                </div >
+                */
               </div >
 
-              {/* High-Visibility Tools Menu */}
+              /* High-Visibility Tools Menu */
+              /* 
               <AnimatePresence>
                 {isToolsMenuOpen && (
                   <motion.div
@@ -4767,7 +4768,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
 
                       return (
                         <div className="w-72 sm:w-80 px-1 pointer-events-auto">
-                          {/* Features Vertical Panel */}
+                          /* Features Vertical Panel */
                           <div className="bg-surface/95 dark:bg-[#1a1a1a]/95 backdrop-blur-3xl rounded-2xl sm:rounded-3xl border border-border shadow-2xl p-2 sm:p-4 mb-2 sm:mb-4 ring-1 ring-black/5">
                             <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
                               {[
@@ -5426,53 +5427,38 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                               ))}
                             </div>
 
-                              {/* Reset to AIVA Button */}
-                              <div className="mt-2 flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    setIsToolsMenuOpen(false);
-                                    navigate('/dashboard/marketplace');
-                                  }}
-                                  className="flex-1 flex items-center justify-between px-3 py-2 rounded-xl bg-primary/5 hover:bg-primary/10 border border-primary/20 transition-all group"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-primary/20 rounded-lg text-primary text-xs shrink-0">
-                                      <ShoppingBag size={14} />
-                                    </div>
-                                    <span className="text-xs font-bold text-primary uppercase tracking-wider">Explore</span>
+                            /* Browse More Button */
+                            <div className="mt-3 pt-3 border-t border-border">
+                              <button
+                                onClick={() => {
+                                  setIsToolsMenuOpen(false);
+                                  navigate('/dashboard/marketplace');
+                                }}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-primary/5 hover:bg-primary/10 border border-primary/20 transition-all group"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-primary/20 rounded-lg text-primary">
+                                    <ShoppingBag size={14} />
                                   </div>
-                                  <Plus size={14} className="text-primary group-hover:rotate-90 transition-transform" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setIsImageGeneration(false);
-                                    setIsVideoGeneration(false);
-                                    setIsDeepSearch(false);
-                                    setIsAudioConvertMode(false);
-                                    setIsDocumentConvert(false);
-                                    setIsCodeWriter(false);
-                                    setActiveAgent({ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' });
-                                    setIsToolsMenuOpen(false);
-                                  }}
-                                  className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-600 transition-all group flex items-center gap-2"
-                                >
-                                  <X size={14} className="group-hover:rotate-90 transition-transform" />
-                                  <span className="text-xs font-bold uppercase tracking-wider">Cancel</span>
-                                </button>
-                              </div>
+                                  <span className="text-xs font-bold text-primary uppercase tracking-wider">Explore More Tools</span>
+                                </div>
+                                <Plus size={14} className="text-primary group-hover:rotate-90 transition-transform" />
+                              </button>
                             </div>
                           </div>
+                        </div>
                       );
                     })()}
                   </motion.div>
                 )}
               </AnimatePresence>
-              {/* Input Area */}
+              */
+              /* Input Area */
               < div className="relative flex-1 min-w-0 py-1 px-1" >
                 <AnimatePresence>
                   {(isDeepSearch || isImageGeneration || isVoiceMode || isAudioConvertMode || isDocumentConvert || isCodeWriter || isVideoGeneration || (activeAgent.slug && activeAgent.slug.startsWith('tool-'))) && (
                     <div className="absolute bottom-full left-0 mb-5 flex gap-2 overflow-x-auto no-scrollbar pointer-events-auto w-full max-w-full pb-2">
-                      {/* Agent Tool Pill (Primary) */}
+                      /* Agent Tool Pill (Primary) */
                       {activeAgent.slug && activeAgent.slug.startsWith('tool-') && (
                         <motion.div initial={{ opacity: 0, y: 5, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 bg-primary/20 text-primary rounded-xl text-xs font-bold border border-primary/30 backdrop-blur-xl whitespace-nowrap shrink-0 shadow-lg shadow-primary/10 group transition-all hover:scale-105">
                           <div className="w-5 h-5 rounded-md overflow-hidden shrink-0">
@@ -5556,7 +5542,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                 />
               </div >
 
-              {/* Right Actions Group */}
+              /* Right Actions Group */
               < div className="flex items-center gap-1 sm:gap-1.5 pr-0.5 shrink-0" >
                 {isListening && (
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 rounded-full border border-red-500/20 mr-2">
@@ -5624,7 +5610,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
           </div >
         </div >
 
-        {/* Live AI Modal */}
+        /* Live AI Modal */
         < AnimatePresence >
           {isLiveMode && (
             <LiveAI
@@ -5634,7 +5620,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
           )}
         </AnimatePresence >
 
-        {/* Feedback Modal */}
+        /* Feedback Modal */
         < Transition appear show={feedbackOpen} as={Fragment}>
           <Dialog as="div" className="relative z-50" onClose={() => setFeedbackOpen(false)}>
             <Transition.Child

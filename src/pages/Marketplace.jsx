@@ -18,6 +18,7 @@ const HARDCODED_AGENTS = [
     description: "Your dedicated AI assistant for scheduling, notes, and task management.",
     category: "Productivity & Office",
     icon: Calendar,
+    avatar: "/AGENTS_IMG/personal-assistant.png",
     bgGradient: "bg-gradient-to-br from-primary to-purple-600",
     rating: "5.0",
     path: "/dashboard/ai-personal-assistant"
@@ -28,6 +29,7 @@ const HARDCODED_AGENTS = [
     description: "Streamline your recruitment process with AI-powered candidate sourcing and screening.",
     category: "HR & Finance",
     icon: Briefcase,
+    avatar: "/AGENTS_IMG/AIHIRE.png",
     bgGradient: "bg-gradient-to-br from-blue-500 to-indigo-600",
     rating: "4.9",
     path: "/dashboard/workspace/AIHIRE"
@@ -38,6 +40,7 @@ const HARDCODED_AGENTS = [
     description: "Automate business workflows and generate professional documents with ease.",
     category: "Business OS",
     icon: Database,
+    avatar: "/AGENTS_IMG/AIBIZ.png",
     bgGradient: "bg-gradient-to-br from-emerald-500 to-teal-600",
     rating: "4.8",
     path: "/agents/aibiz"
@@ -48,6 +51,7 @@ const HARDCODED_AGENTS = [
     description: "The foundation for your enterprise AI solutions, providing robust data management.",
     category: "Business OS",
     icon: Cpu,
+    avatar: "/AGENTS_IMG/AIBASE.png",
     bgGradient: "bg-gradient-to-br from-orange-500 to-red-600",
     rating: "4.9",
     path: "/agents/aibase"
@@ -58,6 +62,7 @@ const HARDCODED_AGENTS = [
     description: "Boost your revenue with AI-driven sales intelligence and outreach strategies.",
     category: "Sales & Marketing",
     icon: TrendingUp,
+    avatar: "/AGENTS_IMG/AISALES.png",
     bgGradient: "bg-gradient-to-br from-fuchsia-500 to-rose-600",
     rating: "5.0",
     path: "/dashboard/workspace/AISALES"
@@ -95,6 +100,7 @@ const Marketplace = () => {
   const [showDemo, setShowDemo] = useState(false)
   const [demoUrl, setDemoUrl] = useState("")
   const [selectedTool, setSelectedTool] = useState(null)
+  const [showComingSoon, setShowComingSoon] = useState(null);
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -168,23 +174,29 @@ const Marketplace = () => {
 
   const allAvailableAgents = [
     ...HARDCODED_AGENTS.map(a => ({ ...a, isHardcoded: true, _id: a.slug })),
-    ...agents.map(a => ({ ...a, isHardcoded: false }))
+    ...agents.filter(a => ![
+      'tool-dito', 'DiTo',
+      'tool-aihealth', 'AIHEALTH',
+      'tool-aiwrite', 'AIWRITE'
+    ].includes(a.slug) && ![
+      'DiTo', 'AIHEALTH', 'AIWRITE'
+    ].includes(a.agentName)).map(a => ({ ...a, isHardcoded: false }))
   ];
 
   const filteredAgents = allAvailableAgents.filter(agent => {
     // Robust category matching
     const agentCat = (agent.category || "").trim().toLowerCase();
     const filterCat = (filter || "all").trim().toLowerCase();
-    
+
     const matchesCategory = filterCat === 'all' || agentCat === filterCat;
-    
+
     // Improved search with safety checks
     const name = (agent.agentName || agent.name || "").toLowerCase();
     const desc = (agent.description || "").toLowerCase();
     const q = (searchQuery || "").toLowerCase().trim();
-    
+
     const matchesSearch = !q || name.includes(q) || desc.includes(q);
-    
+
     return matchesCategory && matchesSearch;
   });
 
@@ -261,10 +273,23 @@ const Marketplace = () => {
 
   const renderAgentCard = (agent) => {
     // A tool is either hardcoded or has a slug that matches our tool list
-    const isSystemTool = agent.isHardcoded || (agent.slug && (agent.slug.startsWith('tool-') || true)); 
+    const isSystemTool = agent.isHardcoded || (agent.slug && agent.slug.startsWith('tool-'));
     // Actually, for marketplace seeded agents, we want them to behave like tools (open popup)
     const ToolIcon = getToolIcon(agent.slug);
-    const isAgentActive = userAgent.some((ag) => ag && agent._id == ag._id);
+    const isAgentActive = userAgent.some((ag) => {
+      if (!ag) return false;
+      const agId = typeof ag === 'string' ? ag : ag._id;
+      const agSlug = typeof ag === 'object' ? ag.slug : null;
+      
+      const targetId = agent._id;
+      const targetSlug = agent.slug;
+
+      if (!targetId && !targetSlug) return false;
+
+      return (agId && targetId && String(agId) === String(targetId)) || 
+             (agSlug && targetSlug && agSlug === targetSlug) ||
+             (ag === targetId);
+    });
 
     const handleCardClick = () => {
       if (agent.isHardcoded) {
@@ -281,6 +306,9 @@ const Marketplace = () => {
       } else if (isSystemTool) {
         if (!isAgentActive) {
           setSelectedTool({ ...agent, icon: ToolIcon });
+        } else {
+          // If already active, show "Coming Soon" for the standalone workspace
+          setShowComingSoon(agent);
         }
       } else {
         toggleBuy(agent._id);
@@ -291,7 +319,7 @@ const Marketplace = () => {
       if (agent.isHardcoded) {
         return (
           <>
-            {t('marketplacePage.openApp')}
+            {t('marketplacePage.openApp') || 'Open App'}
           </>
         );
       } else if (isSystemTool) {
@@ -300,7 +328,9 @@ const Marketplace = () => {
             <Check className="w-4 h-4" /> Active
           </>
         ) : (
-          t('marketplacePage.subscribe') || 'Subscribe'
+          <>
+            <Download className="w-4 h-4" /> {t('marketplacePage.subscribe') || 'Subscribe'}
+          </>
         );
       } else {
         return isAgentActive ? (
@@ -324,7 +354,7 @@ const Marketplace = () => {
         return "bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20";
       } else if (isSystemTool) {
         return isAgentActive
-          ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default'
+          ? 'bg-emerald-500 text-white hover:opacity-90 shadow-lg shadow-emerald-500/20'
           : 'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20';
       } else {
         return isAgentActive
@@ -412,6 +442,65 @@ const Marketplace = () => {
 
       <AnimatePresence>
         {subToggle.subscripPgTgl && <SubscriptionForm id={agentId} />}
+        
+        {/* Coming Soon Modal */}
+        {showComingSoon && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-card border border-border rounded-3xl p-8 max-w-lg w-full shadow-2xl relative text-center overflow-hidden"
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/10 blur-[100px] -z-10" />
+
+              <div className="flex flex-col items-center gap-6">
+                <div className={`w-24 h-24 rounded-2xl ${showComingSoon.bgGradient || 'bg-gradient-to-br from-primary to-indigo-600'} flex items-center justify-center shadow-xl animate-pulse`}>
+                  {React.createElement(getToolIcon(showComingSoon.slug), { className: "w-12 h-12 text-white", strokeWidth: 2 })}
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black text-maintext tracking-tight uppercase">Coming Soon</h2>
+                  <p className="text-subtext max-w-xs mx-auto">
+                    The standalone **{showComingSoon.agentName} Workspace** is currently in development.
+                  </p>
+                </div>
+
+                <div className="bg-primary/5 border border-primary/10 p-4 rounded-2xl w-full">
+                  <p className="text-sm font-medium text-primary">
+                    🚀 **Good News!**
+                    <br />
+                    This tool is already active in your **AI Choice Magic Tools** menu within the chat.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <button
+                    onClick={() => navigate('/dashboard/chat')}
+                    className="flex-1 py-3 px-6 bg-primary text-white rounded-xl font-bold hover:scale-105 transition-all shadow-lg shadow-primary/20"
+                  >
+                    Go to Chat
+                  </button>
+                  <button
+                    onClick={() => setShowComingSoon(null)}
+                    className="flex-1 py-3 px-6 bg-secondary text-subtext rounded-xl font-bold hover:bg-border transition-all"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowComingSoon(null)}
+                className="absolute top-4 right-4 p-2 hover:bg-secondary rounded-full transition-all text-subtext"
+              >
+                <X size={20} />
+              </button>
+            </motion.div>
+          </div>
+        )}
+
         {showDemo && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
