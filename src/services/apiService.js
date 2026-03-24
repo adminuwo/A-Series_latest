@@ -49,11 +49,14 @@ apiClient.interceptors.response.use(
 
 export const apiService = {
   // --- AI Tools ---
-  async generateImage(prompt) {
+  async generateImage(prompt, modelMapping, provider) {
     try {
-      console.log("[Frontend] Generating image for prompt:", prompt);
+      console.log(`[Frontend] Generating image for prompt: "${prompt}" with model: ${modelMapping || 'default'} and provider: ${provider || 'openai'}`);
+      
+      const endpoint = provider === 'vertex' ? 'image/generate' : 'openai/image';
+      
       // Increased timeout to 60s for image generation
-      const response = await apiClient.post('image/generate', { prompt }, { timeout: 60000 });
+      const response = await apiClient.post(endpoint, { prompt, modelMapping }, { timeout: 60000 });
       console.log("[Frontend] Image generation success:", response.data);
       return response.data;
     } catch (error) {

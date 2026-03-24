@@ -1088,7 +1088,7 @@ const Chat = () => {
 
       try {
         // Use apiService
-        const data = await apiService.generateImage(prompt);
+        const data = await apiService.generateImage(prompt, activeAgent?.modelMapping, activeAgent?.provider);
 
         if (data && (data.imageUrl || data.data)) {
           const finalUrl = data.imageUrl || data.data; // Handle different response structures
@@ -5451,8 +5451,24 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                     bgColor: 'bg-primary/10',
                                     active: activeAgent?.slug === agent.slug || activeAgent?.slug === (agent.slug?.startsWith('tool-') ? agent.slug : `tool-${agent.slug}`),
                                     onClick: () => {
-                                      setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
-                                      setActiveAgent({ agentName: agent.agentName, category: agent.category, slug: agent.slug, avatar: agent.avatar || '/AGENTS_IMG/default.png' });
+                                      const slug = agent.slug?.startsWith('tool-') ? agent.slug : `tool-${agent.slug}`;
+                                      const isImageAgent = slug.includes('openai-image');
+                                      const isVideoAgent = slug.includes('openai-video');
+
+                                      setIsImageGeneration(isImageAgent);
+                                      setIsVideoGeneration(isVideoAgent);
+                                      setIsDeepSearch(false);
+                                      setIsAudioConvertMode(false);
+                                      setIsDocumentConvert(false);
+                                      setIsCodeWriter(false);
+                                      
+                                      setActiveAgent({ 
+                                        ...agent, 
+                                        agentName: agent.agentName, 
+                                        category: agent.category, 
+                                        slug: agent.slug, 
+                                        avatar: agent.avatar || '/AGENTS_IMG/default.png' 
+                                      });
                                       setIsToolsMenuOpen(false);
                                     }
                                   }))

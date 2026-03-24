@@ -1,0 +1,252 @@
+{
+  "skills": [
+    {
+      "id": "image-gen",
+      "slug": "tool-image-gen",
+      "title": "Image Gen",
+      "description": "Create high-quality AI images.",
+      "category": "Creative",
+      "avatar": "/AGENTS_IMG/deepart.png"
+    },
+    {
+      "id": "video-gen",
+      "slug": "tool-video-gen",
+      "title": "Video Gen",
+      "description": "Short cinematic AI videos.",
+      "category": "Creative",
+      "avatar": "/AGENTS_IMG/AIVIDEO.png"
+    },
+    {
+      "id": "deep-search",
+      "slug": "tool-deep-search",
+      "title": "Deep Search",
+      "description": "Advanced reasoning & web research.",
+      "category": "Research",
+      "avatar": "/AGENTS_IMG/deepsearch.png"
+    },
+    {
+      "id": "audio-convert",
+      "slug": "tool-audio-convert",
+      "title": "Text to Audio",
+      "description": "Natural Voice synthesis.",
+      "category": "Creative",
+      "avatar": "/AGENTS_IMG/AIVOICE.png"
+    },
+    {
+      "id": "ai-document",
+      "slug": "tool-ai-document",
+      "title": "AI Document Analysis",
+      "description": "Extract text & insights from docs.",
+      "category": "Business OS",
+      "avatar": "/AGENTS_IMG/AIDOC.png"
+    },
+    {
+      "id": "ai-blur",
+      "slug": "tool-ai-blur",
+      "title": "AI Blur (Privacy)",
+      "description": "Auto-blur faces & objects in video.",
+      "category": "Design & Creative",
+      "avatar": "/AGENTS_IMG/AIPRIVACY.png"
+    },
+    {
+      "id": "ai-detector",
+      "slug": "tool-ai-detector",
+      "title": "AI Detector",
+      "description": "Identify objects & people in video.",
+      "category": "Data & Intelligence",
+      "avatar": "/AGENTS_IMG/AISCAN.png"
+    },
+    {
+      "id": "convert",
+      "slug": "tool-universal-converter",
+      "title": "Universal Document Converter",
+      "description": "Bidirectional conversion for PDF, DOCX, PPTX, XLSX, and Images.",
+      "category": "Productivity",
+      "avatar": "/AGENTS_IMG/AICONVERT.png"
+    },
+    {
+      "id": "code",
+      "slug": "tool-code-writer",
+      "title": "Code Writer",
+      "description": "Expert coding & debugging.",
+      "category": "Coding",
+      "avatar": "/AGENTS_IMG/AISCRIPT.png"
+    },
+    {
+      "id": "image-editing",
+      "slug": "tool-image-editing-customization",
+      "title": "Image Editor",
+      "description": "AI-powered image modification.",
+      "category": "Creative",
+      "avatar": "/AGENTS_IMG/AIMARKET.png"
+    },
+    {
+      "id": "fast-video",
+      "slug": "tool-fast-video-generator",
+      "title": "Fast Video Gen",
+      "description": "Rapidly generate AI videos from prompts.",
+      "category": "Creative",
+      "avatar": "/AGENTS_IMG/AIVIDEO.png"
+    },
+    {
+      "id": "music-lyria",
+      "slug": "tool-lyria-for-music",
+      "title": "Music Generation",
+      "description": "High-fidelity AI music generation.",
+      "category": "Creative",
+      "avatar": "/AGENTS_IMG/AIMUSIC.png"
+    },
+    {
+      "id": "time-series",
+      "slug": "tool-time-series-forecasting",
+      "title": "Predictive Analytics",
+      "description": "Automated BQML forecasting.",
+      "category": "Data & Intelligence",
+      "avatar": "/AGENTS_IMG/AICRAFT.png"
+    },
+    {
+      "id": "llm-auditor",
+      "slug": "tool-llm-auditor",
+      "title": "LLM Auditor",
+      "description": "Verify AI response accuracy.",
+      "category": "Research",
+      "avatar": "/AGENTS_IMG/AILEGAL.png"
+    },
+    {
+      "id": "shopping",
+      "slug": "tool-personalized-shopping",
+      "title": "Smart Shopping",
+      "description": "Brand-tailored recommendations.",
+      "category": "Sales & Marketing",
+      "avatar": "/AGENTS_IMG/AIMARKET.png"
+    },
+    {
+      "id": "brand-seo",
+      "slug": "tool-brand-search-optimization",
+      "title": "Brand SEO",
+      "description": "Competitor & keyword analysis.",
+      "category": "Sales & Marketing",
+      "avatar": "/AGENTS_IMG/AIBRAND.png"
+    },
+    {
+      "id": "fomc",
+      "slug": "tool-fomc-research",
+      "title": "FOMC Research",
+      "description": "Financial data analysis.",
+      "category": "Research",
+      "avatar": "/AGENTS_IMG/AICORE.png"
+    },
+    {
+      "id": "img-scoring",
+      "slug": "tool-image-scoring",
+      "title": "Image Scoring",
+      "description": "Policy-compliant evaluation.",
+      "category": "Design & Creative",
+      "avatar": "/AGENTS_IMG/AISCAN.png"
+    },
+    {
+      "id": "data-science",
+      "slug": "tool-data-science",
+      "title": "Data Science",
+      "description": "Natural language data modeling.",
+      "category": "Data & Intelligence",
+      "avatar": "/AGENTS_IMG/AILAB.png"
+    },
+    {
+      "id": "rag-engine",
+      "slug": "tool-rag-engine",
+      "title": "RAG Engine",
+      "description": "Context-aware grounded AI.",
+      "category": "Data & Intelligence",
+      "avatar": "/AGENTS_IMG/AIMIND.png"
+    },
+    {
+      "id": "finance-advisor",
+      "slug": "tool-financial-advisor",
+      "title": "Finance Advisor",
+      "description": "Investment & finance AI.",
+      "category": "HR & Finance",
+      "avatar": "/AGENTS_IMG/AIPAY.png"
+    },
+    {
+      "id": "marketing-agency",
+      "slug": "tool-marketing-agency",
+      "title": "Marketing AI",
+      "description": "Full-stack marketing automation.",
+      "category": "Sales & Marketing",
+      "avatar": "/AGENTS_IMG/AIMARKET.png"
+    },
+    {
+      "id": "cust-service",
+      "slug": "tool-customer-service",
+      "title": "Customer Service",
+      "description": "Video & image-based support.",
+      "category": "Business OS",
+      "avatar": "/AGENTS_IMG/AICARE.png"
+    },
+    {
+      "id": "academic",
+      "slug": "tool-academic-research",
+      "title": "Academic Assistant",
+      "description": "Scholarly publication analysis.",
+      "category": "Research",
+      "avatar": "/AGENTS_IMG/AIDOC.png"
+    },
+    {
+      "id": "bug-assistant",
+      "slug": "tool-bug-assistant",
+      "title": "Bug Assistant",
+      "description": "Software bug resolution.",
+      "category": "Coding",
+      "avatar": "/AGENTS_IMG/AISCRIPT.png"
+    },
+    {
+      "id": "travel",
+      "slug": "tool-travel-concierge",
+      "title": "Travel Concierge",
+      "description": "Real-time itinerary planning.",
+      "category": "Lifestyle",
+      "avatar": "/AGENTS_IMG/AITRANS.png"
+    },
+    {
+      "id": "nvidia-nemotron",
+      "slug": "tool-nvidia-nemotron-nano-12b",
+      "title": "NVIDIA Nemotron",
+      "description": "Efficient 12B model for speed and accuracy.",
+      "category": "Data & Intelligence",
+      "avatar": "/AGENTS_IMG/default.png"
+    },
+    {
+      "id": "claude-sonnet",
+      "slug": "tool-claude-sonnet-4-5",
+      "title": "Claude Sonnet 4.5",
+      "description": "Leading model for research & coding.",
+      "category": "Data & Intelligence",
+      "avatar": "/AGENTS_IMG/default.png"
+    },
+    {
+      "id": "blip2",
+      "slug": "tool-blip2",
+      "title": "AI Image Analysis",
+      "description": "Advanced vision-language reasoning.",
+      "category": "Data & Intelligence",
+      "avatar": "/AGENTS_IMG/default.png"
+    },
+    {
+      "id": "path-foundation",
+      "slug": "tool-path-foundation",
+      "title": "Pathology Research",
+      "description": "AI for pathology diagnostics research.",
+      "category": "Medical AI",
+      "avatar": "/AGENTS_IMG/default.png"
+    },
+    {
+      "id": "derm-foundation",
+      "slug": "tool-derm-foundation",
+      "title": "Dermatology AI",
+      "description": "Skin condition identification AI.",
+      "category": "Medical AI",
+      "avatar": "/AGENTS_IMG/default.png"
+    }
+  ]
+}
