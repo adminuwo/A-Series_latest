@@ -194,13 +194,13 @@ const Marketplace = () => {
       'tool-openai-search-preview', 'tool-openai-search-pro', 'tool-openai-search-lite', 'tool-openai-search-realtime',
       'tool-openai-content', 'tool-openai-chat', 'tool-openai-tts', 'tool-openai-stt', 'tool-openai-code',
       'tool-openai-document', 'tool-openai-translator', 'tool-openai-extractor', 'tool-openai-embeddings',
-      'tool-ai-personal-assistant', 'tool-image-gen', 'tool-deep-search', 'tool-video-gen', 'tool-vertex-music-gen'
+      'tool-video-gen', 'tool-vertex-music-gen'
     ].includes(a.slug) && ![
       'DiTo', 'AIHEALTH', 'AIWRITE',
       'AI Web Search Preview', 'AI Web Search Pro', 'AI Web Search Lite', 'AI Real-time Search Assistant',
       'Smart Content Writer', 'AI Chat Assistant', 'Voice Narration Studio', 'Audio Transcriber',
       'AI Code Assistant', 'Document Intelligence', 'Professional Translator', 'Structured Data Extractor',
-      'Semantic AI Embeddinger', 'AI Personal Assistant', 'AI Image Generator', 'Deep Search',
+      'Semantic AI Embeddinger',
       'AI Video Generator', 'Music Generation',
       'Image Editing', 'AI Voice Generator', 'AI Document Converter', 'Image Understanding', 'AI Pixel Segmentor',
       'Vision Analyzer'

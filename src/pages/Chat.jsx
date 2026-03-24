@@ -1649,7 +1649,8 @@ const Chat = () => {
 
   useEffect(() => {
     const loadSessions = async () => {
-      const data = await chatStorageService.getSessions(activeAgent.agentName);
+      // Global history: Load sessions regardless of current agent to ensure users never see an "empty" history when switching tools
+      const data = await chatStorageService.getSessions();
       setSessions(data);
 
       // Fetch User Subscribed Agents
@@ -3401,9 +3402,9 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
             animate={{ width: window.innerWidth < 1024 ? '100%' : 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             className={`
-              fixed lg:relative inset - y - 0 left - 0 z - [60] lg: z - 10
-      h - full bg - secondary / 95 dark: bg - [#121212] / 95 border - r border - border
-              flex flex - col backdrop - blur - 3xl shadow - 2xl lg: shadow - none overflow - hidden lg: rounded - r - 3xl
+              fixed lg:relative inset-y-0 left-0 z-[60] lg:z-10
+              h-full bg-white/80 dark:bg-black/95 border-r border-border/50
+              flex flex-col backdrop-blur-3xl shadow-2xl lg:shadow-none overflow-hidden lg:rounded-r-3xl transition-all duration-300
             `}
           >
             {/* Sidebar Header */}
@@ -3466,8 +3467,8 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                         className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold text-subtext uppercase tracking-wider sticky top-0 bg-secondary/95 backdrop-blur-sm z-10 hover:text-primary transition-colors group/header"
                       >
                         <span>{group}</span>
-                        <div className={`p - 0.5 rounded - md transition - all ${isCollapsed ? '-rotate-90 bg-primary/10 text-primary' : 'rotate-0 text-subtext group-hover/header:bg-primary/5'} `}>
-                          <ChevronDown className="w-3 h-3" />
+                        <div className={`p-1 rounded-md transition-all ${isCollapsed ? '-rotate-90 bg-primary/10 text-primary' : 'rotate-0 text-subtext group-hover/header:bg-primary/5'} `}>
+                          <ChevronDown className="w-3.5 h-3.5" />
                         </div>
                       </button>
 
@@ -3498,25 +3499,25 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                 <>
                                   <button
                                     onClick={() => {
-                                      navigate(`/ dashboard / chat / ${s.sessionId} `);
+                                      navigate(`/dashboard/chat/${s.sessionId}`);
                                       setShowHistory(false);
                                     }}
                                     className={`
-      w - full text - left p - 3 rounded - xl transition - all flex items - start gap - 3
-                                    ${currentSessionId === s.sessionId
+                                      w-full text-left p-3 rounded-xl transition-all flex items-start gap-3 group/session
+                                      ${currentSessionId === s.sessionId
                                         ? 'bg-primary/10 border border-primary/20 shadow-sm'
-                                        : 'hover:bg-surface-hover border border-transparent'
+                                        : 'hover:bg-primary/5 border border-transparent'
                                       }
-      `}
+                                    `}
                                   >
                                     <div className={`
-      shrink - 0 w - 8 h - 8 rounded - lg flex items - center justify - center transition - colors
-                                    ${currentSessionId === s.sessionId ? 'bg-primary text-white' : 'bg-secondary text-subtext group-hover:text-primary group-hover:bg-primary/10'}
-      `}>
+                                      shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all
+                                      ${currentSessionId === s.sessionId ? 'bg-primary text-white shadow-md' : 'bg-secondary text-subtext group-hover/session:text-primary group-hover/session:bg-primary/10'}
+                                    `}>
                                       <MessageSquare className="w-4 h-4" />
                                     </div>
-                                    <div className="flex-1 min-w-0 pr-8">
-                                      <p className={`text - sm font - bold truncate leading - none mb - 1.5 ${currentSessionId === s.sessionId ? 'text-primary' : 'text-maintext'} `}>
+                                    <div className="flex-1 min-w-0">
+                                      <p className={`text-sm font-bold truncate leading-none mb-1.5 ${currentSessionId === s.sessionId ? 'text-primary' : 'text-maintext'} `}>
                                         {s.title || "Untitled Chat"}
                                       </p>
                                       <p className="text-[10px] text-subtext font-medium flex items-center gap-1.5">
@@ -3577,30 +3578,30 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         )}
 
         {/* Header */}
-        <div className="h-12 md:h-14 border-b border-border flex items-center justify-between px-3 md:px-4 bg-secondary z-10 shrink-0 gap-2">
-          <div className="flex items-center gap-1 min-w-0">
+        <div className="h-16 md:h-18 border-b border-border/50 flex items-center justify-between px-4 md:px-6 bg-white/70 backdrop-blur-xl z-20 shrink-0 gap-3 shadow-sm">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => setTglState(prev => ({ ...prev, sidebarOpen: true }))}
-              className="lg:hidden p-2 -ml-2 text-subtext hover:text-maintext rounded-lg hover:bg-surface/50 transition-colors"
+              className="lg:hidden p-2.5 -ml-2 text-subtext hover:text-primary rounded-xl hover:bg-primary/5 transition-all"
             >
               <MenuIcon className="w-6 h-6" />
             </button>
 
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className={`p - 2 rounded - lg transition - colors ${showHistory ? 'text-primary bg-primary/10' : 'text-subtext hover:text-maintext hover:bg-surface/50'} `}
+              className={`p-2.5 rounded-xl transition-all duration-300 ${showHistory ? 'text-primary bg-primary/10 shadow-inner' : 'text-subtext hover:text-primary hover:bg-primary/5'} `}
               title="Chat History"
             >
               <History className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-primary truncate">
+            <div className="flex items-center gap-3">
+              <span className="font-black text-xl md:text-2xl text-primary tracking-tight truncate drop-shadow-sm shimmer-text">
                 {activeAgent.agentName === 'AIVA' || !activeAgent.agentName ? t('brandName') : activeAgent.agentName}
               </span>
               {activeAgent.agentName !== 'AIVA' && activeAgent.agentName && (
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">
-                  Powered by A-Series
+                <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-widest border border-primary/20 backdrop-blur-sm shadow-sm hover:bg-primary/10 transition-colors">
+                  A-Series <span className="opacity-50 mx-1">|</span> Engine v3.1
                 </span>
               )}
             </div>
@@ -3636,41 +3637,39 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         <div
           ref={chatContainerRef}
           onScroll={handleScroll}
-          className="relative flex-1 overflow-y-auto p-1 sm:p-2 md:p-3 pb-48 md:pb-56 space-y-2.5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent aiva-scalable-text"
+          className="relative flex-1 overflow-y-auto p-2 sm:p-4 md:p-6 pb-48 md:pb-56 space-y-6 scrollbar-none chat-grid-bg bg-background/50 aiva-scalable-text"
         >
           {messages.length > 0 && (
             <>
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`group relative flex items - start gap - 2 md: gap - 3 w - full max - w - 5xl mx - auto cursor - pointer ${msg.role === 'user' ? 'flex-row-reverse' : ''
-                    } `}
+                  className={`group relative flex items-start gap-3 md:gap-4 w-full max-w-5xl mx-auto ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                   onClick={() => setActiveMessageId(activeMessageId === msg.id ? null : msg.id)}
                 >
                   {/* Actions Menu (Always visible for discoverability) */}
 
                   <div
-                    className={`w - 8 h - 8 rounded - full flex items - center justify - center shrink - 0 ${msg.role === 'user'
-                      ? 'bg-primary/80 backdrop-blur-md shadow-sm'
-                      : 'bg-surface border border-border shadow-sm'
-                      } `}
+                    className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${msg.role === 'user'
+                      ? 'bg-gradient-to-br from-primary to-indigo-600'
+                      : 'bg-white border border-border modern-shadow'
+                      }`}
                   >
                     {msg.role === 'user' ? (
-                      <User className="w-4 h-4 text-white" />
+                      <User className="w-5 h-5 text-white" />
                     ) : (
-                      <img src={msg.agentAvatar || "/AGENTS_IMG/AIVA.png"} alt={msg.agentName || "AI"} className="w-5 h-5 object-contain" />
+                      <img src={msg.agentAvatar || "/AGENTS_IMG/AIVA.png"} alt={msg.agentName || "AI"} className="w-6 h-6 object-contain" />
                     )}
                   </div>
 
                   <div
-                    className={`flex flex - col ${msg.role === 'user' ? 'items-end' : 'items-start'
-                      } max - w - [85 %] sm: max - w - [80 %] md: max - w - [75 %]`}
+                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-[85%] sm:max-w-[80%] md:max-w-[70%]`}
                   >
                     <div
-                      className={`group / bubble relative px - 3 py - 2.5 sm: px - 5 sm: py - 4 rounded - 2xl sm: rounded - [1.5rem] leading - relaxed whitespace - pre - wrap break-words shadow - sm w - fit max - w - full transition - all duration - 300 min - h - [40px] hover: scale - [1.002] ${msg.role === 'user'
-                        ? 'bg-primary/80 backdrop-blur-md border border-white/20 text-white rounded-tr-sm shadow-lg shadow-primary/20 text-sm sm:text-base'
-                        : `bg-surface border border-border/40 text-maintext rounded-tl-sm shadow-sm hover:shadow-md text-sm sm:text-base ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-1 outline-primary/20' : ''}`
-                        } `}
+                      className={`group/bubble relative px-4 py-3 sm:px-6 sm:py-4 rounded-3xl leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 min-h-[44px] hover:scale-[1.005] ${msg.role === 'user'
+                        ? 'bg-gradient-to-br from-primary to-indigo-600 text-white rounded-tr-sm shadow-xl shadow-primary/20'
+                        : `bg-white border border-border/60 text-maintext rounded-tl-sm modern-shadow hover:shadow-lg ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-2 outline-primary/10' : ''}`
+                        }`}
                     >
 
                       {msg.isProcessing && (
@@ -3707,12 +3706,12 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                   </button>
                                 </div>
                               ) : (
-                                <div className={`flex items - center gap - 3 p - 3 rounded - xl border transition - colors backdrop - blur - md ${msg.role === 'user' ? 'bg-transparent border-white/20 hover:bg-white/10 shadow-none' : 'bg-secondary/30 border-border hover:bg-secondary/50'} `}>
+                                <div className={`flex items-center gap-3 p-3 rounded-xl border transition-colors backdrop-blur-md ${msg.role === 'user' ? 'bg-transparent border-white/20 hover:bg-white/10 shadow-none' : 'bg-secondary/30 border-border hover:bg-secondary/50'} `}>
                                   <div
                                     className="flex-1 flex items-center gap-3 min-w-0 cursor-pointer p-0.5 rounded-lg"
                                     onClick={() => setViewingDoc(att)}
                                   >
-                                    <div className={`w - 10 h - 10 rounded - lg flex items - center justify - center shrink - 0 ${(() => {
+                                    <div className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${(() => {
                                       const name = (att.name || '').toLowerCase();
                                       if (msg.role === 'user') return 'bg-white shadow-sm';
                                       if (name.endsWith('.pdf')) return 'bg-red-50 dark:bg-red-900/20';
@@ -3720,16 +3719,15 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                       if (name.match(/\.(xls|xlsx|csv)$/)) return 'bg-emerald-50 dark:bg-emerald-900/20';
                                       if (name.match(/\.(ppt|pptx)$/)) return 'bg-orange-50 dark:bg-orange-900/20';
                                       return 'bg-secondary';
-                                    })()
-                                      } `}>
+                                    })()}`}>
                                       {(() => {
                                         const name = (att.name || '').toLowerCase();
                                         const baseClass = "w-6 h-6";
-                                        if (name.match(/\.(xls|xlsx|csv)$/)) return <FileSpreadsheet className={`${baseClass} text - emerald - 600`} />;
-                                        if (name.match(/\.(ppt|pptx)$/)) return <Presentation className={`${baseClass} text - orange - 600`} />;
-                                        if (name.endsWith('.pdf')) return <FileText className={`${baseClass} text - red - 600`} />;
-                                        if (name.match(/\.(doc|docx)$/)) return <FileIcon className={`${baseClass} text - blue - 600`} />;
-                                        return <FileIcon className={`${baseClass} text - primary`} />;
+                                        if (name.match(/\.(xls|xlsx|csv)$/)) return <FileSpreadsheet className={`${baseClass} text-emerald-600`} />;
+                                        if (name.match(/\.(ppt|pptx)$/)) return <Presentation className={`${baseClass} text-orange-600`} />;
+                                        if (name.endsWith('.pdf')) return <FileText className={`${baseClass} text-red-600`} />;
+                                        if (name.match(/\.(doc|docx)$/)) return <FileIcon className={`${baseClass} text-blue-600`} />;
+                                        return <FileIcon className={`${baseClass} text-primary`} />;
                                       })()}
                                     </div>
                                     <div className="min-w-0 flex-1">
@@ -4677,7 +4675,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
               </div>
             )}
 
-            <form onSubmit={handleSendMessage} className="relative w-full max-w-5xl mx-auto flex items-center gap-1 bg-white dark:bg-[#0a0a0a] border border-black/5 dark:border-white/10 rounded-2xl p-0.5 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:border-primary/20 backdrop-blur-3xl px-1 z-50">
+            <form onSubmit={handleSendMessage} className="relative w-full max-w-5xl mx-auto flex items-center gap-2 bg-white/80 dark:bg-black/80 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-3xl p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 hover:shadow-[0_25px_60px_rgba(0,0,0,0.15)] hover:border-primary/30 z-50">
               <input
                 id="file-upload"
                 type="file"

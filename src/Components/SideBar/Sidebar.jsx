@@ -134,7 +134,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   // Dynamic class for active nav items
   const navItemClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group font-medium border border-transparent ${isActive
-      ? 'bg-primary/10 text-primary border-primary/10'
+      ? 'bg-primary/10 text-primary border-primary/10 active-glow shadow-sm'
       : 'text-subtext hover:bg-surface hover:text-maintext'
     }`;
 
