@@ -13,17 +13,6 @@ import { useLanguage } from '../context/LanguageContext';
 
 const HARDCODED_AGENTS = [
   {
-    agentName: "AI Personal Assistant",
-    slug: "tool-ai-personal-assistant",
-    description: "Your dedicated AI assistant for scheduling, notes, and task management.",
-    category: "Productivity & Office",
-    icon: Calendar,
-    avatar: "/AGENTS_IMG/personal-assistant.png",
-    bgGradient: "bg-gradient-to-br from-primary to-purple-600",
-    rating: "5.0",
-    path: "/dashboard/ai-personal-assistant"
-  },
-  {
     agentName: "AI Hire",
     slug: "tool-aihire",
     description: "Streamline your recruitment process with AI-powered candidate sourcing and screening.",
@@ -66,6 +55,28 @@ const HARDCODED_AGENTS = [
     bgGradient: "bg-gradient-to-br from-fuchsia-500 to-rose-600",
     rating: "5.0",
     path: "/dashboard/workspace/AISALES"
+  },
+  {
+    agentName: "AI Health",
+    slug: "tool-aihealth",
+    description: "Personal Wellness and Diagnostic Suite. Analyze symptoms, track metrics, and run health automation routines.",
+    category: "Medical & Health AI",
+    icon: Heart,
+    avatar: "/AGENTS_IMG/AIHEALTH.png",
+    bgGradient: "bg-gradient-to-br from-pink-500 to-rose-500",
+    rating: "4.9",
+    path: "/dashboard/workspace/AIHEALTH"
+  },
+  {
+    agentName: "AI Write",
+    slug: "tool-aiwrite",
+    description: "AI-Powered Content Generation and Curation Workspace. Create marketing copy and optimize text efficiently.",
+    category: "Sales & Marketing",
+    icon: PenTool,
+    avatar: "/AGENTS_IMG/AIWRITE.png",
+    bgGradient: "bg-gradient-to-br from-violet-500 to-purple-600",
+    rating: "4.8",
+    path: "/dashboard/workspace/AIWRITE"
   }
 ];
 
@@ -177,9 +188,22 @@ const Marketplace = () => {
     ...agents.filter(a => ![
       'tool-dito', 'DiTo',
       'tool-aihealth', 'AIHEALTH',
-      'tool-aiwrite', 'AIWRITE'
+      'tool-aiwrite', 'AIWRITE',
+      'tool-vertex-stt', 'tool-audio-convert', 'tool-universal-converter', 'tool-image-edit', 
+      'tool-image-understanding-claude', 'tool-pixel-segmentor-sam', 'tool-openai-vision',
+      'tool-openai-search-preview', 'tool-openai-search-pro', 'tool-openai-search-lite', 'tool-openai-search-realtime',
+      'tool-openai-content', 'tool-openai-chat', 'tool-openai-tts', 'tool-openai-stt', 'tool-openai-code',
+      'tool-openai-document', 'tool-openai-translator', 'tool-openai-extractor', 'tool-openai-embeddings',
+      'tool-ai-personal-assistant', 'tool-image-gen', 'tool-deep-search', 'tool-video-gen', 'tool-vertex-music-gen'
     ].includes(a.slug) && ![
-      'DiTo', 'AIHEALTH', 'AIWRITE'
+      'DiTo', 'AIHEALTH', 'AIWRITE',
+      'AI Web Search Preview', 'AI Web Search Pro', 'AI Web Search Lite', 'AI Real-time Search Assistant',
+      'Smart Content Writer', 'AI Chat Assistant', 'Voice Narration Studio', 'Audio Transcriber',
+      'AI Code Assistant', 'Document Intelligence', 'Professional Translator', 'Structured Data Extractor',
+      'Semantic AI Embeddinger', 'AI Personal Assistant', 'AI Image Generator', 'Deep Search',
+      'AI Video Generator', 'Music Generation',
+      'Image Editing', 'AI Voice Generator', 'AI Document Converter', 'Image Understanding', 'AI Pixel Segmentor',
+      'Vision Analyzer'
     ].includes(a.agentName)).map(a => ({ ...a, isHardcoded: false }))
   ];
 
