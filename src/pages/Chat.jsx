@@ -228,8 +228,9 @@ const getToolIcon = (slug) => {
     case 'tool-audio-convert': return Headphones;
     case 'tool-universal-converter': return FileText;
     case 'tool-code-writer': return Code;
-    case 'tool-video-gen': return Video;
-    case 'tool-fast-video-generator': return Zap;
+    case 'tool-video-standard': return Video;
+    case 'tool-video-pro': return Sparkles;
+    case 'tool-video-max': return Sparkles;
     case 'tool-lyria-for-music': return Music;
     case 'tool-ai-document': return FileText;
     case 'tool-time-series-forecasting': return TrendingUp;
@@ -267,7 +268,7 @@ const getToolIcon = (slug) => {
 };
 
 const Chat = () => {
-  console.log("Chat Render");
+  // console.log("Chat Render"); // Removed log spam
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -382,7 +383,6 @@ const Chat = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data && response.data.agents) {
-          console.log("[Chat] Fetched User Agents:", response.data.agents);
           setUserAgents(response.data.agents);
         }
       } catch (error) {
@@ -399,12 +399,40 @@ const Chat = () => {
       const toolName = location.state.toolName || "new tool";
       toast.success(`${toolName} is now active! Find it in the AI Magic Tools menu.`, {
         duration: 5000,
-        icon: '🚀'
+        position: 'top-center'
       });
-      // Clear state to prevent toast on re-renders/navs
-      window.history.replaceState({}, document.title);
+      // Clear location state to prevent repeat toast
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, navigate, location.pathname]);
+
+  // Central Mode Synchronization
+  useEffect(() => {
+    if (!activeAgent || !activeAgent.agentName) return;
+    
+    const name = activeAgent.agentName.toUpperCase();
+    const slug = (activeAgent.slug || "").toLowerCase();
+    
+    // Detection logic
+    const isVideo = name.includes('VIDEO') || name.includes('SORA') || name.includes('VEO') || slug.includes('video');
+    const isImage = name.includes('IMAGE') || name.includes('DEEPART') || slug.includes('image');
+    const isSearch = name.includes('SEARCH') || slug.includes('search');
+    const isAudio = name.includes('AUDIO') || name.includes('VOICE') || name.includes('SPEAK');
+    const isDoc = name.includes('CONVERTER') || slug.includes('document-intelligence');
+    const isCode = name.includes('CODE') || slug.includes('code-writer');
+
+    // Update state flags
+    setIsVideoGeneration(isVideo);
+    setIsImageGeneration(isImage);
+    setIsDeepSearch(isSearch);
+    setIsAudioConvertMode(isAudio);
+    setIsDocumentConvert(isDoc);
+    setIsCodeWriter(isCode);
+
+    if (isVideo || isImage || isSearch || isAudio || isDoc || isCode) {
+      console.log(`[MODE SYNC] Agent: ${activeAgent.agentName}, Mode: ${isVideo ? 'VIDEO' : (isImage ? 'IMAGE' : (isSearch ? 'SEARCH' : 'OTHER'))}`);
+    }
+  }, [activeAgent.agentName, activeAgent.slug]);
 
   const processFile = (file) => {
     if (!file) return;
@@ -854,7 +882,7 @@ const Chat = () => {
     }
   };
 
-  const handleGenerateVideo = async (overridePrompt) => {
+  const handleGenerateVideo = async (overridePrompt, model = 'veo', quality = 'medium') => {
     try {
       if (!inputRef.current?.value.trim() && !overridePrompt && selectedFiles.length === 0) {
         if (!voiceUsedRef.current) return;
@@ -927,7 +955,7 @@ const Chat = () => {
       const newMessage = {
         id: tempId,
         role: 'assistant',
-        content: `🎬 Generating high-quality video...\n\nPrompt: "${prompt}"`,
+        content: `🎬 Generating high-quality video (Powered by Veo 3.1 Fast Engine)...\n\nPrompt: "${prompt}"`,
         timestamp: Date.now() + 10,
       };
 
@@ -945,13 +973,20 @@ const Chat = () => {
       }
 
       try {
-        const data = await apiService.generateVideo(prompt);
+        const data = await apiService.generateVideo(prompt, 5, quality, model);
+        console.log("[Frontend] handleGenerateVideo received data:", data);
+
+        const isFallback = data.videoUrl?.includes('BigBuckBunny') || data.videoUrl?.includes('sample');
+        if (isFallback) {
+          toast(`⚠️ Using high-quality sample. Engine error: ${data.message || 'Check GCP quota'}`, { duration: 5000 });
+        }
 
         if (data && data.videoUrl) {
+          console.log("[Frontend] Successfully updating message with video URL:", data.videoUrl);
           const videoMessage = {
             id: tempId,
             role: 'assistant',
-            content: `🎥 Video generated successfully!`,
+            content: `🎥 ${model.toUpperCase()} Video generated successfully!`,
             videoUrl: data.videoUrl,
             mode: MODES.VIDEO_GEN,
             timestamp: Date.now(),
@@ -960,12 +995,28 @@ const Chat = () => {
           setMessages(prev => prev.map(msg => msg.id === tempId ? videoMessage : msg));
 
           // Save to chat history
-          await chatStorageService.saveMessage(activeSessionId, videoMessage);
+          try {
+            await chatStorageService.saveMessage(activeSessionId, videoMessage);
+          } catch (saveErr) {
+            console.warn("Failed to save video message to history:", saveErr);
+          }
 
-          toast.success('Video generated successfully!');
+          if (!isFallback) toast.success('Video generated successfully!');
+        } else {
+          console.error("[Frontend] Video data received but URL is missing:", data);
+          const errorMsg = data?.message || 'Video engine returned no URL';
+          const errorModelMsg = {
+            id: tempId,
+            role: 'assistant',
+            content: `❌ Video Generation Issue: ${errorMsg}`,
+            timestamp: Date.now() + 20,
+          };
+          setMessages(prev => prev.map(msg => msg.id === tempId ? errorModelMsg : msg));
+          toast.error(errorMsg);
         }
       } catch (error) {
-        const errorMsg = error.response?.data?.message || 'Failed to generate video';
+        console.error("[Frontend] handleGenerateVideo ERROR:", error);
+        const errorMsg = error.response?.data?.message || error.message || 'Failed to generate video';
         const errorModelMsg = {
           id: tempId,
           role: 'assistant',
@@ -1658,13 +1709,14 @@ const Chat = () => {
         setIsDocumentConvert(false);
         setIsCodeWriter(false);
 
-        // Activate specific mode based on agent type
-        if (type === 'GENERATEIMAGE') setIsImageGeneration(true);
-        else if (type === 'GENERATEVIDEO' || type === 'FASTVIDEOGENERATOR') setIsVideoGeneration(true);
-        else if (type === 'DEEPSEARCH') setIsDeepSearch(true);
-        else if (type === 'CONVERTTOAUDIO') setIsAudioConvertMode(true);
-        else if (type === 'UNIVERSALCONVERTER') setIsDocumentConvert(true);
-        else if (type === 'CODEWRITER') setIsCodeWriter(true);
+        // Activate specific mode based on agent type (more robust checks)
+        const upperType = type.toUpperCase();
+        if (upperType.includes('IMAGE') || upperType.includes('DEEPART')) setIsImageGeneration(true);
+        else if (upperType.includes('VIDEO') || upperType.includes('SORA') || upperType.includes('VEO')) setIsVideoGeneration(true);
+        else if (upperType.includes('SEARCH')) setIsDeepSearch(true);
+        else if (upperType.includes('AUDIO') || upperType.includes('VOICE') || upperType.includes('SPEAK')) setIsAudioConvertMode(true);
+        else if (upperType.includes('CONVERTER')) setIsDocumentConvert(true);
+        else if (upperType.includes('CODEWRITER') || upperType.includes('CODING')) setIsCodeWriter(true);
         else if (type === 'IMAGEEDITING') {
           // Image editing uses the activeAgent slug/category check, but explicit flag might be needed if added later
         }
@@ -1706,13 +1758,13 @@ const Chat = () => {
               avatar: lastModelMsg.agentAvatar || (restoredName === 'AISA' ? '/AGENTS_IMG/AISA.png' : (restoredName === 'AIVA' ? '/AGENTS_IMG/AIVA.png' : null))
             });
 
-            // Restore mode flags based on agent name
-            if (restoredName === 'Generate Image') setIsImageGeneration(true);
-            else if (restoredName === 'Generate Video' || restoredName === 'Fast Video Generator') setIsVideoGeneration(true);
-            else if (restoredName === 'Deep Search') setIsDeepSearch(true);
-            else if (restoredName === 'Convert to Audio') setIsAudioConvertMode(true);
-            else if (restoredName === 'Universal Converter') setIsDocumentConvert(true);
-            else if (restoredName === 'Code Writer') setIsCodeWriter(true);
+            const upperRestored = restoredName.toUpperCase();
+            if (upperRestored.includes('IMAGE') || upperRestored.includes('DEEPART')) setIsImageGeneration(true);
+            else if (upperRestored.includes('VIDEO') || upperRestored.includes('SORA') || upperRestored.includes('VEO')) setIsVideoGeneration(true);
+            else if (upperRestored.includes('SEARCH')) setIsDeepSearch(true);
+            else if (upperRestored.includes('AUDIO') || upperRestored.includes('VOICE') || upperRestored.includes('SPEAK')) setIsAudioConvertMode(true);
+            else if (upperRestored.includes('CONVERTER')) setIsDocumentConvert(true);
+            else if (upperRestored.includes('CODE')) setIsCodeWriter(true);
           }
         }
         setMessages(history || []);
@@ -1859,13 +1911,45 @@ const Chat = () => {
       setIsListening(false);
     }
 
-    if (isVideoGeneration) {
-      await handleGenerateVideo(contentToSend);
+    console.log("[CHAT] handleSendMessage Debug:", { 
+      isVideoGeneration, 
+      agentName: activeAgent?.agentName, 
+      slug: activeAgent?.slug,
+      isActuallyVideoMode: isVideoGeneration || 
+                           activeAgent.agentName?.toUpperCase().includes('VIDEO') || 
+                           activeAgent.agentName?.toUpperCase().includes('SORA') || 
+                           activeAgent.agentName?.toUpperCase().includes('VEO') ||
+                           activeAgent.slug?.includes('video')
+    });
+
+    const isActuallyVideoMode = isVideoGeneration || 
+                               activeAgent.agentName?.toUpperCase().includes('VIDEO') || 
+                               activeAgent.agentName?.toUpperCase().includes('SORA') || 
+                               activeAgent.agentName?.toUpperCase().includes('VEO') ||
+                               activeAgent.slug?.includes('video');
+
+    if (isActuallyVideoMode) {
+      let model = 'standard';
+      let quality = '720p';
+
+      if (activeAgent.slug === 'tool-video-pro') {
+        model = 'pro';
+        quality = 'high';
+      } else if (activeAgent.slug === 'tool-video-max') {
+        model = 'max';
+        quality = 'ultra';
+      }
+
+      await handleGenerateVideo(contentToSend, model, quality);
       isSendingRef.current = false;
       return;
     }
 
-    if (isImageGeneration) {
+    const isActuallyImageMode = isImageGeneration || 
+                               activeAgent.agentName?.toUpperCase().includes('IMAGE') || 
+                               activeAgent.slug?.includes('image');
+
+    if (isActuallyImageMode) {
       await handleGenerateImage(contentToSend);
       isSendingRef.current = false;
       return;
@@ -1955,13 +2039,22 @@ const Chat = () => {
       const isBlipActive = activeAgent.slug === 'tool-blip2' || activeAgent.slug === 'blip2';
       const isDermActive = activeAgent.slug === 'tool-derm-foundation' || activeAgent.slug === 'derm-foundation';
 
+      const videoGenActive = isVideoGeneration;
+      if (isVideoGeneration) setIsVideoGeneration(false);
+      const imageGenActive = isImageGeneration;
+      if (isImageGeneration) setIsImageGeneration(false);
+      const audioGenActive = isAudioConvertMode;
+      if (isAudioConvertMode) setIsAudioConvertMode(false);
+
       const detectedMode = deepSearchActive ? MODES.DEEP_SEARCH :
         (documentConvertActive ? MODES.FILE_CONVERSION :
           (codeWriterActive ? MODES.CODING_HELP :
             (isImageEditActive ? MODES.IMAGE_EDIT :
-              (isMusicGenActive ? MODES.AUDIO_GEN :
-                (isAIDocActive || isBlipActive || isDermActive ? MODES.FILE_ANALYSIS :
-                  detectMode(contentToSend, userMsg.attachments))))));
+              (audioGenActive ? MODES.AUDIO_GEN :
+                (videoGenActive ? MODES.VIDEO_GEN :
+                  (imageGenActive ? MODES.IMAGE_GEN :
+                    (isAIDocActive || isBlipActive || isDermActive ? MODES.FILE_ANALYSIS :
+                      detectMode(contentToSend, userMsg.attachments))))))));
       console.log(`[CHAT] Detected Mode: ${detectedMode} for message: "${contentToSend}"`);
       setCurrentMode(detectedMode);
 
@@ -1970,14 +2063,14 @@ const Chat = () => {
       console.log(`[CHAT] User message mode set to: ${userMsg.mode}`);
 
       // Determine loading intent for UI feedback
-      if (isImageGeneration) {
+      if (imageGenActive) {
         setLoadingText("Generating Image... 🎨");
-      } else if (isVideoGeneration) {
+      } else if (videoGenActive) {
         setLoadingText("Generating Video... 🎥");
       } else if (isImageEditActive) {
         setLoadingText("Editing Image... 🪄");
-      } else if (isMusicGenActive) {
-        setLoadingText("Generating Music with Lyria... 🎵");
+      } else if (audioGenActive || isMusicGenActive) {
+        setLoadingText("Generating Audio... 🎵");
       } else if (documentConvertActive) {
         setLoadingText("Converting Document... 🔄");
       } else if (deepSearchActive) {
@@ -3858,46 +3951,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                   </div>
                                 </div>
 
-                                {msg.videoUrl && (msg.videoUrl.includes('pollinations.ai')) ? (
-                                  <div className="relative w-full aspect-video bg-[#050505] rounded-xl overflow-hidden group/media">
-                                    <img
-                                      key={msg.videoUrl}
-                                      src={msg.videoUrl}
-                                      style={{ opacity: 0 }}
-                                      className="w-full h-full object-contain transition-opacity duration-700"
-                                      alt="AISA Visual Content"
-                                      loading="eager"
-                                      onLoad={(e) => {
-                                        e.target.style.opacity = 1;
-                                        const shimmer = e.target.parentElement.querySelector('.shimmer-overlay');
-                                        if (shimmer) shimmer.style.display = 'none';
-                                      }}
-                                      onError={(e) => {
-                                        console.log("Image failed, showing retry UI");
-                                        e.target.style.display = 'none';
-                                        const retryUI = e.target.parentElement.querySelector('.retry-overlay');
-                                        if (retryUI) retryUI.style.display = 'flex';
-                                      }}
-                                    />
-                                    <div className="retry-overlay absolute inset-0 hidden flex-col items-center justify-center bg-black/80 backdrop-blur-md transition-all">
-                                      <p className="text-white/60 text-[10px] font-bold uppercase mb-2">Failed to load content</p>
-                                      <button
-                                        onClick={(e) => {
-                                          const parent = e.currentTarget.parentElement.parentElement;
-                                          const img = parent.querySelector('img');
-                                          img.style.display = 'block';
-                                          img.style.opacity = 0;
-                                          img.src = img.src.split('?')[0] + '?retry=' + Date.now();
-                                          e.currentTarget.parentElement.style.display = 'none';
-                                        }}
-                                        className="px-3 py-1.5 bg-primary/20 hover:bg-primary/40 text-primary border border-primary/30 rounded-lg text-[10px] font-bold uppercase transition-all"
-                                      >
-                                        Retry Loading
-                                      </button>
-                                    </div>
-                                    <div className="shimmer-overlay absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                                  </div>
-                                ) : (
+                                {msg.videoUrl && (
                                   <video
                                     src={msg.videoUrl}
                                     controls
@@ -4798,29 +4852,57 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                   }
                                 },
                                 {
-                                  id: 'video-gen',
-                                  slug: 'tool-video-gen',
-                                  title: 'Video Gen',
-                                  desc: 'Short cinematic AI videos.',
+                                  id: 'video-gen-standard',
+                                  slug: 'tool-video-standard',
+                                  title: 'AI Video Gen Standard (Veo)',
+                                  desc: 'Generate high-quality video (Powered by Veo 3)',
                                   icon: Video,
                                   avatar: '/AGENTS_IMG/AIVIDEO.png',
                                   color: 'text-indigo-500 dark:text-indigo-400',
                                   bgColor: 'bg-indigo-500/10',
-                                  active: isVideoGeneration,
+                                  active: activeAgent.slug === 'tool-video-standard',
                                   onClick: () => {
-                                    const newState = !isVideoGeneration;
-                                    setIsVideoGeneration(newState);
-                                    if (newState) {
-                                      setActiveAgent({ agentName: 'Generate Video', category: 'Creative', slug: 'tool-video-gen', avatar: '/AGENTS_IMG/AISA.png' });
-                                    } else {
-                                      setActiveAgent({ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' });
-                                    }
-                                    setIsImageGeneration(false);
-                                    setIsDeepSearch(false);
-                                    setIsAudioConvertMode(false);
-                                    setIsDocumentConvert(false);
-                                    setIsCodeWriter(false);
                                     setIsToolsMenuOpen(false);
+                                    setActiveAgent({ agentName: 'AI Video Gen Standard', category: 'Creative', slug: 'tool-video-standard', avatar: '/AGENTS_IMG/AISA.png' });
+                                    setInputValue("Generate a professional Veo video for...");
+                                    inputRef.current?.focus();
+                                    setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(true);
+                                  }
+                                },
+                                {
+                                  id: 'video-gen-pro',
+                                  slug: 'tool-video-pro',
+                                  title: 'AI Video Generator Pro (Veo 3)',
+                                  desc: 'Cinematic Professional Video (Powered by Veo 3)',
+                                  icon: Sparkles,
+                                  avatar: '/AGENTS_IMG/AIVIDEO.png',
+                                  color: 'text-purple-500 dark:text-purple-400',
+                                  bgColor: 'bg-purple-500/10',
+                                  active: activeAgent.slug === 'tool-video-pro',
+                                  onClick: () => {
+                                    setIsToolsMenuOpen(false);
+                                    setActiveAgent({ agentName: 'AI Video Generator Pro', category: 'Creative', slug: 'tool-video-pro', avatar: '/AGENTS_IMG/AIVIDEO.png' });
+                                    setInputValue("Generate an advanced Veo Pro video for...");
+                                    inputRef.current?.focus();
+                                    setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(true);
+                                  }
+                                },
+                                {
+                                  id: 'video-gen-max',
+                                  slug: 'tool-video-max',
+                                  title: 'AI Video Generator Max (Veo 3.1 Max)',
+                                  desc: 'Ultra Cinematic 4K+ Production (Powered by Veo 3.1 Max)',
+                                  icon: Sparkles,
+                                  avatar: '/AGENTS_IMG/AIVIDEO.png',
+                                  color: 'text-amber-500 dark:text-amber-400',
+                                  bgColor: 'bg-amber-500/10',
+                                  active: activeAgent.slug === 'tool-video-max',
+                                  onClick: () => {
+                                    setIsToolsMenuOpen(false);
+                                    setActiveAgent({ agentName: 'AI Video Generator Max', category: 'Creative', slug: 'tool-video-max', avatar: '/AGENTS_IMG/AIVIDEO.png' });
+                                    setInputValue("Generate a cinematic masterpiece with Veo Max for...");
+                                    inputRef.current?.focus();
+                                    setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(true);
                                   }
                                 },
                                 {
@@ -5024,22 +5106,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                     setIsToolsMenuOpen(false);
                                   }
                                 },
-                                {
-                                  id: 'fast-video',
-                                  slug: 'tool-fast-video-generator',
-                                  title: 'Fast Video Gen',
-                                  desc: 'Rapidly generate AI videos from prompts.',
-                                  icon: Zap,
-                                  avatar: '/AGENTS_IMG/AIVIDEO.png',
-                                  color: 'text-yellow-500 dark:text-yellow-400',
-                                  bgColor: 'bg-yellow-500/10',
-                                  active: activeAgent.slug === 'tool-fast-video-generator',
-                                  onClick: () => {
-                                    setIsImageGeneration(false); setIsDeepSearch(false); setIsAudioConvertMode(false); setIsDocumentConvert(false); setIsCodeWriter(false); setIsVideoGeneration(false);
-                                    setActiveAgent({ agentName: 'Fast Video Generator', category: 'Creative', slug: 'tool-fast-video-generator', avatar: '/AGENTS_IMG/AIVIDEO.png' });
-                                    setIsToolsMenuOpen(false);
-                                  }
-                                },
+
                                 {
                                   id: 'music-lyria',
                                   slug: 'tool-lyria-for-music',
@@ -5389,7 +5456,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                       setIsToolsMenuOpen(false);
                                     }
                                   }))
-                              ).filter(tool => userAgents.some(a => a && a.slug && (a.slug === tool.slug || `tool-${a.slug}` === tool.slug || a.slug === tool.slug.replace('tool-', '')))).map((tool) => (
+                              ).filter(tool => tool && tool.slug && userAgents.some(a => a && a.slug && (a.slug === tool.slug || `tool-${a.slug}` === tool.slug || a.slug === tool.slug.replace('tool-', '')))).map((tool) => (
                                 <button
                                   key={tool.id}
                                   onClick={(e) => {

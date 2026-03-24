@@ -66,17 +66,61 @@ export const apiService = {
     }
   },
 
-  async generateVideo(prompt, duration = 5, quality = 'medium') {
+  async generateVideo(prompt, duration = 5, quality = 'medium', model = 'veo') {
     try {
-      console.log("[Frontend] Generating video for prompt:", prompt);
-      // Increased timeout to 120s for video generation as it takes longer
-      const response = await apiClient.post('video/generate', { prompt, duration, quality }, { timeout: 120000 });
-      console.log("[Frontend] Video generation success:", response.data);
-      return response.data;
+      console.log("[Frontend] Starting Async Video Job:", prompt);
+      
+      // 1. Start the job
+      const startResponse = await apiClient.post('video/generate', { prompt, duration, quality, model });
+      
+      if (!startResponse.data?.success || !startResponse.data?.jobId) {
+        throw new Error(startResponse.data?.message || "Failed to start video job");
+      }
+
+      const jobId = startResponse.data.jobId;
+      console.log("[Frontend] Job Started ID:", jobId);
+
+      // 2. Poll the status until complete or failed
+      let isFinished = false;
+      let attempts = 0;
+      const maxAttempts = 60; // 15 minutes (15s per poll)
+      
+      while (!isFinished && attempts < maxAttempts) {
+        attempts++;
+        console.log(`[Frontend] Polling video status... (${attempts}/${maxAttempts})`);
+        
+        await new Promise(resolve => setTimeout(resolve, 15000)); // Wait 15s
+
+        const statusResponse = await apiClient.get(`video/status/${jobId}`);
+        const job = statusResponse.data;
+
+        if (job.status === 'completed') {
+          console.log("[Frontend] Video Job Complete:", job.videoUrl);
+          return {
+            success: true,
+            videoUrl: job.videoUrl,
+            reply: job.reply || "Your cinematic video is ready!",
+            prompt: job.prompt
+          };
+        } else if (job.status === 'failed') {
+          throw new Error(job.message || "Google Veo failed to generate this video.");
+        }
+        
+        // Update console with progress if available
+        if (job.progress) console.log(`[Frontend] Rendering Progress: ${job.progress}%`);
+      }
+
+      throw new Error("Video generation took too long ( > 15 minutes). Please check back later.");
+
     } catch (error) {
       console.error("Failed to generate video:", error);
       throw error;
     }
+  },
+
+  async getVideoStatus(jobId) {
+    const response = await apiClient.get(`video/status/${jobId}`);
+    return response.data;
   },
 
   // --- Auth ---

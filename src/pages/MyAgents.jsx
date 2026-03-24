@@ -191,8 +191,13 @@ const MyAgents = () => {
                                                 navigate(`${AppRoute.WORKSPACE}/${name}`);
                                             } else if (standaloneAgents[name]) {
                                                 navigate(standaloneAgents[name]);
-                                            } else if (chatAgents.includes(name)) {
-                                                navigate(AppRoute.CHAT, { state: { agentType: name, agent: agent } });
+                                            } else if (chatAgents.includes(name) || (agent.slug && agent.slug.startsWith('tool-'))) {
+                                                // If it's a tool (has tool- slug), navigate to chat
+                                                const agentType = agent.slug && agent.slug.startsWith('tool-') 
+                                                    ? agent.slug.toUpperCase().replace('TOOL-', '').replace(/-/g, '')
+                                                    : name;
+                                                
+                                                navigate(AppRoute.CHAT, { state: { agentType: agentType, agent: agent } });
                                             } else if (internalRouteAgents[name]) {
                                                 navigate(internalRouteAgents[name]);
                                             } else {
