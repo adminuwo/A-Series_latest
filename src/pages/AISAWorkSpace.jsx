@@ -97,9 +97,9 @@ import AIBIZInputs from '../agents/AIBIZ/AIBIZInputs.jsx';
 import AIHIREInputs from '../agents/AIHIRE/AiHire.jsx';
 import AIHEALTHInputs from '../agents/AIHEALTH/AIHEALTHInputs.jsx';
 import AIDESKInputs from '../agents/AIDESK/AIDESKInputs.jsx';
-import AgentActions from '../components/AISAWorkSpace/AgentActions.jsx';
+import AgentActions from '../Components/AISAWorkSpace/AgentActions.jsx';
 import { buildAISalesPrompt } from '../agents/AISALES/promptBuilder.js';
-import { AGENTS, DEAL_STAGES } from '../components/AISAWorkSpace/constants.js';
+import { AGENTS, DEAL_STAGES } from '../Components/AISAWorkSpace/constants.js';
 import { PERSONAS } from '../agents/AISALES/constants.js';
 const OBJECTION_TYPES = [
     'Price/Budget',
