@@ -949,8 +949,8 @@ const AIWRITEInputs = ({
     // --- SUB-UI RENDERING ---
 
     const renderActionFooter = (buttonText, isDisabled = false) => (
-        <div className="mt-20 flex flex-col items-center pb-16 w-full">
-            <div className="flex items-center justify-between w-full">
+        <div className="mt-12 md:mt-20 flex flex-col items-center pb-8 md:pb-16 w-full px-4">
+            <div className="flex flex-col md:flex-row items-center justify-between w-full gap-6">
                 <div className="flex gap-4 relative">
                     <div className="relative">
                         <button
@@ -966,7 +966,7 @@ const AIWRITEInputs = ({
                                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                                     animate={{ opacity: 1, scale: 1, y: 15 }}
                                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                    className="absolute top-full left-0 mt-4 w-[400px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 p-7 z-[100]"
+                                    className="absolute top-full left-0 mt-4 w-[calc(100vw-2rem)] md:w-[400px] bg-white rounded-3xl md:rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 p-6 md:p-7 z-[100]"
                                 >
                                     <div className="flex items-center justify-between mb-5">
                                         <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Recent Sessions</h4>
@@ -1116,18 +1116,18 @@ const AIWRITEInputs = ({
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
-                        className="w-full mt-12 bg-white rounded-[40px] shadow-2xl shadow-blue-500/10 border border-slate-50 overflow-hidden relative"
+                        className="w-full mt-6 lg:mt-12 bg-white rounded-3xl md:rounded-[40px] shadow-2xl shadow-blue-500/10 border border-slate-50 overflow-hidden relative"
                     >
                         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400" />
 
                         {/* Result Header */}
-                        <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
-                            <div className="flex items-center gap-4">
+                        <div className="px-4 py-6 md:px-10 md:py-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/30">
+                            <div className="flex items-center gap-3 md:gap-4">
                                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
                                     <Sparkles size={18} />
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-black text-slate-800 tracking-tight uppercase">Generation Result</h4>
+                                    <h4 className="text-xs md:text-sm font-black text-slate-800 tracking-tight uppercase">Generation Result</h4>
                                     <p className="text-[9px] text-blue-400 font-bold uppercase tracking-widest">Optimized Content Intelligent Engine</p>
                                 </div>
                             </div>
@@ -1155,23 +1155,23 @@ const AIWRITEInputs = ({
                         </div>
 
                         {/* Result Content */}
-                        <div className="p-12 prose prose-slate max-w-none prose-sm prose-headings:font-black prose-headings:text-slate-800 prose-p:text-slate-600 prose-p:leading-relaxed whitespace-pre-wrap">
+                        <div className="p-4 sm:p-6 md:p-12 prose prose-slate max-w-none prose-sm prose-headings:font-black prose-headings:text-slate-800 prose-p:text-slate-600 prose-p:leading-relaxed whitespace-pre-wrap">
                             {renderStructuredResult()}
                         </div>
 
                         {/* Result Footer */}
-                        <div className="px-12 py-8 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                        <div className="px-6 md:px-12 py-6 md:py-8 bg-slate-50 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="flex items-center gap-6">
                                 <span className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                     <Clock size={14} /> {new Date().toLocaleTimeString()}
                                 </span>
-                                <span className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                                <span className="flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest text-center">
                                     <CheckCircle2 size={14} /> Plagiarism Free
                                 </span>
                             </div>
                             <button
                                 onClick={handleAdvancedExecute}
-                                className="flex items-center gap-2 px-8 py-4 bg-slate-800 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-slate-200"
+                                className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-slate-800 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-slate-200"
                             >
                                 <RefreshCw size={14} /> Improve with AI
                             </button>
@@ -1186,12 +1186,12 @@ const AIWRITEInputs = ({
     const renderAgencyUI = () => (
         <div className="w-full px-4">
             {mode === 'planner' ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10">
                     {/* Card 1: Social Brand */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/[0.85] backdrop-blur-xl rounded-[48px] p-10 shadow-2xl shadow-blue-500/5 border border-white/50 space-y-12 flex flex-col">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-[24px] bg-gradient-to-br from-blue-50 to-white flex items-center justify-center text-blue-600 shadow-sm border border-blue-100/50">
-                                <Building2 className="w-8 h-8" />
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/[0.85] backdrop-blur-xl rounded-3xl md:rounded-[48px] p-6 md:p-10 shadow-2xl shadow-blue-500/5 border border-white/50 space-y-8 md:space-y-12 flex flex-col">
+                        <div className="flex items-center gap-4 md:gap-6">
+                            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl md:rounded-[24px] bg-gradient-to-br from-blue-50 to-white flex items-center justify-center text-blue-600 shadow-sm border border-blue-100/50">
+                                <Building2 className="w-6 h-6 md:w-8 md:h-8" />
                             </div>
                             <div>
                                 <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none mb-2">Social Brand</h3>
@@ -1214,7 +1214,7 @@ const AIWRITEInputs = ({
                                         value={agencyInputs.companyName}
                                         onChange={(e) => handleAgencyInputChange('companyName', e.target.value)}
                                         placeholder="Enter brand name..."
-                                        className="w-full bg-slate-50/50 border border-slate-100 rounded-full px-8 py-6 text-sm font-black text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-200/50 transition-all shadow-inner placeholder:text-slate-300"
+                                        className="w-full bg-slate-50/50 border border-slate-100 rounded-full px-6 md:px-8 py-4 md:py-6 text-sm font-black text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-200/50 transition-all shadow-inner placeholder:text-slate-300"
                                     />
                                 </div>
                             </div>
@@ -1243,10 +1243,10 @@ const AIWRITEInputs = ({
                     </motion.div>
 
                     {/* Card 2: Social Strategy */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white/[0.85] backdrop-blur-xl rounded-[48px] p-10 shadow-2xl shadow-blue-500/5 border border-white/50 space-y-12">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-[24px] bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100/50">
-                                <TargetIcon className="w-8 h-8" />
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white/[0.85] backdrop-blur-xl rounded-3xl md:rounded-[48px] p-6 md:p-10 shadow-2xl shadow-blue-500/5 border border-white/50 space-y-8 md:space-y-12">
+                        <div className="flex items-center gap-4 md:gap-6">
+                            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl md:rounded-[24px] bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100/50">
+                                <TargetIcon className="w-6 h-6 md:w-8 md:h-8" />
                             </div>
                             <div>
                                 <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none mb-2">Social Strategy</h3>
@@ -1334,10 +1334,10 @@ const AIWRITEInputs = ({
                     </motion.div>
 
                     {/* Card 3: Social Engine */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/[0.85] backdrop-blur-xl rounded-[48px] p-10 shadow-2xl shadow-blue-500/5 border border-white/50 space-y-12">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-[24px] bg-gradient-to-br from-slate-50 to-white flex items-center justify-center text-slate-600 shadow-sm border border-slate-100/50">
-                                <Clock className="w-8 h-8" />
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/[0.85] backdrop-blur-xl rounded-3xl md:rounded-[48px] p-6 md:p-10 shadow-2xl shadow-blue-500/5 border border-white/50 space-y-8 md:space-y-12">
+                        <div className="flex items-center gap-4 md:gap-6">
+                            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl md:rounded-[24px] bg-gradient-to-br from-slate-50 to-white flex items-center justify-center text-slate-600 shadow-sm border border-slate-100/50">
+                                <Clock className="w-6 h-6 md:w-8 md:h-8" />
                             </div>
                             <div>
                                 <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none mb-2">Social Engine</h3>
@@ -1513,13 +1513,13 @@ const AIWRITEInputs = ({
 
     const renderInfluencerUI = () => (
         <div className="w-full px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Card 1: Vibe Check */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 md:space-y-10">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-5">
-                            <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><Music className="w-7 h-7" /></div>
-                            <div><h3 className="text-lg font-black text-slate-800 tracking-tight">Vibe Check</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Niche & Mood</p></div>
+                        <div className="flex items-center gap-4 md:gap-5">
+                            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl md:rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><Music className="w-6 h-6 md:w-7 md:h-7" /></div>
+                            <div><h3 className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">Vibe Check</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Niche & Mood</p></div>
                         </div>
                         <button
                             onClick={handleSmartConfig}
@@ -1648,10 +1648,10 @@ const AIWRITEInputs = ({
                     </div>
                 </motion.div>
                 {/* Card 3: Freelance Ops */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><Shapes className="w-7 h-7" /></div>
-                        <div><h3 className="text-lg font-black text-slate-800 tracking-tight">Freelance Ops</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Business Growth Tools</p></div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 md:space-y-10">
+                    <div className="flex items-center gap-4 md:gap-5">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl md:rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><Shapes className="w-6 h-6 md:w-7 md:h-7" /></div>
+                        <div><h3 className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">Freelance Ops</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Business Growth Tools</p></div>
                     </div>
                     <div className="space-y-4">
                         <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest px-1">Select Tool</label>
@@ -1675,15 +1675,15 @@ const AIWRITEInputs = ({
 
     const renderStudentUI = () => (
         <div className="w-full px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
                 {/* Left Side: The Writing Workspace */}
-                <div className="lg:col-span-8 space-y-10">
+                <div className="lg:col-span-8 space-y-6 md:space-y-10">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="bg-white rounded-[40px] p-12 shadow-2xl shadow-blue-500/5 border border-slate-100 flex flex-col min-h-[700px]"
+                        className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-12 shadow-2xl shadow-blue-500/5 border border-slate-100 flex flex-col min-h-[500px] md:min-h-[700px]"
                     >
-                        <div className="flex items-center justify-between mb-12">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-8 md:mb-12">
                             <div className="flex items-center gap-6">
                                 <div className="w-16 h-16 rounded-[28px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-200">
                                     <PenTool className="w-8 h-8" />
@@ -1746,7 +1746,7 @@ const AIWRITEInputs = ({
                                     value={studentSubject}
                                     onChange={(e) => setStudentSubject(e.target.value)}
                                     placeholder="Which course or field are we exploring? (e.g. Modern Architecture)"
-                                    className="w-full bg-slate-50/50 border border-slate-100 rounded-[30px] px-10 py-7 text-lg font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-slate-300"
+                                    className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl md:rounded-[30px] px-6 md:px-10 py-5 md:py-7 text-sm md:text-lg font-bold text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-slate-300"
                                 />
                             </div>
 
@@ -1764,7 +1764,7 @@ const AIWRITEInputs = ({
                                     value={studentTopic}
                                     onChange={(e) => setStudentTopic(e.target.value)}
                                     placeholder="Your precise research topic will appear here..."
-                                    className="w-full bg-white border-2 border-slate-50 rounded-[40px] p-12 text-xl font-black text-slate-800 outline-none focus:border-blue-500/20 focus:ring-0 transition-all min-h-[300px] resize-none shadow-inner placeholder:text-slate-200 leading-relaxed"
+                                    className="w-full bg-white border-2 border-slate-50 rounded-3xl md:rounded-[40px] p-6 md:p-12 text-sm md:text-xl font-black text-slate-800 outline-none focus:border-blue-500/20 focus:ring-0 transition-all min-h-[200px] md:min-h-[300px] resize-none shadow-inner placeholder:text-slate-200 leading-relaxed"
                                 />
 
                                 <AnimatePresence>
@@ -1804,9 +1804,9 @@ const AIWRITEInputs = ({
                 </div>
 
                 {/* Right Side: Advanced Controls */}
-                <div className="lg:col-span-4 space-y-8">
+                <div className="lg:col-span-4 space-y-6 md:space-y-8">
                     {/* Tool Selection */}
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8">
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-6 md:space-y-8">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 rounded-[22px] bg-indigo-50 flex items-center justify-center text-indigo-600"><Layout className="w-6 h-6" /></div>
@@ -1849,7 +1849,7 @@ const AIWRITEInputs = ({
                     </motion.div>
 
                     {/* Word Count & Tone */}
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 md:space-y-10">
                         <div className="space-y-6">
                             <div className="space-y-3">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Words Volume</label>
@@ -1891,9 +1891,9 @@ const AIWRITEInputs = ({
 
     const renderStartupUI = () => (
         <div className="w-full px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Card 1: Product Branding */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 md:space-y-10">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-5">
                             <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><Rocket className="w-7 h-7" /></div>
@@ -1924,10 +1924,10 @@ const AIWRITEInputs = ({
                     </div>
                 </motion.div>
                 {/* Card 2: Market Strategy */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><TargetIcon className="w-7 h-7" /></div>
-                        <div><h3 className="text-lg font-black text-slate-800 tracking-tight">Market Strategy</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Audience & Tone</p></div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 md:space-y-10">
+                    <div className="flex items-center gap-4 md:gap-5">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl md:rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><TargetIcon className="w-6 h-6 md:w-7 md:h-7" /></div>
+                        <div><h3 className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">Market Strategy</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Audience & Tone</p></div>
                     </div>
                     <div className="space-y-8">
                         <div className="space-y-3">
@@ -1949,10 +1949,10 @@ const AIWRITEInputs = ({
                     </div>
                 </motion.div>
                 {/* Card 3: Growth Toolkit */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><TrendingUp className="w-7 h-7" /></div>
-                        <div><h3 className="text-lg font-black text-slate-800 tracking-tight">Growth Toolkit</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">High-Converting Features</p></div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 md:space-y-10">
+                    <div className="flex items-center gap-4 md:gap-5">
+                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl md:rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600"><TrendingUp className="w-6 h-6 md:w-7 md:h-7" /></div>
+                        <div><h3 className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">Growth Toolkit</h3><p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">High-Converting Features</p></div>
                     </div>
                     <div className="space-y-4">
                         <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest px-1">Select Feature</label>
@@ -1977,9 +1977,9 @@ const AIWRITEInputs = ({
 
     const renderAuthorUI = () => (
         <div className="w-full px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Card 1: Creative Context */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[40px] p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-10">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl md:rounded-[40px] p-6 md:p-10 shadow-xl shadow-blue-500/5 border border-slate-50 space-y-8 md:space-y-10">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-5">
                             <div className="w-14 h-14 rounded-[30px] bg-blue-50 flex items-center justify-center text-blue-600">
@@ -2151,11 +2151,11 @@ const AIWRITEInputs = ({
 
     return (
         <div className="w-full flex flex-col items-center">
-            <div className="flex justify-start md:justify-center gap-6 md:gap-12 border-b border-slate-50 w-full mb-8 lg:mb-12 overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
+            <div className="flex justify-start md:justify-center gap-4 md:gap-10 border-b border-slate-50 w-full mb-6 lg:mb-12 overflow-x-auto no-scrollbar pb-2 px-4 shadow-sm md:shadow-none">
                 {SEGMENTS.map((seg) => (
-                    <button key={seg.id} onClick={() => setSegment(seg.id)} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.25em] transition-all relative flex items-center gap-2 md:gap-3 shrink-0 ${segment === seg.id ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}>
+                    <button key={seg.id} onClick={() => setSegment(seg.id)} className={`pb-3 text-[10px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.25em] transition-all relative flex items-center gap-2 md:gap-3 shrink-0 ${segment === seg.id ? 'text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}>
                         {seg.icon && <seg.icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${segment === seg.id ? 'text-blue-600' : 'text-slate-300'}`} />}
-                        {seg.label}
+                        <span className="whitespace-nowrap">{seg.label}</span>
                         {segment === seg.id && <motion.div layoutId="activeTabSegment" className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-600 rounded-t-full" />}
                     </button>
                 ))}

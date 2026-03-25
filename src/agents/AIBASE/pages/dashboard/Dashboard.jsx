@@ -81,8 +81,8 @@ const Dashboard = () => {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-maintext">Hello, Admin </h1>
-                <p className="text-subtext mt-2 text-lg">Here's what's happening in your Knowledge Hub today.</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-maintext">Hello, Admin </h1>
+                <p className="text-base md:text-lg text-subtext mt-2">Here's what's happening in your Knowledge Hub today.</p>
             </div>
 
             {/* Stats Grid */}

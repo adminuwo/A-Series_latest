@@ -395,10 +395,10 @@ const Chat = () => {
   // Central Mode Synchronization
   useEffect(() => {
     if (!activeAgent || !activeAgent.agentName) return;
-    
+
     const name = activeAgent.agentName.toUpperCase();
     const slug = (activeAgent.slug || "").toLowerCase();
-    
+
     // Detection logic
     const isVideo = name.includes('VIDEO') || name.includes('SORA') || name.includes('VEO') || slug.includes('video');
     const isImage = name.includes('IMAGE') || name.includes('DEEPART') || slug.includes('image');
@@ -1902,22 +1902,22 @@ const Chat = () => {
       setIsListening(false);
     }
 
-    console.log("[CHAT] handleSendMessage Debug:", { 
-      isVideoGeneration, 
-      agentName: activeAgent?.agentName, 
+    console.log("[CHAT] handleSendMessage Debug:", {
+      isVideoGeneration,
+      agentName: activeAgent?.agentName,
       slug: activeAgent?.slug,
-      isActuallyVideoMode: isVideoGeneration || 
-                           activeAgent.agentName?.toUpperCase().includes('VIDEO') || 
-                           activeAgent.agentName?.toUpperCase().includes('SORA') || 
-                           activeAgent.agentName?.toUpperCase().includes('VEO') ||
-                           activeAgent.slug?.includes('video')
+      isActuallyVideoMode: isVideoGeneration ||
+        activeAgent.agentName?.toUpperCase().includes('VIDEO') ||
+        activeAgent.agentName?.toUpperCase().includes('SORA') ||
+        activeAgent.agentName?.toUpperCase().includes('VEO') ||
+        activeAgent.slug?.includes('video')
     });
 
-    const isActuallyVideoMode = isVideoGeneration || 
-                               activeAgent.agentName?.toUpperCase().includes('VIDEO') || 
-                               activeAgent.agentName?.toUpperCase().includes('SORA') || 
-                               activeAgent.agentName?.toUpperCase().includes('VEO') ||
-                               activeAgent.slug?.includes('video');
+    const isActuallyVideoMode = isVideoGeneration ||
+      activeAgent.agentName?.toUpperCase().includes('VIDEO') ||
+      activeAgent.agentName?.toUpperCase().includes('SORA') ||
+      activeAgent.agentName?.toUpperCase().includes('VEO') ||
+      activeAgent.slug?.includes('video');
 
     if (isActuallyVideoMode) {
       let model = 'standard';
@@ -1936,9 +1936,9 @@ const Chat = () => {
       return;
     }
 
-    const isActuallyImageMode = isImageGeneration || 
-                               activeAgent.agentName?.toUpperCase().includes('IMAGE') || 
-                               activeAgent.slug?.includes('image');
+    const isActuallyImageMode = isImageGeneration ||
+      activeAgent.agentName?.toUpperCase().includes('IMAGE') ||
+      activeAgent.slug?.includes('image');
 
     if (isActuallyImageMode) {
       await handleGenerateImage(contentToSend);
@@ -3568,29 +3568,29 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         )}
 
         {/* Header */}
-        <div className="h-16 md:h-18 border-b border-border/50 flex items-center justify-between px-4 md:px-6 bg-white/70 backdrop-blur-xl z-20 shrink-0 gap-3 shadow-sm">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="h-14 sm:h-16 md:h-18 border-b border-border/50 flex items-center justify-between px-3 sm:px-4 md:px-6 bg-white/75 backdrop-blur-2xl z-20 shrink-0 gap-2 sm:gap-3 shadow-sm sticky top-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <button
               onClick={() => setTglState(prev => ({ ...prev, sidebarOpen: true }))}
-              className="lg:hidden p-2.5 -ml-2 text-subtext hover:text-primary rounded-xl hover:bg-primary/5 transition-all"
+              className="lg:hidden p-2 -ml-1 text-subtext hover:text-primary rounded-xl hover:bg-primary/5 transition-all"
             >
-              <MenuIcon className="w-6 h-6" />
+              <MenuIcon className="w-5.5 h-5.5 sm:w-6 sm:h-6" />
             </button>
 
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className={`p-2.5 rounded-xl transition-all duration-300 ${showHistory ? 'text-primary bg-primary/10 shadow-inner' : 'text-subtext hover:text-primary hover:bg-primary/5'} `}
+              className={`p-2 rounded-xl transition-all duration-300 ${showHistory ? 'text-primary bg-primary/10 shadow-inner' : 'text-subtext hover:text-primary hover:bg-primary/5'} `}
               title="Chat History"
             >
-              <History className="w-5 h-5" />
+              <History className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </button>
 
-            <div className="flex items-center gap-3">
-              <span className="font-black text-xl md:text-2xl text-primary tracking-tight truncate drop-shadow-sm shimmer-text">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <span className="font-black text-lg sm:text-xl md:text-2xl text-primary tracking-tight truncate drop-shadow-sm shimmer-text">
                 {activeAgent.agentName === 'AIVA' || !activeAgent.agentName ? t('brandName') : activeAgent.agentName}
               </span>
               {activeAgent.agentName !== 'AIVA' && activeAgent.agentName && (
-                <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-widest border border-primary/20 backdrop-blur-sm shadow-sm hover:bg-primary/10 transition-colors">
+                <span className="hidden md:inline-flex px-2.5 py-1 rounded-full bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-widest border border-primary/20 backdrop-blur-sm shadow-sm hover:bg-primary/10 transition-colors">
                   A-Series <span className="opacity-50 mx-1">|</span> Engine v3.1
                 </span>
               )}
@@ -3640,7 +3640,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                   {/* Actions Menu (Always visible for discoverability) */}
 
                   <div
-                    className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${msg.role === 'user'
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${msg.role === 'user'
                       ? 'bg-gradient-to-br from-primary to-indigo-600'
                       : 'bg-white border border-border modern-shadow'
                       }`}
@@ -3648,15 +3648,15 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                     {msg.role === 'user' ? (
                       <User className="w-5 h-5 text-white" />
                     ) : (
-                      <img src={msg.agentAvatar || "/AGENTS_IMG/AIVA.png"} alt={msg.agentName || "AI"} className="w-6 h-6 object-contain" />
+                      <img src={msg.agentAvatar || "/AGENTS_IMG/AIVA.png"} alt={msg.agentName || "AI"} className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
                     )}
                   </div>
 
                   <div
-                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-[85%] sm:max-w-[80%] md:max-w-[70%]`}
+                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-[90%] sm:max-w-[85%] md:max-w-[75%]`}
                   >
                     <div
-                      className={`group/bubble relative px-4 py-3 sm:px-6 sm:py-4 rounded-3xl leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 min-h-[44px] hover:scale-[1.005] ${msg.role === 'user'
+                      className={`group/bubble relative px-3 py-2 sm:px-6 sm:py-4 rounded-3xl leading-relaxed whitespace-pre-wrap break-words transition-all duration-300 min-h-[40px] hover:scale-[1.005] ${msg.role === 'user'
                         ? 'bg-gradient-to-br from-primary to-indigo-600 text-white rounded-tr-sm shadow-xl shadow-primary/20'
                         : `bg-white border border-border/60 text-maintext rounded-tl-sm modern-shadow hover:shadow-lg ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-2 outline-primary/10' : ''}`
                         }`}
@@ -3835,9 +3835,9 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                   );
                                 },
                                 p: ({ children }) => <p className={`mb-1.5 last:mb-0 ${msg.role === 'user' ? 'm-0 leading-normal' : 'leading-relaxed'} `}>{children}</p>,
-                                ul: ({ children }) => <ul className="list-disc pl-5 mb-3 last:mb-0 space-y-1.5 marker:text-primary transition-all">{children}</ul>,
-                                ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 last:mb-0 space-y-1.5 marker:text-primary transition-all">{children}</ol>,
-                                li: ({ children }) => <li className="mb-1 last:mb-0 transition-colors">{children}</li>,
+                                ul: ({ children }) => <ul className="list-disc pl-5 mb-3 sm:mb-4 mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 transition-all marker:text-primary">{children}</ul>,
+                                ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 sm:mb-4 mt-1 sm:mt-2 space-y-0.5 sm:space-y-1 transition-all marker:text-primary">{children}</ol>,
+                                li: ({ children }) => <li className="mb-1 sm:mb-2 leading-relaxed last:mb-0 transition-colors">{children}</li>,
                                 h1: ({ children }) => <h1 className="font-bold mb-2 mt-3 block text-[1.4em] text-primary tracking-tight">{children}</h1>,
                                 h2: ({ children }) => <h2 className="font-bold mb-1.5 mt-2 block text-[1.2em] text-primary tracking-tight">{children}</h2>,
                                 h3: ({ children }) => <h3 className="font-bold mb-1 mt-1.5 block text-[1.1em] text-primary tracking-tight">{children}</h3>,
@@ -3929,7 +3929,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                               )}
                             </ReactMarkdown>
 
-                                                        {/* Dynamic Video Rendering */}
+                            {/* Dynamic Video Rendering */}
                             {msg.videoUrl && (
                               <div className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm">
                                 <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity pointer-events-none">
@@ -3984,7 +3984,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                     const errDiv = document.createElement('div');
                                     errDiv.className = 'p-10 text-center text-xs text-subtext bg-surface/30 rounded-xl';
                                     errDiv.innerText = 'Image expired or failed to load. Please try regenerating.';
-                                    if(e.target.parentElement) e.target.parentElement.appendChild(errDiv);
+                                    if (e.target.parentElement) e.target.parentElement.appendChild(errDiv);
                                   }}
                                 />
                                 <button
@@ -4302,14 +4302,14 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                     })();
 
                                     return (
-                                      <>
+                                      <div className="flex items-center gap-1.5 sm:gap-2 sm:overflow-visible overflow-x-auto no-scrollbar pb-0.5 max-w-[160px] xs:max-w-[200px] sm:max-w-none px-0.5">
                                         {vIcons.includes('volume') && (
                                           <button
                                             onClick={() => {
                                               const isHindi = /[\u0900-\u097F]/.test(msg.content);
                                               speakResponse(msg.content, isHindi ? 'Hindi' : 'English', msg.id, msg.attachments || [], true);
                                             }}
-                                            className={`transition-colors p-1.5 rounded-lg ${speakingMessageId === msg.id
+                                            className={`transition-colors p-1.5 rounded-lg shrink-0 ${speakingMessageId === msg.id
                                               ? 'text-primary bg-primary/10'
                                               : 'text-subtext hover:text-primary hover:bg-surface-hover'
                                               }`}
@@ -4325,7 +4325,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                         {vIcons.includes('copy') && (
                                           <button
                                             onClick={() => handleCopyMessage(msg.content)}
-                                            className="text-subtext hover:text-maintext transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
+                                            className="text-subtext hover:text-maintext transition-colors p-1.5 hover:bg-surface-hover rounded-lg shrink-0"
                                             title="Copy"
                                           >
                                             <Copy className="w-3.5 h-3.5" />
@@ -4334,7 +4334,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                         {vIcons.includes('thumbsUp') && (
                                           <button
                                             onClick={() => handleThumbsUp(msg.id)}
-                                            className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'up'
+                                            className={`transition-colors p-1.5 rounded-lg shrink-0 ${messageFeedback[msg.id]?.type === 'up'
                                               ? 'text-blue-500 bg-blue-500/10'
                                               : 'text-subtext hover:text-primary hover:bg-surface-hover'
                                               }`}
@@ -4346,7 +4346,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                         {vIcons.includes('thumbsDown') && (
                                           <button
                                             onClick={() => handleThumbsDown(msg.id)}
-                                            className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'down'
+                                            className={`transition-colors p-1.5 rounded-lg shrink-0 ${messageFeedback[msg.id]?.type === 'down'
                                               ? 'text-red-500 bg-red-500/10'
                                               : 'text-subtext hover:text-red-500 hover:bg-surface-hover'
                                               }`}
@@ -4358,7 +4358,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                         {vIcons.includes('share') && (
                                           <button
                                             onClick={() => handleShare(msg.content)}
-                                            className="text-subtext hover:text-primary transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
+                                            className="text-subtext hover:text-primary transition-colors p-1.5 hover:bg-surface-hover rounded-lg shrink-0"
                                             title="Share Text"
                                           >
                                             <Share className="w-3.5 h-3.5" />
@@ -4366,7 +4366,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                         )}
 
                                         {vIcons.includes('pdf') && (
-                                          <Menu as="div" className="relative inline-block text-left">
+                                          <Menu as="div" className="relative inline-block text-left shrink-0">
                                             <Menu.Button className="text-subtext hover:text-red-500 transition-colors flex items-center" disabled={pdfLoadingId === msg.id}>
                                               {pdfLoadingId === msg.id ? (
                                                 <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
@@ -4375,7 +4375,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                               )}
                                             </Menu.Button>
                                             <Transition
-                                              as={Fragment}
+                                              as={ Fragment }
                                               enter="transition ease-out duration-100"
                                               enterFrom="transform opacity-0 scale-95"
                                               enterTo="transform opacity-100 scale-100"
@@ -4426,7 +4426,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                             </Transition>
                                           </Menu>
                                         )}
-                                      </>
+                                      </div>
                                     );
                                   })()}
                                 </div>
@@ -4752,13 +4752,13 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                   type="button"
                   ref={attachBtnRef}
                   onClick={() => setIsAttachMenuOpen(!isAttachMenuOpen)}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${isAttachMenuOpen ? 'bg-primary text-white rotate-45' : 'bg-secondary hover:bg-primary/10 text-subtext hover:text-primary'}`}
+                  className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all duration-200 ${isAttachMenuOpen ? 'bg-primary text-white rotate-45' : 'bg-secondary hover:bg-primary/10 text-subtext hover:text-primary'}`}
                   title="Add to chat"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                 </button>
 
-                
+
                 <div className="relative">
                   <button
                     type="button"
@@ -4782,13 +4782,13 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                       setIsToolsMenuOpen(!isToolsMenuOpen);
                       console.log("Tools Menu Toggled:", !isToolsMenuOpen);
                     }}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${isToolsMenuOpen || isImageGeneration || isDeepSearch || isAudioConvertMode || isDocumentConvert || isCodeWriter || isVideoGeneration || (activeAgent.slug && activeAgent.slug.startsWith('tool-')) ? 'bg-primary/20 text-primary scale-110 shadow-lg shadow-primary/30 ring-2 ring-primary/20' : 'bg-transparent text-subtext hover:text-primary hover:bg-secondary'}`}
+                    className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 ${isToolsMenuOpen || isImageGeneration || isDeepSearch || isAudioConvertMode || isDocumentConvert || isCodeWriter || isVideoGeneration || (activeAgent.slug && activeAgent.slug.startsWith('tool-')) ? 'bg-primary/20 text-primary scale-110 shadow-lg shadow-primary/30 ring-2 ring-primary/20' : 'bg-transparent text-subtext hover:text-primary hover:bg-secondary'}`}
                     title="AI Magic Tools"
                   >
-                    <Sparkles className="w-5 h-5" />
+                    <Sparkles className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                   </button>
                 </div>
-                
+
               </div >
 
               {/* High-Visibility Tools Menu */}
@@ -5449,13 +5449,13 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                       setIsAudioConvertMode(false);
                                       setIsDocumentConvert(false);
                                       setIsCodeWriter(false);
-                                      
-                                      setActiveAgent({ 
-                                        ...agent, 
-                                        agentName: agent.agentName, 
-                                        category: agent.category, 
-                                        slug: agent.slug, 
-                                        avatar: agent.avatar || '/AGENTS_IMG/default.png' 
+
+                                      setActiveAgent({
+                                        ...agent,
+                                        agentName: agent.agentName,
+                                        category: agent.category,
+                                        slug: agent.slug,
+                                        avatar: agent.avatar || '/AGENTS_IMG/default.png'
                                       });
                                       setIsToolsMenuOpen(false);
                                     }
@@ -5497,42 +5497,42 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                               ))}
                             </div>
 
-                              {/* Reset to AIVA Button */}
-                              <div className="mt-2 flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    setIsToolsMenuOpen(false);
-                                    navigate('/dashboard/marketplace');
-                                  }}
-                                  className="flex-1 flex items-center justify-between px-3 py-2 rounded-xl bg-primary/5 hover:bg-primary/10 border border-primary/20 transition-all group"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-primary/20 rounded-lg text-primary text-xs shrink-0">
-                                      <ShoppingBag size={14} />
-                                    </div>
-                                    <span className="text-xs font-bold text-primary uppercase tracking-wider">Explore</span>
+                            {/* Reset to AIVA Button */}
+                            <div className="mt-2 flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setIsToolsMenuOpen(false);
+                                  navigate('/dashboard/marketplace');
+                                }}
+                                className="flex-1 flex items-center justify-between px-3 py-2 rounded-xl bg-primary/5 hover:bg-primary/10 border border-primary/20 transition-all group"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1.5 bg-primary/20 rounded-lg text-primary text-xs shrink-0">
+                                    <ShoppingBag size={14} />
                                   </div>
-                                  <Plus size={14} className="text-primary group-hover:rotate-90 transition-transform" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setIsImageGeneration(false);
-                                    setIsVideoGeneration(false);
-                                    setIsDeepSearch(false);
-                                    setIsAudioConvertMode(false);
-                                    setIsDocumentConvert(false);
-                                    setIsCodeWriter(false);
-                                    setActiveAgent({ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' });
-                                    setIsToolsMenuOpen(false);
-                                  }}
-                                  className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-600 transition-all group flex items-center gap-2"
-                                >
-                                  <X size={14} className="group-hover:rotate-90 transition-transform" />
-                                  <span className="text-xs font-bold uppercase tracking-wider">Cancel</span>
-                                </button>
-                              </div>
+                                  <span className="text-xs font-bold text-primary uppercase tracking-wider">Explore</span>
+                                </div>
+                                <Plus size={14} className="text-primary group-hover:rotate-90 transition-transform" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setIsImageGeneration(false);
+                                  setIsVideoGeneration(false);
+                                  setIsDeepSearch(false);
+                                  setIsAudioConvertMode(false);
+                                  setIsDocumentConvert(false);
+                                  setIsCodeWriter(false);
+                                  setActiveAgent({ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA.png' });
+                                  setIsToolsMenuOpen(false);
+                                }}
+                                className="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-600 transition-all group flex items-center gap-2"
+                              >
+                                <X size={14} className="group-hover:rotate-90 transition-transform" />
+                                <span className="text-xs font-bold uppercase tracking-wider">Cancel</span>
+                              </button>
                             </div>
                           </div>
+                        </div>
                       );
                     })()}
                   </motion.div>
@@ -5643,10 +5643,10 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                         <button
                           type="button"
                           onClick={() => setIsLiveMode(true)}
-                          className="w-9 h-9 rounded-full flex items-center justify-center text-subtext hover:text-primary hover:bg-secondary transition-colors"
+                          className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-subtext hover:text-primary hover:bg-secondary transition-colors"
                           title="Live Video Call"
                         >
-                          <Video className="w-5 h-5" />
+                          <Video className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                         </button>
                       )}
 
@@ -5654,10 +5654,10 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                         <button
                           type="button"
                           onClick={handleVoiceInput}
-                          className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-red-500 text-white' : 'text-subtext hover:text-primary hover:bg-secondary'}`}
+                          className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors ${isListening ? 'bg-red-500 text-white' : 'text-subtext hover:text-primary hover:bg-secondary'}`}
                           title="Voice Input"
                         >
-                          <Mic className="w-5 h-5" />
+                          <Mic className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                         </button>
                       )}
                     </>
@@ -5673,7 +5673,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                         setIsLoading(false);
                         isSendingRef.current = false;
                       }}
-                      className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-600 hover:scale-105 transition-all"
+                      className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-600 hover:scale-105 transition-all"
                     >
                       <div className="w-3 h-3 bg-white rounded-sm" />
                     </button>
@@ -5683,9 +5683,9 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                       <button
                         type="submit"
                         disabled={(!inputValue.trim() && filePreviews.length === 0) || isLoading}
-                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg ${(!inputValue.trim() && filePreviews.length === 0) ? 'bg-secondary text-subtext/50 shadow-none' : 'bg-gradient-to-tr from-primary to-indigo-600 text-white shadow-primary/30 hover:scale-105 hover:shadow-primary/40'}`}
+                        className={`w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all shadow-lg ${(!inputValue.trim() && filePreviews.length === 0) ? 'bg-secondary text-subtext/50 shadow-none' : 'bg-gradient-to-tr from-primary to-indigo-600 text-white shadow-primary/30 hover:scale-105 hover:shadow-primary/40'}`}
                       >
-                        <Send className="w-5 h-5 ml-0.5" />
+                        <Send className="w-4.5 h-4.5 sm:w-5 sm:h-5 ml-0.5" />
                       </button>
                     </div>
                   )

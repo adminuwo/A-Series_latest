@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { X, Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import Button from './Button';

@@ -2601,25 +2601,15 @@ const AISAWorkSpace = () => {
                             </button>
                         )}
                         {activeAgent?.id === 'AIHEALTH' ? (
-                            <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-10 h-10 rounded-xl bg-[#f0f4ff] flex items-center justify-center text-[#5865f2] shadow-sm">
-                                        <Activity className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-sm font-black text-slate-800 tracking-tight leading-none">AI-Based Holistic Health & Wellness Planner</h2>
-                                        <p className="text-[10px] font-medium text-slate-400 mt-1.5">Integrate modern science with ancient Ayurvedic wisdom for your personalized wellness journey.</p>
-                                    </div>
+                            <>
+                                <div className="w-9 h-9 lg:w-12 lg:h-12 shrink-0 bg-[#f0f4ff] rounded-lg lg:rounded-xl shadow-sm border border-[#e0e8ff] flex items-center justify-center p-1">
+                                    <Activity className="w-5 h-5 lg:w-6 lg:h-6 text-[#5865f2]" />
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="px-3 py-1 bg-[#f8f9fc] border border-slate-100 rounded-full">
-                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">Basic Access</span>
-                                    </div>
-                                    <div className="w-8 h-8 rounded-full bg-[#f0f4ff] border border-[#e0e8ff] flex items-center justify-center text-[#5865f2] font-black text-[10px] uppercase">
-                                        {user?.name?.charAt(0) || 'U'}
-                                    </div>
+                                <div className="space-y-0.5 min-w-0 overflow-hidden">
+                                    <h2 className="text-xs lg:text-sm font-black text-slate-800 tracking-tight truncate">AIHEALTH Agent</h2>
+                                    <p className="hidden md:block text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Holistic Wellness</p>
                                 </div>
-                            </div>
+                            </>
                         ) : (
                             <>
                                 <div className={`w-9 h-9 lg:w-12 lg:h-12 shrink-0 ${activeAgent?.id === 'AIWRITE' ? 'bg-blue-50' : activeAgent?.id === 'AISALES' ? 'bg-indigo-50' : 'bg-slate-50'} rounded-lg lg:rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden p-1`}>

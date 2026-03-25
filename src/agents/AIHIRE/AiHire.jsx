@@ -650,15 +650,15 @@ export default function AiHire() {
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Header Card */}
-                <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 relative overflow-hidden group">
+                <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -mr-32 -mt-32 blur-3xl" />
                     <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 bg-emerald-500 rounded-3xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                                <Users className="w-8 h-8 text-white" />
+                            <div className="w-12 h-12 md:w-16 md:h-16 bg-emerald-500 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                <Users className="w-6 h-6 md:w-8 md:h-8 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-black text-maintext tracking-tight uppercase">Hire Intelligence</h1>
+                                <h1 className="text-xl md:text-3xl font-black text-maintext tracking-tight uppercase">Hire Intelligence</h1>
                                 <div className="flex items-center gap-3 mt-1">
                                     <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
                                         <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
@@ -670,12 +670,12 @@ export default function AiHire() {
                         </div>
 
                         {/* Top Navigation */}
-                        <div className="flex bg-secondary/50 p-1.5 rounded-3xl border border-border/40">
+                        <div className="flex overflow-x-auto scrollbar-none bg-secondary/50 p-1.5 rounded-3xl border border-border/40 max-w-full">
                             {['Strategy', 'Evaluation', 'Offer', 'Planning', 'Analytics'].map(mode => (
                                 <button
                                     key={mode}
                                     onClick={() => setHiringMode(mode)}
-                                    className={`px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${hiringMode === mode ? 'bg-white text-emerald-600 shadow-md shadow-emerald-500/5 translate-y-[-1px]' : 'text-subtext hover:text-maintext'
+                                    className={`px-4 md:px-6 py-2 md:py-2.5 rounded-2xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${hiringMode === mode ? 'bg-white text-emerald-600 shadow-md shadow-emerald-500/5 translate-y-[-1px]' : 'text-subtext hover:text-maintext'
                                         }`}
                                 >
                                     {mode}
@@ -691,7 +691,7 @@ export default function AiHire() {
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* Global Config Card */}
-                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-8">
+                        <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6 md:space-y-8">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
                                     <Target className="w-6 h-6" />
@@ -747,7 +747,7 @@ export default function AiHire() {
                                 className="space-y-8"
                             >
                                 {hiringMode === 'Strategy' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-8">
+                                    <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6 md:space-y-8">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
                                                 <GitGraph className="w-6 h-6" />
@@ -778,7 +778,7 @@ export default function AiHire() {
 
                                 {hiringMode === 'Evaluation' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                        <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6 md:space-y-8">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
                                                     <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
@@ -824,7 +824,7 @@ export default function AiHire() {
                                             </div>
                                         </div>
 
-                                        <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                        <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6 md:space-y-8">
                                             <div className="flex items-center gap-4">
                                                 <div className="p-3 bg-pink-50 text-pink-600 rounded-2xl">
                                                     <ShieldCheck className="w-6 h-6" />
@@ -859,7 +859,7 @@ export default function AiHire() {
                                 )}
 
                                 {hiringMode === 'Offer' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                    <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6 md:space-y-8">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-red-50 text-red-600 rounded-2xl">
                                                 <IndianRupee className="w-6 h-6" />
@@ -904,7 +904,7 @@ export default function AiHire() {
                                 )}
 
                                 {hiringMode === 'Planning' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                    <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6 md:space-y-8">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl">
                                                 <Building2 className="w-6 h-6" />
@@ -929,7 +929,7 @@ export default function AiHire() {
                                 )}
 
                                 {hiringMode === 'Analytics' && (
-                                    <div className="bg-white rounded-[40px] p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6">
+                                    <div className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-border/40 shadow-xl shadow-emerald-500/5 space-y-6 md:space-y-8">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
                                                 <BarChart3 className="w-6 h-6" />
@@ -953,7 +953,7 @@ export default function AiHire() {
 
                     {/* Right Panel: Advanced Parameters */}
                     <div className="lg:col-span-4 space-y-8">
-                        <div className="bg-[#1e293b] rounded-[40px] p-8 border border-white/5 shadow-2xl space-y-8 text-white">
+                        <div className="bg-[#1e293b] rounded-3xl md:rounded-[40px] p-5 md:p-8 border border-white/5 shadow-2xl space-y-6 md:space-y-8 text-white">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-white/10 text-white rounded-2xl">
                                     <Activity className="w-6 h-6" />
@@ -1098,7 +1098,7 @@ export default function AiHire() {
                         </div>
 
                         {/* Quick Tips or Stats */}
-                        <div className="bg-emerald-600 rounded-[40px] p-8 text-white space-y-4 shadow-xl shadow-emerald-600/20">
+                        <div className="bg-emerald-600 rounded-3xl md:rounded-[40px] p-6 md:p-8 text-white space-y-4 shadow-xl shadow-emerald-600/20">
                             <TrendingUp className="w-8 h-8 opacity-60" />
                             <h4 className="text-lg font-black uppercase leading-tight">AIHIRE Advantage</h4>
                             <p className="text-xs opacity-80 leading-relaxed font-medium">
@@ -1140,16 +1140,16 @@ export default function AiHire() {
             <AnimatePresence>
                 {showResultModal && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 lg:p-12 overflow-hidden" onClick={() => setShowResultModal(false)}>
-                        <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-[#f8fafc] flex flex-col h-full w-full max-w-6xl rounded-[48px] overflow-hidden shadow-2xl border border-white/20">
+                        <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-[#f8fafc] flex flex-col h-full w-full max-w-6xl rounded-3xl md:rounded-[48px] overflow-hidden shadow-2xl border border-white/20">
 
                             {/* Modal Header */}
-                            <div className="p-8 border-b border-border/40 bg-white flex items-center justify-between shrink-0">
+                            <div className="p-5 md:p-8 border-b border-border/40 bg-white flex items-center justify-between shrink-0">
                                 <div className="flex items-center gap-5">
                                     <div className="p-3 bg-emerald-500 rounded-3xl shadow-lg shadow-emerald-500/20">
                                         <Users className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
-                                        <h3 className="text-2xl font-black text-maintext tracking-tight uppercase italic">{hiringMode} Intelligence</h3>
+                                        <h3 className="text-xl md:text-2xl font-black text-maintext tracking-tight uppercase italic">{hiringMode} Intelligence</h3>
                                         <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-[0.2em] opacity-80">Autonomous Talent Strategy Outcome</p>
                                     </div>
                                 </div>
@@ -1158,7 +1158,7 @@ export default function AiHire() {
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar space-y-12">
+                             <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar space-y-8 md:space-y-12">
 
                                 {/* Scorecard — Evaluation only */}
                                 {hiringMode === 'Evaluation' && scorecardData?.candidates?.length > 0 && (
@@ -1174,7 +1174,7 @@ export default function AiHire() {
                                                 const vStyle = c.verdict === 'HIRE' ? 'bg-emerald-500 ring-[#10b981]' : c.verdict === 'REJECT' ? 'bg-red-500 ring-[#ef4444]' : 'bg-amber-400 ring-[#f59e0b]';
                                                 return (
                                                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                                                        className="bg-white rounded-[40px] border border-border/40 p-8 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
+                                                        className="bg-white rounded-3xl md:rounded-[40px] border border-border/40 p-5 md:p-8 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
                                                         <div className="absolute top-0 right-0 w-24 h-24 bg-secondary/50 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform" />
                                                         <div className="relative">
                                                             <div className="flex justify-between items-start mb-6">
@@ -1262,7 +1262,7 @@ export default function AiHire() {
                                         const result = renderMessageAsCards(lastMsg);
                                         return result?.cards?.map((card, idx) => (
                                             <motion.div key={idx} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + idx * 0.1 }}
-                                                className="bg-white rounded-[40px] p-10 border border-border/40 shadow-sm relative overflow-hidden group">
+                                                className="bg-white rounded-3xl md:rounded-[40px] p-5 md:p-10 border border-border/40 shadow-sm relative overflow-hidden group">
                                                 <div className="flex items-center gap-5 mb-8">
                                                     <div className="p-3 bg-secondary/50 rounded-2xl group-hover:bg-emerald-500 group-hover:text-white transition-all duration-500">
                                                         <SearchIcon className="w-6 h-6" />

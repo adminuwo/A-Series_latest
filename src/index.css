@@ -220,3 +220,23 @@
   border-radius: 0 4px 4px 0;
   box-shadow: 0 0 15px hsl(var(--primary));
 }
+
+/* Scrollbar Utilities */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-border/40 rounded-full hover:bg-border/60 transition-colors;
+}

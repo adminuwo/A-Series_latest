@@ -394,34 +394,34 @@ export default function AiSales() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] p-4 lg:p-12 font-sans flex flex-col items-center relative overflow-hidden">
+        <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 lg:p-12 font-sans flex flex-col items-center relative overflow-hidden">
             {/* Ambient Background Elements */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
                 <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-500/5 blur-[120px] rounded-full animate-pulse" />
                 <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
             </div>
 
-            <div className="w-full max-w-screen-2xl relative z-10 flex flex-col gap-8">
+            <div className="w-full max-w-screen-2xl relative z-10 flex flex-col gap-6 md:gap-8">
                 {/* Header Navigation */}
-                <div className="flex items-center justify-between gap-8 py-5 px-10 bg-white border border-slate-200 rounded-[35px] shadow-sm">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 py-5 px-6 md:px-10 bg-white border border-slate-200 rounded-3xl md:rounded-[35px] shadow-sm">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-[15px] flex items-center justify-center shadow-lg shadow-blue-600/20">
-                            <Briefcase className="w-6 h-6 text-white" />
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-xl md:rounded-[15px] flex items-center justify-center shadow-lg shadow-blue-600/20">
+                            <Briefcase className="w-5 h-5 md:w-6 md:h-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-black text-[#0f172a] tracking-tight uppercase leading-none mb-1">Sales Intelligence</h1>
+                            <h1 className="text-base md:text-lg font-black text-[#0f172a] tracking-tight uppercase leading-none mb-1">Sales Intelligence</h1>
                             <div className="flex items-center gap-2">
-                                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">+ System Operational</span>
+                                <span className="text-[8px] md:text-[9px] font-black text-blue-500 uppercase tracking-widest">+ System Operational</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-10">
+                    <div className="flex items-center gap-6 md:gap-10 w-full md:w-auto overflow-x-auto scrollbar-none pb-2 md:pb-0">
                         {navItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setSalesMode(item.id)}
-                                className={`relative py-2 text-[10px] font-black uppercase tracking-widest transition-all ${salesMode === item.id ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`relative py-1 md:py-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${salesMode === item.id ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
                             >
                                 {item.label}
                                 {salesMode === item.id && (
@@ -434,10 +434,10 @@ export default function AiSales() {
                         ))}
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full md:w-auto">
                         <button 
                             onClick={() => setIsHistoryOpen(true)}
-                            className="group flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-[18px] text-[10px] font-black uppercase tracking-widest text-[#0f172a] hover:bg-slate-50 transition-all"
+                            className="group flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl md:rounded-[18px] text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#0f172a] hover:bg-slate-50 transition-all"
                         >
                             <History size={14} className="text-slate-400" />
                             History
@@ -445,8 +445,8 @@ export default function AiSales() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
-                    <div className="lg:col-span-7 flex flex-col gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
+                    <div className="lg:col-span-7 flex flex-col gap-6 md:gap-10">
                         {/* Dynamic Input Modules */}
                         <AnimatePresence mode="wait">
                             <motion.div 
@@ -464,7 +464,7 @@ export default function AiSales() {
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 20 }}
-                                            className="absolute -right-4 top-24 w-80 bg-slate-900/95 backdrop-blur-2xl rounded-[40px] shadow-2xl p-8 border border-white/10 z-[100] font-mono text-[10px] text-blue-400 leading-relaxed overflow-hidden"
+                                            className="absolute md:-right-4 top-24 w-full md:w-80 bg-slate-900/95 backdrop-blur-2xl rounded-3xl md:rounded-[40px] shadow-2xl p-6 md:p-8 border border-white/10 z-[100] font-mono text-[10px] text-blue-400 leading-relaxed overflow-hidden"
                                         >
                                             <div className="absolute top-0 left-0 w-full h-1 bg-blue-500/20" />
                                             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
@@ -482,8 +482,8 @@ export default function AiSales() {
 
                                 {/* Module 1: Campaign Configuration (REUSED FOR MOST MODES) */}
                                 {(['LEAD GEN', 'OUTREACH', 'PITCHING', 'MESSAGING'].includes(salesMode)) && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all group">
-                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-8">Campaign Configuration</h2>
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all group">
+                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-6 md:mb-8">Campaign Configuration</h2>
                                         
                                         <div className="flex flex-col gap-6">
                                             <div className="flex items-center gap-4">
@@ -515,8 +515,8 @@ export default function AiSales() {
 
                                 {/* Module 2: Market Reconnaissance (SPECIFIC TO LEAD GEN) */}
                                 {(salesMode === 'LEAD GEN') && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all">
-                                        <div className="flex items-center justify-between mb-8">
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all">
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
                                             <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest">Market Reconnaissance</h2>
                                             <button 
                                                 onClick={handleGenerateLeads}
@@ -560,8 +560,8 @@ export default function AiSales() {
 
                                 {/* Module 3: Outreach Configuration */}
                                 {(salesMode === 'OUTREACH') && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all">
-                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-8">Outreach Parameters</h2>
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all">
+                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-6 md:mb-8">Outreach Parameters</h2>
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="bg-[#f1f5f9] rounded-[18px] flex items-center px-6 py-4 border border-slate-200">
                                                 <UserCircle2 className="w-4 h-4 text-slate-400 mr-4" />
@@ -585,8 +585,8 @@ export default function AiSales() {
 
                                 {/* Module 4: Pitch Designer */}
                                 {(salesMode === 'PITCHING') && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all">
-                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-8">Pitch Architecture</h2>
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all">
+                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-6 md:mb-8">Pitch Architecture</h2>
                                         <div className="space-y-6">
                                             <div className="bg-[#f1f5f9] rounded-[18px] flex items-center px-6 py-4 border border-slate-200">
                                                 <TrendingUp className="w-4 h-4 text-slate-400 mr-4" />
@@ -602,8 +602,8 @@ export default function AiSales() {
 
                                 {/* Module 5: Closing Logic */}
                                 {(salesMode === 'CLOSING') && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all">
-                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-8">Final Closing Strategy</h2>
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all">
+                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-6 md:mb-8">Final Closing Strategy</h2>
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="bg-[#f1f5f9] rounded-[18px] flex items-center px-6 py-4 border border-slate-200">
                                                 <DollarSign className="w-4 h-4 text-slate-400 mr-4" />
@@ -623,8 +623,8 @@ export default function AiSales() {
 
                                 {/* Module 6: CRM Bridge */}
                                 {(salesMode === 'CRM') && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all">
-                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-8">CRM Automation & Sync</h2>
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all">
+                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-6 md:mb-8">CRM Automation & Sync</h2>
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="bg-[#f1f5f9] rounded-[18px] flex items-center px-6 py-4 border border-slate-200">
                                                 <Settings2 className="w-4 h-4 text-slate-400 mr-4" />
@@ -646,8 +646,8 @@ export default function AiSales() {
 
                                 {/* Module 7: Messaging Sequence */}
                                 {(salesMode === 'MESSAGING') && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all">
-                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-8">Unified Messaging Stream</h2>
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all">
+                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-6 md:mb-8">Unified Messaging Stream</h2>
                                         <div className="grid grid-cols-2 gap-6">
                                             <div className="bg-[#f1f5f9] rounded-[18px] flex items-center px-6 py-4 border border-slate-200">
                                                 <MessageSquare className="w-4 h-4 text-slate-400 mr-4" />
@@ -668,28 +668,28 @@ export default function AiSales() {
 
                                 {/* Module 3: Agent Archetype */}
                                 {(salesMode === 'LEAD GEN') && (
-                                    <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm transition-all">
-                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-10">Agent Personality</h2>
+                                    <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm transition-all">
+                                        <h2 className="text-[10px] font-black text-[#1e293b] uppercase tracking-widest mb-8 md:mb-10 text-center md:text-left">Agent Personality</h2>
                                         
-                                        <div className="flex gap-12 items-center justify-center">
+                                        <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center justify-center">
                                             {[
-                                                { name: 'The Challenger', icon: <Zap className="w-6 h-6" />, color: 'text-amber-500', bg: 'bg-amber-50' },
-                                                { name: 'The Consultative', icon: <BrainCircuit className="w-6 h-6" />, color: 'text-blue-500', bg: 'bg-blue-50' },
-                                                { name: 'The Relationship Builder', icon: <Users className="w-6 h-6" />, color: 'text-emerald-500', bg: 'bg-emerald-50' }
+                                                { name: 'The Challenger', icon: <Zap className="w-5 h-5 md:w-6 md:h-6" />, color: 'text-amber-500', bg: 'bg-amber-50' },
+                                                { name: 'The Consultative', icon: <BrainCircuit className="w-5 h-5 md:w-6 md:h-6" />, color: 'text-blue-500', bg: 'bg-blue-50' },
+                                                { name: 'The Relationship Builder', icon: <Users className="w-5 h-5 md:w-6 md:h-6" />, color: 'text-emerald-500', bg: 'bg-emerald-50' }
                                             ].map(p => {
                                                 const isActive = strategyContext.personality === p.name;
                                                 return (
                                                     <button
                                                         key={p.name}
                                                         onClick={() => setStrategyContext({ ...strategyContext, personality: p.name })}
-                                                        className={`flex flex-col items-center gap-4 transition-all ${isActive ? 'scale-105' : 'opacity-40 hover:opacity-60'}`}
+                                                        className={`flex flex-col items-center gap-3 md:gap-4 transition-all ${isActive ? 'scale-105' : 'opacity-40 hover:opacity-60'}`}
                                                     >
-                                                        <div className={`w-28 h-28 rounded-full flex items-center justify-center border-4 transition-all duration-500 ${isActive ? `border-blue-500 bg-white shadow-xl` : 'border-slate-100 bg-slate-50'}`}>
-                                                            <div className={`w-20 h-20 rounded-full flex items-center justify-center ${isActive ? p.bg : 'bg-transparent'}`}>
+                                                        <div className={`w-20 h-20 md:w-28 md:h-28 rounded-full flex items-center justify-center border-4 transition-all duration-500 ${isActive ? `border-blue-500 bg-white shadow-xl` : 'border-slate-100 bg-slate-50'}`}>
+                                                            <div className={`w-14 h-14 md:w-20 md:h-20 rounded-full flex items-center justify-center ${isActive ? p.bg : 'bg-transparent'}`}>
                                                                 <div className={isActive ? p.color : 'text-slate-400'}>{p.icon}</div>
                                                             </div>
                                                         </div>
-                                                        <span className="text-[10px] font-black text-[#1e293b] tracking-wider uppercase">{p.name}</span>
+                                                        <span className="text-[9px] md:text-[10px] font-black text-[#1e293b] tracking-wider uppercase">{p.name}</span>
                                                     </button>
                                                 );
                                             })}
@@ -701,37 +701,35 @@ export default function AiSales() {
                     </div>
 
                     {/* Right Side: Simulation Command Center */}
-                    <div className="lg:col-span-5 flex flex-col h-full sticky top-12">
-                        <div className="bg-white rounded-[35px] p-10 border border-slate-200 shadow-sm h-full flex flex-col">
+                    <div className="lg:col-span-5 flex flex-col h-full lg:sticky top-12">
+                        <div className="bg-white rounded-3xl md:rounded-[35px] p-6 md:p-10 border border-slate-200 shadow-sm h-full flex flex-col">
                             
                             <div className="flex flex-col h-full">
                                 <div className="text-center mb-8">
                                     <h3 className="text-lg font-black text-[#1e293b] tracking-tight uppercase mb-1">Real-Time Strategy Preview</h3>
                                 </div>
 
-                                <div className="flex flex-col items-center justify-center mb-10">
-                                    <div className="relative w-48 h-48">
+                                <div className="flex flex-col items-center justify-center mb-6 md:mb-10">
+                                    <div className="relative w-36 h-36 md:w-48 md:h-48">
                                         <svg className="w-full h-full transform -rotate-90">
-                                            <circle cx="96" cy="96" r="80" className="text-slate-100" strokeWidth="12" stroke="currentColor" fill="transparent" />
-                                            <motion.circle
-                                                cx="96" cy="96" r="80"
+                                            <circle cx="50%" cy="50%" r="35%" className="text-slate-100" strokeWidth="10" stroke="currentColor" fill="transparent" />
+                                            {/* Simplified svg for mobile, maybe keep fixed cx/cy for consistency */}
+                                            <circle cx="50%" cy="50%" r="35%"
                                                 stroke={scoreColor}
-                                                strokeWidth="12"
-                                                strokeDasharray={2 * Math.PI * 80}
-                                                initial={{ strokeDashoffset: 2 * Math.PI * 80 }}
-                                                animate={{ strokeDashoffset: 2 * Math.PI * 80 - (score / 100) * (2 * Math.PI * 80) }}
+                                                strokeWidth="10"
+                                                strokeDasharray="220"
+                                                strokeDashoffset={220 - (score / 100) * 220}
                                                 strokeLinecap="round"
                                                 fill="transparent"
-                                                transition={{ duration: 1.5, ease: "easeOut" }}
+                                                className="transition-all duration-1000"
                                             />
                                         </svg>
                                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Confidence</span>
-                                            <span className="text-4xl font-black text-[#1e293b] tracking-tighter">{score}%</span>
-                                            <span className="text-[7px] font-black text-red-500 uppercase mt-1">{scoreLabel}</span>
+                                            <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5 md:mb-1">Confidence</span>
+                                            <span className="text-2xl md:text-4xl font-black text-[#1e293b] tracking-tighter">{score}%</span>
                                         </div>
                                     </div>
-                                    <p className="text-[12px] font-black uppercase tracking-[0.2em] mt-6" style={{ color: scoreColor }}>{scoreLabel}</p>
+                                    <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] mt-4 md:mt-6" style={{ color: scoreColor }}>{scoreLabel}</p>
                                 </div>
 
                                 <div className="flex-1 w-full p-8 bg-slate-50/50 rounded-[25px] border border-slate-100 overflow-hidden relative mb-8">

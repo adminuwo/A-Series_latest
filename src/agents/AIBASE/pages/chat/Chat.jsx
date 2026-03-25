@@ -304,11 +304,11 @@ const Chat = () => {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     {messages.map((msg) => (
-                        <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'assistant' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'}`}>
-                                {msg.role === 'assistant' ? <Bot className="w-6 h-6" /> : <User className="w-6 h-6" />}
+                        <div key={msg.id} className={`flex gap-3 md:gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'assistant' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'}`}>
+                                {msg.role === 'assistant' ? <Bot className="w-5 h-5 md:w-6 md:h-6" /> : <User className="w-5 h-5 md:w-6 md:h-6" />}
                             </div>
-                            <div className={`max-w-[80%] p-4 rounded-2xl ${msg.role === 'assistant' ? 'bg-surface text-maintext rounded-tl-none' : 'bg-primary text-white rounded-tr-none'}`}>
+                            <div className={`max-w-[90%] md:max-w-[80%] p-3 md:p-4 rounded-2xl ${msg.role === 'assistant' ? 'bg-surface text-maintext rounded-tl-none' : 'bg-primary text-white rounded-tr-none'}`}>
                                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                             </div>
                         </div>
@@ -362,7 +362,7 @@ const Chat = () => {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Ask anything..."
-                                className="w-full pl-6 pr-14 py-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-maintext placeholder-subtext shadow-inner"
+                                className="w-full pl-4 md:pl-6 pr-14 py-3 md:py-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-primary/20 text-sm md:text-base text-maintext placeholder-subtext shadow-inner"
                                 disabled={isLoading}
                             />
                             <button

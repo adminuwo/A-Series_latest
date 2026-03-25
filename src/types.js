@@ -71,7 +71,7 @@ export const AppRoute = {
 
 
 
-const PROD_API = "https://a-series-backend-743928421487.asia-south1.run.app/api";
+//const PROD_API = "https://a-series-backend-743928421487.asia-south1.run.app/api";
 const DEV_API = "http://localhost:8080/api";
 
 // Robust check: if we are on a live domain, consider it production
