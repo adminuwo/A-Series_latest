@@ -71,16 +71,19 @@ export const AppRoute = {
 
 
 
-const PROD_API = "https://backend-ttl8.onrender.com/api";
+const PROD_API = "https://a-series-backend-743928421487.asia-south1.run.app/api";
 const DEV_API = "http://localhost:8080/api";
 
-// Robust check: if we are on the live domain, FORCE the prod API
-const isLiveDomain = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
+// Robust check: if we are on a live domain, consider it production
+const isLiveDomain = typeof window !== 'undefined' && 
+  (window.location.hostname.includes('onrender.com') || 
+   window.location.hostname.includes('aimall24.com') || 
+   window.location.hostname.includes('a-series.in'));
 
 export const API = isLiveDomain
-  ? PROD_API
+  ? (import.meta.env.VITE_API_BASE_URL || PROD_API)
   : (import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? PROD_API : DEV_API));
-console.log('api', API);
+console.log('API Target:', API);
 
 export const apis = {
   emailVerificationApi: `${API}/email_varification`,
