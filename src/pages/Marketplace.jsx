@@ -77,6 +77,17 @@ const HARDCODED_AGENTS = [
     bgGradient: "bg-gradient-to-br from-violet-500 to-purple-600",
     rating: "4.8",
     path: "/dashboard/workspace/AIWRITE"
+  },
+  {
+    agentName: "AI Personal Assistant",
+    slug: "tool-ai-personal-assistant",
+    description: "Your dedicated AI assistant for scheduling, notes, and task management.",
+    category: "Productivity & Office",
+    icon: Calendar,
+    avatar: "/AGENTS_IMG/personal-assistant.png",
+    bgGradient: "bg-gradient-to-br from-primary to-purple-600",
+    rating: "4.9",
+    path: "/dashboard/ai-personal-assistant"
   }
 ];
 
@@ -194,7 +205,7 @@ const Marketplace = () => {
       'tool-openai-search-preview', 'tool-openai-search-pro', 'tool-openai-search-lite', 'tool-openai-search-realtime',
       'tool-openai-content', 'tool-openai-chat', 'tool-openai-tts', 'tool-openai-stt', 'tool-openai-code',
       'tool-openai-document', 'tool-openai-translator', 'tool-openai-extractor', 'tool-openai-embeddings',
-      'tool-video-gen', 'tool-vertex-music-gen',
+      'tool-video-gen', 'tool-vertex-music-gen', 'tool-image-gen', 'tool-deep-search', 'tool-ai-personal-assistant',
       'tool-time-series-forecasting', 'tool-llm-auditor', 'tool-personalized-shopping', 'tool-brand-search-optimization',
       'tool-fomc-research', 'tool-image-scoring', 'tool-data-science', 'tool-rag-engine', 'tool-financial-advisor',
       'tool-marketing-agency', 'tool-customer-service', 'tool-academic-research', 'tool-bug-assistant', 'tool-travel-concierge'
@@ -204,7 +215,7 @@ const Marketplace = () => {
       'Smart Content Writer', 'AI Chat Assistant', 'Voice Narration Studio', 'Audio Transcriber',
       'AI Code Assistant', 'Document Intelligence', 'Professional Translator', 'Structured Data Extractor',
       'Semantic AI Embeddinger',
-      'AI Video Generator', 'Music Generation',
+      'AI Video Generator', 'Music Generation', 'AI Image Generator', 'Deep Search', 'AI Personal Assistant',
       'Image Editing', 'AI Voice Generator', 'AI Document Converter', 'Image Understanding', 'AI Pixel Segmentor',
       'Vision Analyzer',
       'Predictive Analytics', 'LLM Auditor', 'Smart Shopping', 'Brand SEO', 'FOMC Research',

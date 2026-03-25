@@ -28,7 +28,7 @@ export default function OutputPanel({ output, loading, hasGenerated }) {
             {/* AIBIZ HEADER */}
             <div className="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-200">
                 <img
-                    src="/AIBIZ.png"
+                    src="/AGENTS_IMG/AIBIZ.png"
                     alt="AIBIZ Logo"
                     className="w-16 h-16 rounded-2xl shadow-lg object-contain"
                     onError={(e) => {

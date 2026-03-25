@@ -1023,12 +1023,13 @@ const Chat = () => {
 
   const handleGenerateImage = async (overridePrompt) => {
     try {
-      if (!inputRef.current?.value.trim() && !overridePrompt) {
-        toast.error('Please enter a prompt for image generation');
+      if (!inputRef.current?.value.trim() && !overridePrompt && selectedFiles.length === 0) {
+        toast.error('Please enter a prompt or attach an image for generation');
         return;
       }
 
-      const prompt = overridePrompt || inputRef.current.value;
+      const prompt = overridePrompt || inputRef.current?.value || '';
+      const imageFile = selectedFiles.find(f => f instanceof File) || null;
       setIsLoading(true);
 
       let activeSessionId = currentSessionId;
@@ -1044,6 +1045,11 @@ const Chat = () => {
         id: userMsgId,
         role: 'user',
         content: prompt,
+        attachments: imageFile && filePreviews.length > 0 ? filePreviews.map(p => ({
+          url: p.url,
+          name: p.name,
+          type: 'image'
+        })) : [],
         mode: MODES.IMAGE_GEN,
         timestamp: Date.now()
       };
@@ -1074,7 +1080,11 @@ const Chat = () => {
 
       try {
         // Use apiService
-        const data = await apiService.generateImage(prompt, activeAgent?.modelMapping, activeAgent?.provider);
+        const data = await apiService.generateImage(prompt, activeAgent?.modelMapping, activeAgent?.provider, imageFile);
+        
+        if (imageFile) {
+          handleRemoveFile(); // Clear file after sending
+        }
 
         if (data && (data.imageUrl || data.data)) {
           const finalUrl = data.imageUrl || data.data; // Handle different response structures

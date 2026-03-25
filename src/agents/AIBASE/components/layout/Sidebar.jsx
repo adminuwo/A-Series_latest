@@ -26,8 +26,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
             <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-white border-r border-border h-screen flex flex-col z-[60] transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
                 <div className="p-4 border-b border-border flex items-center justify-between">
-                    <div className="flex items-center justify-start max-w-[140px]">
-                        <img src="/logo-new.jpg" alt="AIBASE" className="w-full h-auto object-contain" />
+                    <div className="flex items-center justify-start gap-3">
+                        <img src="/AGENTS_IMG/AIBASE.png" alt="AIBASE Logo" className="w-10 h-10 object-cover rounded-xl shadow-sm shrink-0" />
+                        <span className="font-extrabold text-lg text-maintext tracking-tight truncate">AI Base</span>
                     </div>
                     <button
                         onClick={() => setIsOpen(false)}
