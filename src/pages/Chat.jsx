@@ -32,16 +32,16 @@ const getWelcomeMessage = (name) => `Hello! I’m ${name || 'AIVA'}™, your Art
 
 const FEEDBACK_PROMPTS = {
   en: [
-    "Was this helpful?",
-    "How did I do?",
-    "Is this answer detailed enough?",
-    "Did I answer your question?",
-    "Need anything else?",
-    "Is this what you were looking for?",
-    "Happy to help!",
-    "Let me know if you need more info",
-    "Any other questions?",
-    "Hope this clears things up!"
+    "Was this helpful for you? 😊",
+    "How was my response?",
+    "Should we dive deeper into this?",
+    "Did I hit the mark?",
+    "What else is on your mind?",
+    "Is there a specific detail you'd like to explore?",
+    "Happy to help! Need anything else?",
+    "I'm here for more if you need info!",
+    "Got any other curiosities?",
+    "Hope that was insightful!"
   ],
   hi: [
     "क्या यह मददगार था?",

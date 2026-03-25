@@ -70,19 +70,10 @@ export const AppRoute = {
 
 
 
-
-//const PROD_API = "https://a-series-backend-743928421487.asia-south1.run.app/api";
 const DEV_API = "http://localhost:8080/api";
 
-// Robust check: if we are on a live domain, consider it production
-const isLiveDomain = typeof window !== 'undefined' && 
-  (window.location.hostname.includes('onrender.com') || 
-   window.location.hostname.includes('aimall24.com') || 
-   window.location.hostname.includes('a-series.in'));
-
-export const API = isLiveDomain
-  ? (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api' ? import.meta.env.VITE_API_BASE_URL : PROD_API)
-  : (import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? PROD_API : DEV_API));
+// Robust check: use environment variable as primary source, fallback to DEV in development
+export const API = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? DEV_API : "");
 console.log('API Target:', API);
 
 export const apis = {

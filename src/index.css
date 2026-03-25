@@ -145,8 +145,13 @@
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .ai-typing-shimmer {
@@ -169,10 +174,13 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0px rgba(85, 85, 255, 0.4);
     border-color: rgba(85, 85, 255, 0.5);
   }
+
   50% {
     box-shadow: 0 0 0 4px rgba(85, 85, 255, 0);
     border-color: rgba(85, 85, 255, 0.8);
@@ -225,6 +233,7 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -234,9 +243,11 @@
   width: 5px;
   height: 5px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   @apply bg-border/40 rounded-full hover:bg-border/60 transition-colors;
 }
