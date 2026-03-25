@@ -1683,6 +1683,8 @@ const Chat = () => {
           category: agent.category || 'Internal',
           instructions: agent.instructions || '',
           slug: agent.slug || '',
+          provider: agent.provider || '',
+          modelMapping: agent.modelMapping || '',
           avatar: agent.avatar || (type === 'AISA' ? '/AGENTS_IMG/AISA.png' : (type === 'AIVA' ? '/AGENTS_IMG/AIVA.png' : null))
         });
 
@@ -1742,6 +1744,8 @@ const Chat = () => {
             setActiveAgent({
               agentName: restoredName,
               category: lastModelMsg.agentCategory || 'General',
+              provider: lastModelMsg.provider || '',
+              modelMapping: lastModelMsg.modelMapping || '',
               avatar: lastModelMsg.agentAvatar || (restoredName === 'AISA' ? '/AGENTS_IMG/AISA.png' : (restoredName === 'AIVA' ? '/AGENTS_IMG/AIVA.png' : null))
             });
 
