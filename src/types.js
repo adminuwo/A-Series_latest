@@ -81,7 +81,7 @@ const isLiveDomain = typeof window !== 'undefined' &&
    window.location.hostname.includes('a-series.in'));
 
 export const API = isLiveDomain
-  ? (import.meta.env.VITE_API_BASE_URL || PROD_API)
+  ? (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api' ? import.meta.env.VITE_API_BASE_URL : PROD_API)
   : (import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? PROD_API : DEV_API));
 console.log('API Target:', API);
 

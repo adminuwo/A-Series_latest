@@ -194,7 +194,10 @@ const Marketplace = () => {
       'tool-openai-search-preview', 'tool-openai-search-pro', 'tool-openai-search-lite', 'tool-openai-search-realtime',
       'tool-openai-content', 'tool-openai-chat', 'tool-openai-tts', 'tool-openai-stt', 'tool-openai-code',
       'tool-openai-document', 'tool-openai-translator', 'tool-openai-extractor', 'tool-openai-embeddings',
-      'tool-video-gen', 'tool-vertex-music-gen'
+      'tool-video-gen', 'tool-vertex-music-gen',
+      'tool-time-series-forecasting', 'tool-llm-auditor', 'tool-personalized-shopping', 'tool-brand-search-optimization',
+      'tool-fomc-research', 'tool-image-scoring', 'tool-data-science', 'tool-rag-engine', 'tool-financial-advisor',
+      'tool-marketing-agency', 'tool-customer-service', 'tool-academic-research', 'tool-bug-assistant', 'tool-travel-concierge'
     ].includes(a.slug) && ![
       'DiTo', 'AIHEALTH', 'AIWRITE',
       'AI Web Search Preview', 'AI Web Search Pro', 'AI Web Search Lite', 'AI Real-time Search Assistant',
@@ -203,7 +206,10 @@ const Marketplace = () => {
       'Semantic AI Embeddinger',
       'AI Video Generator', 'Music Generation',
       'Image Editing', 'AI Voice Generator', 'AI Document Converter', 'Image Understanding', 'AI Pixel Segmentor',
-      'Vision Analyzer'
+      'Vision Analyzer',
+      'Predictive Analytics', 'LLM Auditor', 'Smart Shopping', 'Brand SEO', 'FOMC Research',
+      'Image Scoring', 'Data Science', 'RAG Engine', 'Finance Advisor', 'Marketing AI',
+      'Customer Service', 'Academic Assistant', 'Bug Assistant', 'Travel Concierge'
     ].includes(a.agentName)).map(a => ({ ...a, isHardcoded: false }))
   ];
 
