@@ -50,14 +50,29 @@ apiClient.interceptors.response.use(
 
 export const apiService = {
   // --- AI Tools ---
-  async generateImage(prompt, modelMapping, provider) {
+  async generateImage(prompt, modelMapping, provider, imageFile = null) {
     try {
-      console.log(`[Frontend] Generating image for prompt: "${prompt}" with model: ${modelMapping || 'default'} and provider: ${provider || 'openai'}`);
+      console.log(`[Frontend] Generating image for prompt: "${prompt}" with model: ${modelMapping || 'default'} and provider: ${provider || 'openai'}`, imageFile ? 'with image' : '');
       
-      const endpoint = provider === 'vertex' ? 'image/generate' : 'openai/image';
+      let endpoint = provider === 'vertex' ? 'image/generate' : 'openai/image';
+      let payload;
+      let config = { timeout: 60000 };
+      
+      if (imageFile) {
+          endpoint = 'openai/image-edit';
+          payload = new FormData();
+          payload.append('prompt', prompt);
+          if (modelMapping) payload.append('modelMapping', modelMapping);
+          payload.append('image', imageFile);
+          config.headers = { 'Content-Type': 'multipart/form-data' };
+      } else {
+          // If no image is provided but the model is image edit, fallback to standard image generation model
+          if (modelMapping === 'gpt-image-1.5') modelMapping = 'default';
+          payload = { prompt, modelMapping };
+      }
       
       // Increased timeout to 60s for image generation
-      const response = await apiClient.post(endpoint, { prompt, modelMapping }, { timeout: 60000 });
+      const response = await apiClient.post(endpoint, payload, config);
       console.log("[Frontend] Image generation success:", response.data);
       return response.data;
     } catch (error) {

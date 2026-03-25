@@ -11,8 +11,9 @@ const Sidebar = () => {
     return (
         <aside className="w-64 bg-white border-r border-border h-screen sticky top-0 flex flex-col">
             <div className="p-2 border-b border-border">
-                <div className="flex items-center justify-start">
-                    <img src="/logo-new.jpg" alt="AIBASE" className="w-32 h-auto object-contain" />
+                <div className="flex items-center justify-start p-2">
+                    <img src="/AGENTS_IMG/AIBASE.png" alt="AIBASE Logo" className="w-12 h-12 object-cover rounded-xl shadow-sm" />
+                    <span className="ml-3 font-extrabold text-xl text-maintext tracking-tight">AI Base</span>
                 </div>
             </div>
 
