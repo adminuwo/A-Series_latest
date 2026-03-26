@@ -11,85 +11,15 @@ import NotificationBar from '../Components/NotificationBar/NotificationBar';
 import { useLanguage } from '../context/LanguageContext';
 
 
-const HARDCODED_AGENTS = [
-  {
-    agentName: "AI Hire",
-    slug: "tool-aihire",
-    description: "Streamline your recruitment process with AI-powered candidate sourcing and screening.",
-    category: "HR & Finance",
-    icon: Briefcase,
-    avatar: "/AGENTS_IMG/AIHIRE.png",
-    bgGradient: "bg-gradient-to-br from-blue-500 to-indigo-600",
-    rating: "4.9",
-    path: "/dashboard/workspace/AIHIRE"
-  },
-  {
-    agentName: "AI Biz",
-    slug: "tool-aibiz",
-    description: "Automate business workflows and generate professional documents with ease.",
-    category: "Business OS",
-    icon: Database,
-    avatar: "/AGENTS_IMG/AIBIZ.png",
-    bgGradient: "bg-gradient-to-br from-emerald-500 to-teal-600",
-    rating: "4.8",
-    path: "/agents/aibiz"
-  },
-  {
-    agentName: "AI Base",
-    slug: "tool-aibase",
-    description: "The foundation for your enterprise AI solutions, providing robust data management.",
-    category: "Business OS",
-    icon: Cpu,
-    avatar: "/AGENTS_IMG/AIBASE.png",
-    bgGradient: "bg-gradient-to-br from-orange-500 to-red-600",
-    rating: "4.9",
-    path: "/agents/aibase"
-  },
-  {
-    agentName: "AI Sales",
-    slug: "tool-aisales",
-    description: "Boost your revenue with AI-driven sales intelligence and outreach strategies.",
-    category: "Sales & Marketing",
-    icon: TrendingUp,
-    avatar: "/AGENTS_IMG/AISALES.png",
-    bgGradient: "bg-gradient-to-br from-fuchsia-500 to-rose-600",
-    rating: "5.0",
-    path: "/dashboard/workspace/AISALES"
-  },
-  {
-    agentName: "AI Health",
-    slug: "tool-aihealth",
-    description: "Personal Wellness and Diagnostic Suite. Analyze symptoms, track metrics, and run health automation routines.",
-    category: "Medical & Health AI",
-    icon: Heart,
-    avatar: "/AGENTS_IMG/AIHEALTH.png",
-    bgGradient: "bg-gradient-to-br from-pink-500 to-rose-500",
-    rating: "4.9",
-    path: "/dashboard/workspace/AIHEALTH"
-  },
-  {
-    agentName: "AI Write",
-    slug: "tool-aiwrite",
-    description: "AI-Powered Content Generation and Curation Workspace. Create marketing copy and optimize text efficiently.",
-    category: "Sales & Marketing",
-    icon: PenTool,
-    avatar: "/AGENTS_IMG/AIWRITE.png",
-    bgGradient: "bg-gradient-to-br from-violet-500 to-purple-600",
-    rating: "4.8",
-    path: "/dashboard/workspace/AIWRITE"
-  },
-  {
-    agentName: "AI Personal Assistant",
-    slug: "tool-ai-personal-assistant",
-    description: "Your dedicated AI assistant for scheduling, notes, and task management.",
-    category: "Productivity & Office",
-    icon: Calendar,
-    avatar: "/AGENTS_IMG/personal-assistant.png",
-    bgGradient: "bg-gradient-to-br from-primary to-purple-600",
-    rating: "4.9",
-    path: "/dashboard/ai-personal-assistant"
-  }
-];
+const AGENTS_PATH_MAP = {
+  'tool-aihire': '/dashboard/workspace/AIHIRE',
+  'tool-aibiz': '/agents/aibiz',
+  'tool-aibase': '/agents/aibase',
+  'tool-aisales': '/dashboard/workspace/AISALES',
+  'tool-aihealth': '/dashboard/workspace/AIHEALTH',
+  'tool-aiwrite': '/dashboard/workspace/AIWRITE',
+  'tool-ai-personal-assistant': '/dashboard/ai-personal-assistant'
+};
 
 const catKeyMap = {
   'all': 'all',
@@ -123,6 +53,7 @@ const Marketplace = () => {
   const [demoUrl, setDemoUrl] = useState("")
   const [selectedTool, setSelectedTool] = useState(null)
   const [showComingSoon, setShowComingSoon] = useState(null);
+  const [activeType, setActiveType] = useState('all'); // all, agents, skills
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -194,219 +125,204 @@ const Marketplace = () => {
     setAgentId(id)
   };
 
-  const allAvailableAgents = [
-    ...HARDCODED_AGENTS.map(a => ({ ...a, isHardcoded: true, _id: a.slug })),
-    ...agents.filter(a => ![
-      'tool-dito', 'DiTo',
-      'tool-aihealth', 'AIHEALTH',
-      'tool-aiwrite', 'AIWRITE',
-      'tool-vertex-stt', 'tool-audio-convert', 'tool-universal-converter', 'tool-image-edit', 
-      'tool-image-understanding-claude', 'tool-pixel-segmentor-sam', 'tool-openai-vision',
-      'tool-openai-search-preview', 'tool-openai-search-pro', 'tool-openai-search-lite', 'tool-openai-search-realtime',
-      'tool-openai-content', 'tool-openai-chat', 'tool-openai-tts', 'tool-openai-stt', 'tool-openai-code',
-      'tool-openai-document', 'tool-openai-translator', 'tool-openai-extractor', 'tool-openai-embeddings',
-      'tool-video-gen', 'tool-vertex-music-gen', 'tool-image-gen', 'tool-deep-search', 'tool-ai-personal-assistant',
-      'tool-time-series-forecasting', 'tool-llm-auditor', 'tool-personalized-shopping', 'tool-brand-search-optimization',
-      'tool-fomc-research', 'tool-image-scoring', 'tool-data-science', 'tool-rag-engine', 'tool-financial-advisor',
-      'tool-marketing-agency', 'tool-customer-service', 'tool-academic-research', 'tool-bug-assistant', 'tool-travel-concierge'
-    ].includes(a.slug) && ![
-      'DiTo', 'AIHEALTH', 'AIWRITE',
-      'AI Web Search Preview', 'AI Web Search Pro', 'AI Web Search Lite', 'AI Real-time Search Assistant',
-      'Smart Content Writer', 'AI Chat Assistant', 'Voice Narration Studio', 'Audio Transcriber',
-      'AI Code Assistant', 'Document Intelligence', 'Professional Translator', 'Structured Data Extractor',
-      'Semantic AI Embeddinger',
-      'AI Video Generator', 'Music Generation', 'AI Image Generator', 'Deep Search', 'AI Personal Assistant',
-      'Image Editing', 'AI Voice Generator', 'AI Document Converter', 'Image Understanding', 'AI Pixel Segmentor',
-      'Vision Analyzer',
-      'Predictive Analytics', 'LLM Auditor', 'Smart Shopping', 'Brand SEO', 'FOMC Research',
-      'Image Scoring', 'Data Science', 'RAG Engine', 'Finance Advisor', 'Marketing AI',
-      'Customer Service', 'Academic Assistant', 'Bug Assistant', 'Travel Concierge'
-    ].includes(a.agentName)).map(a => ({ ...a, isHardcoded: false }))
-  ];
+    const allAvailableAgents = agents.map(a => ({ ...a, isHardcoded: false }));
 
-  const filteredAgents = allAvailableAgents.filter(agent => {
-    // Robust category matching
-    const agentCat = (agent.category || "").trim().toLowerCase();
-    const filterCat = (filter || "all").trim().toLowerCase();
+    const filteredAgents = allAvailableAgents.filter(agent => {
+        // Robust category matching
+        const agentCat = (agent.category || "").trim().toLowerCase();
+        const filterCat = (filter || "all").trim().toLowerCase();
 
-    const matchesCategory = filterCat === 'all' || agentCat === filterCat;
+        const matchesCategory = filterCat === 'all' || agentCat === filterCat;
 
-    // Improved search with safety checks
-    const name = (agent.agentName || agent.name || "").toLowerCase();
-    const desc = (agent.description || "").toLowerCase();
-    const q = (searchQuery || "").toLowerCase().trim();
+        // Improved search with safety checks
+        const name = (agent.agentName || agent.name || "").toLowerCase();
+        const desc = (agent.description || "").toLowerCase();
+        const q = (searchQuery || "").toLowerCase().trim();
 
-    const matchesSearch = !q || name.includes(q) || desc.includes(q);
+        const matchesSearch = !q || name.includes(q) || desc.includes(q);
+        
+        // Type Matching
+        const isAgent = !!AGENTS_PATH_MAP[agent.slug] || !agent.slug?.startsWith('tool-');
+        const isSkill = agent.slug?.startsWith('tool-') && !AGENTS_PATH_MAP[agent.slug];
+        
+        const matchesType = activeType === 'all' || 
+                           (activeType === 'agents' && isAgent) || 
+                           (activeType === 'skills' && isSkill);
 
-    return matchesCategory && matchesSearch;
-  });
-
-
-  const groupedAgents = categories.reduce((acc, cat) => {
-    if (cat === 'all') return acc;
-    const agentsInCat = filteredAgents.filter(a => a.category === cat);
-    if (agentsInCat.length > 0) {
-      acc[cat] = agentsInCat;
-    }
-    return acc;
-  }, {});
-
-  const getToolIcon = (slug) => {
-    if (!slug) return ImageIcon;
-    const s = slug.startsWith('tool-') ? slug : `tool-${slug}`;
-    switch (s) {
-      case 'tool-image-gen': return ImageIcon;
-      case 'tool-image-editing-customization': return Edit;
-      case 'tool-deep-search': return Search;
-      case 'tool-audio-convert': return Headphones;
-      case 'tool-universal-converter': return FileText;
-      case 'tool-code-writer': return Code;
-      case 'tool-video-gen': return Video;
-      case 'tool-fast-video-generator': return Zap;
-      case 'tool-lyria-for-music': return Music;
-      case 'tool-ai-document': return FileText;
-      case 'tool-ai-blur': return EyeOff;
-      case 'tool-ai-detector': return Eye;
-      case 'tool-claude-sonnet-4-5': return Bot;
-      case 'tool-blip2': return MessageSquare;
-      case 'tool-nvidia-nemotron-nano-12b': return Cpu;
-      case 'tool-path-foundation': return Activity;
-      case 'tool-ai-personal-assistant': return Calendar;
-      case 'tool-openai-content': return Edit;
-      case 'tool-openai-chat': return MessageSquare;
-      case 'tool-openai-image': return ImageIcon;
-      case 'tool-openai-tts': return Headphones;
-      case 'tool-openai-stt': return Mic;
-      case 'tool-openai-code': return Code;
-      case 'tool-openai-document': return FileText;
-      case 'tool-openai-vision': return Eye;
-      case 'tool-openai-video': return Video;
-      case 'tool-openai-search-preview': return Globe;
-      case 'tool-openai-search-pro': return Globe;
-      case 'tool-openai-search-lite': return Globe;
-      case 'tool-openai-search-realtime': return Globe;
-      case 'tool-openai-video-standard': return Video;
-      case 'tool-openai-video-max': return Video;
-      case 'tool-openai-image-standard': return ImageIcon;
-      case 'tool-openai-image-lite': return ImageIcon;
-      case 'tool-openai-image-edit': return Edit;
-      case 'tool-openai-image-edit-standard': return Edit;
-      case 'tool-openai-image-edit-lite': return Edit;
-      case 'tool-vertex-music-gen': return Music;
-      case 'tool-image-understanding-claude': return Brain;
-      case 'tool-pathology-medgemma': return Stethoscope;
-      case 'tool-derm-foundation': return Activity;
-      case 'tool-geospatial-sensing': return MapPin;
-      case 'tool-cxr-foundation': return ShieldCheck;
-      case 'tool-pixel-segmentor-sam': return Target;
-      case 'tool-vertex-stt': return Mic;
-
-      // Workspace Agents
-      case 'tool-aibiz': return BarChart3;
-      case 'tool-aihire': return Users;
-      case 'tool-aihealth': return Heart;
-      case 'tool-aiwrite': return FileText;
-      case 'tool-aisales': return Target;
-      case 'tool-aidesk': return MessageSquare;
-      default: return ImageIcon;
-    }
-  };
-
-  const renderAgentCard = (agent) => {
-    // A tool is either hardcoded or has a slug that matches our tool list
-    const isSystemTool = agent.isHardcoded || (agent.slug && agent.slug.startsWith('tool-'));
-    // Actually, for marketplace seeded agents, we want them to behave like tools (open popup)
-    const ToolIcon = getToolIcon(agent.slug);
-    const isAgentActive = userAgent.some((ag) => {
-      if (!ag) return false;
-      const agId = typeof ag === 'string' ? ag : ag._id;
-      const agSlug = typeof ag === 'object' ? ag.slug : null;
-      
-      const targetId = agent._id;
-      const targetSlug = agent.slug;
-
-      if (!targetId && !targetSlug) return false;
-
-      return (agId && targetId && String(agId) === String(targetId)) || 
-             (agSlug && targetSlug && agSlug === targetSlug) ||
-             (ag === targetId);
+        return matchesCategory && matchesSearch && matchesType;
     });
 
-    const handleCardClick = () => {
-      if (agent.isHardcoded) {
-        navigate(agent.path);
-      } else if (isSystemTool) {
-        setSelectedTool({ ...agent, icon: ToolIcon });
-      }
-    };
 
-    const handleActionButtonClick = (e) => {
-      e.stopPropagation(); // Prevent card click from firing
-      if (agent.isHardcoded) {
-        navigate(agent.path);
-      } else if (isSystemTool) {
-        if (!isAgentActive) {
-          setSelectedTool({ ...agent, icon: ToolIcon });
-        } else {
-          // If already active, show "Coming Soon" for the standalone workspace
-          setShowComingSoon(agent);
+    const groupedAgents = categories.reduce((acc, cat) => {
+        if (cat === 'all') return acc;
+        const agentsInCat = filteredAgents.filter(a => a.category === cat);
+        if (agentsInCat.length > 0) {
+            acc[cat] = agentsInCat;
         }
-      } else {
-        toggleBuy(agent._id);
-      }
+        return acc;
+    }, {});
+
+    const getToolIcon = (slug) => {
+        if (!slug) return ImageIcon;
+        const s = slug.startsWith('tool-') ? slug : `tool-${slug}`;
+        switch (s) {
+            case 'tool-image-gen': return ImageIcon;
+            case 'tool-image-editing-customization': return Edit;
+            case 'tool-deep-search': return Search;
+            case 'tool-audio-convert': return Headphones;
+            case 'tool-universal-converter': return FileText;
+            case 'tool-code-writer': return Code;
+            case 'tool-video-gen': return Video;
+            case 'tool-fast-video-generator': return Zap;
+            case 'tool-lyria-for-music': return Music;
+            case 'tool-ai-document': return FileText;
+            case 'tool-ai-blur': return EyeOff;
+            case 'tool-ai-detector': return Eye;
+            case 'tool-claude-sonnet-4-5': return Bot;
+            case 'tool-blip2': return MessageSquare;
+            case 'tool-nvidia-nemotron-nano-12b': return Cpu;
+            case 'tool-path-foundation': return Activity;
+            case 'tool-ai-personal-assistant': return Calendar;
+            case 'tool-openai-content': return Edit;
+            case 'tool-openai-chat': return MessageSquare;
+            case 'tool-openai-image': return ImageIcon;
+            case 'tool-openai-tts': return Headphones;
+            case 'tool-openai-stt': return Mic;
+            case 'tool-openai-code': return Code;
+            case 'tool-openai-document': return FileText;
+            case 'tool-openai-vision': return Eye;
+            case 'tool-openai-video': return Video;
+            case 'tool-openai-search-preview': return Globe;
+            case 'tool-openai-search-pro': return Globe;
+            case 'tool-openai-search-lite': return Globe;
+            case 'tool-openai-search-realtime': return Globe;
+            case 'tool-openai-video-standard': return Video;
+            case 'tool-openai-video-max': return Video;
+            case 'tool-openai-image-standard': return ImageIcon;
+            case 'tool-openai-image-lite': return ImageIcon;
+            case 'tool-openai-image-edit': return Edit;
+            case 'tool-openai-image-edit-standard': return Edit;
+            case 'tool-openai-image-edit-lite': return Edit;
+            case 'tool-vertex-music-gen': return Music;
+            case 'tool-image-understanding-claude': return Brain;
+            case 'tool-pathology-medgemma': return Stethoscope;
+            case 'tool-derm-foundation': return Activity;
+            case 'tool-geospatial-sensing': return MapPin;
+            case 'tool-cxr-foundation': return ShieldCheck;
+            case 'tool-pixel-segmentor-sam': return Target;
+            case 'tool-vertex-stt': return Mic;
+
+            // Workspace Agents
+            case 'tool-aibiz': return BarChart3;
+            case 'tool-aihire': return Users;
+            case 'tool-aihealth': return Heart;
+            case 'tool-aiwrite': return FileText;
+            case 'tool-aisales': return Target;
+            case 'tool-aidesk': return MessageSquare;
+            default: return ImageIcon;
+        }
     };
 
-    const getActionButtonContent = () => {
-      if (agent.isHardcoded) {
-        return (
-          <>
-            {t('marketplacePage.openApp') || 'Open App'}
-          </>
-        );
-      } else if (isSystemTool) {
-        return isAgentActive ? (
-          <>
-            <Check className="w-4 h-4" /> Active
-          </>
-        ) : (
-          <>
-            <Download className="w-4 h-4" /> {t('marketplacePage.subscribe') || 'Subscribe'}
-          </>
-        );
-      } else {
-        return isAgentActive ? (
-          <>
-            <Check className="w-4 h-4" /> Active
-          </>
-        ) : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon') ? (
-          <>
-            {t('marketplacePage.unavailable')}
-          </>
-        ) : (
-          <>
-            <Download className="w-4 h-4" /> {t('marketplacePage.subscribe')}
-          </>
-        );
-      }
-    };
+    const renderAgentCard = (agent) => {
+        // A tool is either in path map or has a slug that matches our tool list
+        const isWorkspaceTool = !!AGENTS_PATH_MAP[agent.slug];
+        const isSystemTool = isWorkspaceTool || (agent.slug && agent.slug.startsWith('tool-'));
+        // Actually, for marketplace seeded agents, we want them to behave like tools (open popup)
+        const ToolIcon = getToolIcon(agent.slug);
+        const isAgentActive = userAgent.some((ag) => {
+            if (!ag) return false;
+            const agId = typeof ag === 'string' ? ag : ag._id;
+            const agSlug = typeof ag === 'object' ? ag.slug : null;
 
-    const getActionButtonClasses = () => {
-      if (agent.isHardcoded) {
-        return "bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20";
-      } else if (isSystemTool) {
-        return isAgentActive
-          ? 'bg-emerald-500 text-white hover:opacity-90 shadow-lg shadow-emerald-500/20'
-          : 'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20';
-      } else {
-        return isAgentActive
-          ? 'bg-primary/10 text-subtext border border-primary/20 cursor-not-allowed opacity-70'
-          : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon')
-            ? 'bg-border text-subtext cursor-not-allowed opacity-50'
-            : 'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20';
-      }
-    };
+            const targetId = agent._id;
+            const targetSlug = agent.slug;
 
-    const isButtonDisabled = !agent.isHardcoded && !isSystemTool && (isAgentActive || (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon'));
+            if (!targetId && !targetSlug) return false;
+
+            return (agId && targetId && String(agId) === String(targetId)) ||
+                (agSlug && targetSlug && agSlug === targetSlug) ||
+                (ag === targetId);
+        });
+
+        const handleCardClick = () => {
+            if (isWorkspaceTool && isAgentActive) {
+                navigate(AGENTS_PATH_MAP[agent.slug]);
+            } else if (isSystemTool) {
+                setSelectedTool({ ...agent, icon: ToolIcon });
+            }
+        };
+
+        const handleActionButtonClick = (e) => {
+            e.stopPropagation(); // Prevent card click from firing
+            if (isWorkspaceTool && isAgentActive) {
+                navigate(AGENTS_PATH_MAP[agent.slug]);
+            } else if (isSystemTool) {
+                if (!isAgentActive) {
+                    setSelectedTool({ ...agent, icon: ToolIcon });
+                } else {
+                    // If already active, show "Coming Soon" for the standalone workspace (if not in map)
+                    if (AGENTS_PATH_MAP[agent.slug]) {
+                        navigate(AGENTS_PATH_MAP[agent.slug]);
+                    } else {
+                        setShowComingSoon(agent);
+                    }
+                }
+            } else {
+                toggleBuy(agent._id);
+            }
+        };
+
+        const getActionButtonContent = () => {
+            if (isWorkspaceTool && isAgentActive) {
+                return (
+                    <>
+                        {t('marketplacePage.openApp') || 'Open App'}
+                    </>
+                );
+            } else if (isSystemTool) {
+                return isAgentActive ? (
+                    <>
+                        <Check className="w-4 h-4" /> Active
+                    </>
+                ) : (
+                    <>
+                        <Download className="w-4 h-4" /> {t('marketplacePage.subscribe') || 'Subscribe'}
+                    </>
+                );
+            } else {
+                return isAgentActive ? (
+                    <>
+                        <Check className="w-4 h-4" /> Active
+                    </>
+                ) : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon') ? (
+                    <>
+                        {t('marketplacePage.unavailable')}
+                    </>
+                ) : (
+                    <>
+                        <Download className="w-4 h-4" /> {t('marketplacePage.subscribe')}
+                    </>
+                );
+            }
+        };
+
+        const getActionButtonClasses = () => {
+            if (isWorkspaceTool && isAgentActive) {
+                return "bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20";
+            } else if (isSystemTool) {
+                return isAgentActive
+                    ? 'bg-emerald-500 text-white hover:opacity-90 shadow-lg shadow-emerald-500/20'
+                    : 'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20';
+            } else {
+                return isAgentActive
+                    ? 'bg-primary/10 text-subtext border border-primary/20 cursor-not-allowed opacity-70'
+                    : (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon')
+                        ? 'bg-border text-subtext cursor-not-allowed opacity-50'
+                        : 'bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20';
+            }
+        };
+
+        const isButtonDisabled = !isWorkspaceTool && !isSystemTool && (isAgentActive || (agent.status && agent.status.toLowerCase() !== 'live' && agent.status.toLowerCase() !== 'active' && agent.status.toLowerCase() !== 'coming soon'));
 
     return (
       <div
@@ -430,8 +346,15 @@ const Marketplace = () => {
           </div>
         </div>
 
-        <div className="mb-1 relative z-10">
-          <h3 className="text-lg font-bold text-maintext">{agent.agentName} {agent.isHardcoded || !isSystemTool ? <sup className='text-sm'>TM</sup> : ''}</h3>
+        <div className="mb-1 relative z-10 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-maintext truncate pr-2">{agent.agentName} {agent.isHardcoded || !isSystemTool ? <sup className='text-sm'>TM</sup> : ''}</h3>
+          <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest shrink-0 border ${
+            !!AGENTS_PATH_MAP[agent.slug] || !agent.slug?.startsWith('tool-') 
+            ? 'bg-primary/5 text-primary border-primary/20' 
+            : 'bg-indigo-500/5 text-indigo-500 border-indigo-500/20'
+          }`}>
+            {!!AGENTS_PATH_MAP[agent.slug] || !agent.slug?.startsWith('tool-') ? 'AGENT' : 'SKILL'}
+          </span>
         </div>
 
         <div className="flex items-center justify-between mb-3 relative z-10">
@@ -651,15 +574,13 @@ const Marketplace = () => {
                     )}
                     <button
                       onClick={() => {
-                        const name = (selectedTool.agentName || "").toUpperCase().replace(/\s+/g, '');
+                        const slug = selectedTool.slug;
                         setSelectedTool(null);
-                        const workspaceAgents = ['AIBIZ', 'AIHIRE', 'AIHEALTH', 'AIWRITE', 'AISALES', 'AIDESK'];
-
-                        if (name === 'AIPERSONALASSISTANT') {
-                          navigate('/dashboard/ai-personal-assistant');
-                        } else if (workspaceAgents.includes(name)) {
-                          navigate(`/dashboard/workspace/${name}`);
+                        
+                        if (AGENTS_PATH_MAP[slug]) {
+                          navigate(AGENTS_PATH_MAP[slug]);
                         } else {
+                          const name = (selectedTool.agentName || "").toUpperCase().replace(/\s+/g, '');
                           navigate('/dashboard/chat', { state: { agentType: name, agent: selectedTool } });
                         }
                       }}
@@ -741,6 +662,28 @@ const Marketplace = () => {
             }}
             className="w-full bg-surface border border-border rounded-xl py-2.5 pl-10 pr-4 text-maintext focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm"
           />
+        </div>
+
+        {/* Type Filter Segmented Control */}
+        <div className="flex bg-surface border border-border p-1 rounded-2xl shadow-sm">
+          {[
+            { id: 'all', label: 'All', icon: Globe },
+            { id: 'agents', label: 'Agents', icon: Bot },
+            { id: 'skills', label: 'Skills', icon: Sparkles }
+          ].map((type) => (
+            <button
+              key={type.id}
+              onClick={() => setActiveType(type.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeType === type.id 
+                ? 'bg-primary text-white shadow-md' 
+                : 'text-subtext hover:text-maintext'
+              }`}
+            >
+              <type.icon size={14} />
+              {type.label}
+            </button>
+          ))}
         </div>
       </div>
 

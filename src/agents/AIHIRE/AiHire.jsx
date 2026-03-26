@@ -48,6 +48,12 @@ import { generateChatResponse } from '../../services/aisaService';
 import { chatStorageService } from '../../services/chatStorageService';
 import { useNavigate, useParams } from 'react-router';
 import { useLanguage } from '../../context/LanguageContext';
+import { 
+    extractTemplateText, 
+    generateJobDescription, 
+    generateOfferLetter, 
+    generateInterviewQuestions 
+} from '../../services/aihireService';
 
 // Reusable Custom Select Component
 const CustomSelect = ({ value, onChange, options, placeholder, className = "" }) => {
@@ -272,7 +278,7 @@ export default function AiHire() {
 
     const loadSession = async (sid) => {
         try {
-            const history = await chatStorageService.getSessionMessages(sid);
+            const history = await chatStorageService.getHistory(sid);
             if (history) setMessages(history);
             setCurrentSessionId(sid);
         } catch (err) {
@@ -376,7 +382,8 @@ export default function AiHire() {
                 id: Date.now().toString(),
                 role: 'user',
                 content: finalInput,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                agentName: 'AIHIRE'
             };
             setMessages(prev => [...prev, userMsg]);
 
@@ -539,12 +546,13 @@ export default function AiHire() {
             // Save session
             let activeSessionId = currentSessionId;
             if (activeSessionId === 'new') {
-                const newSession = await chatStorageService.createSession('AIHIRE', `Hire: ${hireRole || hiringMode}`);
-                activeSessionId = newSession.sessionId;
+                const newSid = await chatStorageService.createSession();
+                activeSessionId = newSid;
                 setCurrentSessionId(activeSessionId);
             }
-            await chatStorageService.saveMessage(activeSessionId, userMsg);
-            await chatStorageService.saveMessage(activeSessionId, modelMsg);
+            const sessionTitle = hireRole ? `Hire: ${hireRole}` : `Hire Strategy: ${hiringMode}`;
+            await chatStorageService.saveMessage(activeSessionId, userMsg, sessionTitle);
+            await chatStorageService.saveMessage(activeSessionId, modelMsg, sessionTitle);
 
             // Re-load sidebar history after new session is saved
             if (currentSessionId === 'new') {
@@ -682,6 +690,15 @@ export default function AiHire() {
                                 </button>
                             ))}
                         </div>
+
+                        {/* History Button */}
+                        <button
+                            onClick={() => setIsHistoryOpen(true)}
+                            className="p-3 bg-secondary/50 hover:bg-white text-subtext hover:text-emerald-600 rounded-2xl border border-border/40 transition-all flex items-center gap-2 group ml-auto"
+                        >
+                            <History className="w-5 h-5 group-hover:rotate-[-12deg] transition-transform" />
+                            <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">History</span>
+                        </button>
                     </div>
                 </div>
 

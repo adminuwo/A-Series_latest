@@ -111,5 +111,6 @@ export const apis = {
   webSearch: `${API}/search/web`,
   conversion: `${API}/conversion`,
   reminders: `${API}/reminders`,
+  locales: `${API}/locales`,
   backendUrl: API,
 };
