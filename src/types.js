@@ -73,7 +73,7 @@ export const AppRoute = {
 const DEV_API = "http://localhost:8080/api";
 
 // Robust check: use environment variable as primary source, fallback to DEV in development
-export const API = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? DEV_API : "");
+export const API = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? DEV_API : "/api");
 console.log('API Target:', API);
 
 export const apis = {
