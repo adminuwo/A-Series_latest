@@ -78,6 +78,12 @@ const Landing = () => {
 
           {user ? <Link to={AppRoute.PROFILE}><CircleUser className='h-6 w-6 md:h-7 md:w-7 text-maintext' /></Link> : <div className="flex gap-2 md:gap-4 items-center">
             <button
+              onClick={() => navigate(AppRoute.PRICING)}
+              className="text-sm md:text-base text-subtext hover:text-primary font-medium transition-colors whitespace-nowrap"
+            >
+              Pricing
+            </button>
+            <button
               onClick={() => navigate("/login")}
               className="text-sm md:text-base text-subtext hover:text-primary font-medium transition-colors whitespace-nowrap"
             >
@@ -198,6 +204,31 @@ const Landing = () => {
           </div>
         </motion.div>
 
+        {/* Quick Pricing Section Preview */}
+        <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="mt-32 w-full max-w-5xl py-20 px-8 rounded-[3rem] bg-gradient-to-br from-primary/5 to-purple-500/5 border border-primary/10 text-center relative overflow-hidden"
+        >
+            <div className="absolute top-0 right-0 py-2 px-6 bg-primary text-white text-[10px] font-black uppercase tracking-[2px] rounded-bl-3xl">Limited Offer</div>
+            
+            <h2 className="text-3xl md:text-4xl font-extrabold text-maintext mb-4">Start for Free, <br/><span className="text-primary italic">Pay as you Grow.</span></h2>
+            <p className="text-subtext mb-10 max-w-lg mx-auto">Get unlimited access to AI tools for just ₹499/mo. Sign up now and supercharge your workflow.</p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button 
+                  onClick={() => navigate(AppRoute.PRICING)}
+                  className="px-10 py-5 bg-primary text-white font-black text-sm uppercase tracking-widest rounded-3xl shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all"
+                >
+                  View All Plans
+                </button>
+                <div className="flex items-center gap-2 text-xs font-bold text-subtext/60">
+                    <Shield size={16} className="text-emerald-500" />
+                    Encrypted via Razorpay
+                </div>
+            </div>
+        </motion.div>
 
       </main>
 
@@ -295,6 +326,7 @@ const Landing = () => {
                 {[
                   { label: t('landing.footer.marketplace'), onClick: () => navigate(AppRoute.DASHBOARD + "/marketplace") },
                   { label: t('landing.footer.myAgents'), onClick: () => navigate(AppRoute.DASHBOARD + "/agents") },
+                  { label: 'Pricing Plans', onClick: () => navigate(AppRoute.PRICING) },
                 ].map((link, i) => (
                   <li key={i}>
                     <button

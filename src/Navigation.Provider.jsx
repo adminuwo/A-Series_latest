@@ -29,6 +29,7 @@ import AiSales from './agents/AISALES/AiSales.jsx';
 import ComingSoon from './Components/ComingSoon/ComingSoon.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
+import Pricing from './pages/Pricing';
 
 import { lazy, Suspense } from 'react';
 import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute.jsx';
@@ -175,6 +176,7 @@ const NavigateProvider = () => {
         <Route path={AppRoute.RESET_PASSWORD} element={<ResetPassword />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/agentsoon" element={<ComingSoon />}></Route>
+        <Route path={AppRoute.PRICING} element={<Pricing />} />
         {/* agents */}
         <Route path='/agents/aibiz' element={<AiBiz />}></Route>
         <Route path='/agents/aibase/*' element={<AiBase />}></Route>

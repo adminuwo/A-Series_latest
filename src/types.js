@@ -65,6 +65,7 @@ export const AppRoute = {
   WORKSPACE_AGENT: "/dashboard/workspace/:agentId",
   WORKSPACE_SESSION: "/dashboard/workspace/:agentId/:sessionId",
   AI_HIRE: "/dashboard/workspace/AIHIRE",
+  PRICING: "/pricing",
 };
 
 
