@@ -150,6 +150,13 @@ const Marketplace = () => {
                            (activeType === 'skills' && isSkill);
 
         return matchesCategory && matchesSearch && matchesType;
+    }).sort((a, b) => {
+        // Workspace tools (Open App) first
+        const aIsWorkspace = !!AGENTS_PATH_MAP[a.slug];
+        const bIsWorkspace = !!AGENTS_PATH_MAP[b.slug];
+        if (aIsWorkspace && !bIsWorkspace) return -1;
+        if (!aIsWorkspace && bIsWorkspace) return 1;
+        return 0;
     });
 
 
@@ -245,7 +252,7 @@ const Marketplace = () => {
         });
 
         const handleCardClick = () => {
-            if (isWorkspaceTool && isAgentActive) {
+            if (isWorkspaceTool) {
                 navigate(AGENTS_PATH_MAP[agent.slug]);
             } else if (isSystemTool) {
                 setSelectedTool({ ...agent, icon: ToolIcon });
@@ -254,7 +261,7 @@ const Marketplace = () => {
 
         const handleActionButtonClick = (e) => {
             e.stopPropagation(); // Prevent card click from firing
-            if (isWorkspaceTool && isAgentActive) {
+            if (isWorkspaceTool) {
                 navigate(AGENTS_PATH_MAP[agent.slug]);
             } else if (isSystemTool) {
                 if (!isAgentActive) {
@@ -273,7 +280,7 @@ const Marketplace = () => {
         };
 
         const getActionButtonContent = () => {
-            if (isWorkspaceTool && isAgentActive) {
+            if (isWorkspaceTool) {
                 return (
                     <>
                         {t('marketplacePage.openApp') || 'Open App'}
@@ -307,7 +314,7 @@ const Marketplace = () => {
         };
 
         const getActionButtonClasses = () => {
-            if (isWorkspaceTool && isAgentActive) {
+            if (isWorkspaceTool) {
                 return "bg-primary text-white hover:opacity-90 shadow-lg shadow-primary/20";
             } else if (isSystemTool) {
                 return isAgentActive
