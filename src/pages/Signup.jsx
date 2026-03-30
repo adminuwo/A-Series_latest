@@ -6,6 +6,9 @@ import axios from 'axios';
 import { setUserData } from '../userStore/userData.js';
 import { logo } from '../constants';
 import { useLanguage } from '../context/LanguageContext';
+import { GoogleLogin } from '@react-oauth/google';
+import { useSetRecoilState } from 'recoil';
+import { userData as userDataAtom } from '../userStore/userData';
 
 
 import PolicyModal from '../Components/PolicyModal';
@@ -13,6 +16,7 @@ import PolicyModal from '../Components/PolicyModal';
 const Signup = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const setUserRecoil = useSetRecoilState(userDataAtom);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -20,6 +24,25 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [policyOpen, setPolicyOpen] = useState(null);
+
+  const handleGoogleSuccess = async (response) => {
+    try {
+      setIsLoading(true);
+      const res = await axios.post(apis.googleAuth, {
+        credential: response.credential
+      });
+      setUserData(res.data);
+      setUserRecoil({ user: res.data });
+      localStorage.setItem("userId", res.data.id);
+      localStorage.setItem("token", res.data.token);
+      navigate(AppRoute.DASHBOARD);
+    } catch (err) {
+      console.error("Google Signup Error:", err);
+      setError(err.response?.data?.error || "Google registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const payLoad = {
     name, email, password
@@ -159,6 +182,32 @@ const Signup = () => {
             >
               {isLoading ? t('auth.creatingAccount') : t('auth.signUp')}
             </button>
+
+            {/* Google Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-subtext">{t('auth.orContinueWith')}</span>
+              </div>
+            </div>
+
+            {/* Google Signup Button */}
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => {
+                  setError("Google Signup Failed");
+                }}
+                useOneTap
+                theme="filled_blue"
+                shape="pill"
+                size="large"
+                text="signup_with"
+                width={380}
+              />
+            </div>
           </form>
 
           {/* Footer Login Link */}

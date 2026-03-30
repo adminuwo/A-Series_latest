@@ -3854,32 +3854,36 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                 strong: ({ children }) => <strong className="font-bold text-primary/90">{children}</strong>,
                                 code({ node, inline, className, children, ...props }) {
                                   const match = /language-(\w+)/.exec(className || '');
-                                  if (!inline && match) {
+                                  if (!inline) {
                                     return (
-                                      <div className="relative group/code my-4">
-                                        <div className="absolute top-0 left-0 right-0 h-9 bg-surface/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 rounded-t-xl z-10">
+                                      <div className="relative group/code my-4 w-full">
+                                        <div className="absolute top-0 left-0 right-0 h-10 bg-[#1a1a1a]/95 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-4 rounded-t-xl z-20">
                                           <div className="flex items-center gap-2">
                                             <div className="flex gap-1.5">
-                                              <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/40" />
-                                              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40" />
-                                              <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/40" />
+                                              <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                                              <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                                              <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
                                             </div>
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-subtext/60 ml-2">
-                                              {match[1]}
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-3">
+                                              {match ? match[1] : 'CODE'}
                                             </span>
                                           </div>
-                                          <button
-                                            onClick={() => {
-                                              navigator.clipboard.writeText(String(children).replace(/\n$/, ''));
-                                              toast.success('Code copied!');
-                                            }}
-                                            className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-subtext/40 hover:text-primary"
-                                          >
-                                            <Copy className="w-3.5 h-3.5" />
-                                          </button>
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-[9px] font-bold text-zinc-600 mr-2 hidden sm:inline uppercase">AIVA Code Engine</span>
+                                            <button
+                                              onClick={() => {
+                                                navigator.clipboard.writeText(String(children).replace(/\n$/, ''));
+                                                toast.success('Code copied!');
+                                              }}
+                                              className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-zinc-500 hover:text-primary active:scale-90"
+                                              title="Copy to clipboard"
+                                            >
+                                              <Copy className="w-3.5 h-3.5" />
+                                            </button>
+                                          </div>
                                         </div>
-                                        <div className="overflow-x-auto rounded-xl border border-white/5 shadow-2xl bg-[#050505]">
-                                          <pre className="p-4 pt-12 text-sm leading-relaxed font-mono">
+                                        <div className="overflow-x-auto rounded-xl border border-white/10 shadow-2xl bg-[#0d0d0d] custom-scrollbar">
+                                          <pre className="p-4 pt-12 text-sm leading-relaxed font-mono text-zinc-100 whitespace-pre overflow-x-auto min-w-full block">
                                             <code className={className} {...props}>
                                               {children}
                                             </code>
@@ -3889,7 +3893,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
                                     );
                                   }
                                   return (
-                                    <code className="bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-primary font-bold mx-0.5" {...props}>
+                                    <code className="bg-primary/10 px-1.5 py-0.5 rounded font-mono text-primary font-bold mx-px" {...props}>
                                       {children}
                                     </code>
                                   );
@@ -5706,7 +5710,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         </div >
 
         {/* Live AI Modal */}
-        < AnimatePresence >
+        <AnimatePresence >
           {isLiveMode && (
             <LiveAI
               onClose={() => setIsLiveMode(false)}
@@ -5716,7 +5720,7 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
         </AnimatePresence >
 
         {/* Feedback Modal */}
-        < Transition appear show={feedbackOpen} as={Fragment}>
+        <Transition appear show={feedbackOpen} as={Fragment}>
           <Dialog as="div" className="relative z-50" onClose={() => setFeedbackOpen(false)}>
             <Transition.Child
               as={Fragment}
@@ -5797,10 +5801,9 @@ If the user asks for an image(e.g., "generate", "create", "draw", "show me a pic
               </div>
             </div>
           </Dialog>
-        </Transition >
-
-      </div >
-    </div >
+        </Transition>
+      </div>
+    </div>
   );
 };
 

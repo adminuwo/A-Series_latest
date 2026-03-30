@@ -113,5 +113,6 @@ export const apis = {
   conversion: `${API}/conversion`,
   reminders: `${API}/reminders`,
   locales: `${API}/locales`,
+  googleAuth: `${API}/auth/google-auth`,
   backendUrl: API,
 };

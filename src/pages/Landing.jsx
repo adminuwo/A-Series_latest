@@ -58,8 +58,9 @@ const Landing = () => {
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-secondary">
 
       {/* Background Shapes */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-100 dark:bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-500/10 dark:bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute inset-0 chat-grid-bg opacity-[0.4] pointer-events-none" />
 
       {/* Header */}
       <header className="relative z-50 px-4 py-4 md:px-6 md:py-6 flex justify-between items-center max-w-7xl mx-auto w-full">
@@ -139,12 +140,12 @@ const Landing = () => {
         >
 
           <motion.button
-            whileHover={{ y: -2 }}
+            whileHover={{ y: -4, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => navigate("/dashboard/chat/new")}
-            className="px-8 py-4 bg-primary rounded-2xl font-bold text-lg text-white shadow-xl shadow-primary/30 hover:translate-y-[-2px] transition-all duration-300 flex items-center justify-center gap-2"
+            className="px-10 py-5 bg-primary rounded-2xl font-black text-lg text-white shadow-2xl shadow-primary/40 hover:translate-y-[-4px] transition-all duration-300 flex items-center justify-center gap-2 group"
           >
-            {t('landing.startNow')} <ArrowRight className="w-5 h-5" />
+            {t('landing.startNow')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </motion.button>
 
 
@@ -173,35 +174,44 @@ const Landing = () => {
           transition={{ delay: 0.4 }}
           className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full text-left"
         >
-          <div className="p-6 rounded-3xl bg-background border border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Bot className="w-6 h-6 text-primary" />
+          <motion.div 
+            whileHover={{ y: -8 }}
+            className="p-8 rounded-[2rem] glass-panel transition-all group cursor-default"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+              <Bot className="w-8 h-8 text-primary group-hover:text-white transition-colors" />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-maintext">{t('landing.features.smartAgents.title')}</h3>
-            <p className="text-subtext">
+            <h3 className="text-2xl font-black mb-3 text-maintext tracking-tight">{t('landing.features.smartAgents.title')}</h3>
+            <p className="text-subtext leading-relaxed">
               {t('landing.features.smartAgents.desc')}
             </p>
-          </div>
+          </motion.div>
 
-          <div className="p-6 rounded-3xl bg-background border border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Zap className="w-6 h-6 text-primary" />
+          <motion.div 
+            whileHover={{ y: -8 }}
+            className="p-8 rounded-[2rem] glass-panel transition-all group cursor-default"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+              <Zap className="w-8 h-8 text-primary group-hover:text-white transition-colors" />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-maintext">{t('landing.features.realTime.title')}</h3>
-            <p className="text-subtext">
+            <h3 className="text-2xl font-black mb-3 text-maintext tracking-tight">{t('landing.features.realTime.title')}</h3>
+            <p className="text-subtext leading-relaxed">
               {t('landing.features.realTime.desc')}
             </p>
-          </div>
+          </motion.div>
 
-          <div className="p-6 rounded-3xl bg-background border border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Shield className="w-6 h-6 text-primary" />
+          <motion.div 
+            whileHover={{ y: -8 }}
+            className="p-8 rounded-[2rem] glass-panel transition-all group cursor-default"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+              <Shield className="w-8 h-8 text-primary group-hover:text-white transition-colors" />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-maintext">{t('landing.features.secure.title')}</h3>
-            <p className="text-subtext">
+            <h3 className="text-2xl font-black mb-3 text-maintext tracking-tight">{t('landing.features.secure.title')}</h3>
+            <p className="text-subtext leading-relaxed">
               {t('landing.features.secure.desc')}
             </p>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Quick Pricing Section Preview */}

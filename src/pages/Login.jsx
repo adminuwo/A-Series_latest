@@ -7,6 +7,7 @@ import { setUserData, userData as userDataAtom } from '../userStore/userData';
 import { logo } from '../constants';
 import { useSetRecoilState } from 'recoil';
 import { useLanguage } from '../context/LanguageContext';
+import { GoogleLogin } from '@react-oauth/google';
 
 
 const Login = () => {
@@ -21,6 +22,29 @@ const Login = () => {
   const [error, setError] = useState(false)
   const setUserRecoil = useSetRecoilState(userDataAtom);
   const { t } = useLanguage();
+
+  const handleLoginSuccess = async (response) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(apis.googleAuth, {
+        credential: response.credential
+      });
+      setError(false);
+      setMessage(res.data.message);
+      const from = location.state?.from?.pathname || AppRoute.DASHBOARD;
+      setUserData(res.data);
+      setUserRecoil({ user: res.data });
+      localStorage.setItem("userId", res.data.id);
+      localStorage.setItem("token", res.data.token);
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error("Google Login Error:", err);
+      setError(true);
+      setMessage(err.response?.data?.error || "Google login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const payload = { email, password }
   const handleSubmit = (e) => {
@@ -139,6 +163,33 @@ const Login = () => {
             >
               {loading ? t('auth.signingIn') : t('auth.signIn')}
             </button>
+
+            {/* Google Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-subtext">{t('auth.orContinueWith')}</span>
+              </div>
+            </div>
+
+            {/* Google Login Button */}
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleLoginSuccess}
+                onError={() => {
+                  setError(true);
+                  setMessage("Google Login Failed");
+                }}
+                useOneTap
+                theme="filled_blue"
+                shape="pill"
+                size="large"
+                text="signin_with"
+                width={380}
+              />
+            </div>
           </form>
 
           {/* Signup Redirect */}
